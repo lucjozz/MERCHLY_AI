@@ -61,7 +61,7 @@ Every decision inside AICOS follows these principles.
 
 # 🧠 Project Philosophy
 
-AICOS is developed as if it were a technology company from day one.
+MERCHLY AI is developed as if it were a technology company from day one.
 
 The repository is not only source code.
 
@@ -100,7 +100,7 @@ Autonomous Enterprise
 # 📂 Repository Structure
 
 ```text
-AICOS/
+MERCHLY AI/
 
 .github/
 
