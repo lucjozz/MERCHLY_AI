@@ -333,6 +333,131 @@ Los agentes no pueden:
 
 ---
 
+# Protocolo de Consulta Humana ante Decisiones
+
+## Propósito
+
+Merchly AI establece que toda decisión que implique elegir entre diferentes alternativas, modificar estrategias o generar consecuencias relevantes deberá contar con la validación del responsable humano correspondiente.
+
+Los agentes de inteligencia artificial pueden analizar información, generar propuestas y recomendar acciones, pero no deben asumir la autoridad final cuando exista una decisión que requiera criterio, evaluación de contexto o valoración de riesgos.
+
+---
+
+## Regla Fundamental
+
+Cuando un agente IA detecte la necesidad de tomar una decisión, deberá:
+
+1. Detener cualquier ejecución automática relacionada con dicha decisión.
+2. Identificar al responsable humano correspondiente.
+3. Analizar las alternativas disponibles.
+4. Presentar las opciones de forma estructurada.
+5. Esperar la aprobación humana antes de ejecutar.
+
+---
+
+## Formato Obligatorio de Consulta
+
+Toda solicitud de decisión deberá incluir:
+
+### Situación
+
+Descripción clara del problema o decisión requerida.
+
+### Contexto
+
+Información relevante necesaria para comprender la situación.
+
+### Opciones Disponibles
+
+Cada alternativa deberá incluir:
+
+- Descripción.
+- Beneficios.
+- Riesgos.
+- Costos asociados.
+- Impacto esperado.
+- Nivel de dificultad de implementación.
+
+### Recomendación del Agente
+
+El agente deberá indicar:
+
+- Opción recomendada.
+- Motivo de la recomendación.
+- Nivel de confianza.
+- Información utilizada para llegar a la conclusión.
+
+### Decisión Requerida
+
+Debe finalizar indicando claramente qué aprobación necesita del responsable humano.
+
+---
+
+## Plantilla Oficial de Decisión
+
+DECISIÓN REQUERIDA
+
+Responsable:
+[Nombre del responsable humano]
+
+Situación:
+[Descripción del problema]
+
+Contexto:
+[Información relevante]
+
+Opciones:
+
+Opción A:
+Descripción:
+Beneficios:
+Riesgos:
+Impacto:
+
+Opción B:
+Descripción:
+Beneficios:
+Riesgos:
+Impacto:
+
+Recomendación IA:
+[Análisis y recomendación]
+
+Nivel de confianza:
+[Porcentaje o clasificación]
+
+Decisión final:
+[Pendiente de aprobación humana]
+
+Estado:
+Esperando decisión
+
+---
+
+
+---
+
+## Registro Posterior
+
+Después de recibir la decisión humana, el sistema deberá registrar:
+
+- Decisión seleccionada.
+- Responsable que aprobó.
+- Fecha.
+- Motivo de elección.
+- Resultado esperado.
+- Resultado obtenido posteriormente.
+
+---
+
+## Principio de Control Humano
+
+La automatización de Merchly AI debe aumentar la capacidad humana, nunca eliminar la responsabilidad humana sobre decisiones relevantes.
+
+Los agentes ejecutan.
+
+Los humanos deciden cuando existen alternativas con impacto significativo.
+
 # Resolución de Conflictos
 
 Cuando existan decisiones contradictorias se aplicará este orden de prioridad:
