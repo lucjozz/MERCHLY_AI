@@ -421,7 +421,11 @@ docs/
 
 017-Roadmap/
 
-018-Assets/
+018-Research/
+
+019-Templates/
+
+020-Assets/
 
 memory/
 
