@@ -2,7 +2,7 @@
 
 ---
 
-title: Misión de AICOS
+title: Misión de MERCHLY AI
 document: 000-01
 version: 1.0.0
 status: Approved
@@ -11,7 +11,7 @@ last_updated: 2026-07-20
 next_review: 2027-01-20
 related:
 
-* AICOS_ROOT.md
+* MERCHLY_AI_ROOT.md
 * 02-Vision.md
 * 04-Principios.md
 
@@ -21,15 +21,15 @@ related:
 
 ## Propósito
 
-La misión de AICOS (AI Commerce Operating System) es diseñar y desarrollar una plataforma tecnológica modular que permita crear, operar y escalar negocios digitales mediante inteligencia artificial, reduciendo al mínimo la intervención humana en las tareas operativas y maximizando la capacidad de las personas para tomar decisiones estratégicas.
+La misión de MERCHLY AI (AI Commerce Operating System) es diseñar y desarrollar una plataforma tecnológica modular que permita crear, operar y escalar negocios digitales mediante inteligencia artificial, reduciendo al mínimo la intervención humana en las tareas operativas y maximizando la capacidad de las personas para tomar decisiones estratégicas.
 
-AICOS existe para transformar la forma en que se construyen y administran empresas digitales, sustituyendo procesos manuales, repetitivos y fragmentados por sistemas inteligentes, documentados y automatizados.
+MERCHLY AI existe para transformar la forma en que se construyen y administran empresas digitales, sustituyendo procesos manuales, repetitivos y fragmentados por sistemas inteligentes, documentados y automatizados.
 
 ---
 
 # Declaración de Misión
 
-AICOS desarrolla un sistema operativo empresarial impulsado por inteligencia artificial que integra automatización, análisis de datos y agentes especializados para facilitar la creación y gestión de negocios digitales escalables.
+MERCHLY AI desarrolla un sistema operativo empresarial impulsado por inteligencia artificial que integra automatización, análisis de datos y agentes especializados para facilitar la creación y gestión de negocios digitales escalables.
 
 El propósito del proyecto no es desarrollar una única tienda en línea, sino construir una plataforma reutilizable capaz de operar múltiples empresas, adaptarse a distintos mercados y evolucionar con el avance de la inteligencia artificial.
 
@@ -60,7 +60,7 @@ La misión comprende el diseño y desarrollo de capacidades para:
 
 # Principios que Sustentan la Misión
 
-La misión de AICOS se apoya en los siguientes principios permanentes:
+La misión de MERCHLY AI se apoya en los siguientes principios permanentes:
 
 * Automatización como prioridad.
 * Arquitectura modular.
@@ -87,7 +87,7 @@ La misión se considerará cumplida en la medida en que AICOS logre:
 
 # Exclusiones
 
-La misión de AICOS no incluye:
+La misión de MERCHLY AI no incluye:
 
 * Reemplazar completamente la supervisión humana.
 * Automatizar decisiones estratégicas sin validación.
