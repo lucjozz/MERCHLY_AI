@@ -336,8 +336,8 @@ Documentos completados:
 
 Con la Constitución completada, Merchly AI puede avanzar hacia la siguiente etapa:
 
-```text
-100-Arquitectura/
+```
+001-Arquitectura/
 ```
 
 donde se definirá:
