@@ -2,7 +2,7 @@
 
 ---
 
-title: Principios Fundamentales de AICOS
+title: Principios Fundamentales de MERCHLY AI
 document: 000-04
 version: 1.0.0
 status: Approved
@@ -24,7 +24,7 @@ reviewers:
 
 ## Propósito
 
-Los principios fundamentales establecen las reglas obligatorias que deben guiar todas las decisiones técnicas, funcionales y estratégicas dentro de AICOS.
+Los principios fundamentales establecen las reglas obligatorias que deben guiar todas las decisiones técnicas, funcionales y estratégicas dentro de MERCHLY AI.
 
 A diferencia de los valores, los principios son verificables y deben aplicarse de forma consistente durante todo el ciclo de vida del proyecto.
 
@@ -156,7 +156,7 @@ Las decisiones actuales no deberán limitar el crecimiento futuro del sistema.
 
 ## Descripción
 
-AICOS minimizará la dependencia de proveedores específicos.
+MERCHLY AI minimizará la dependencia de proveedores específicos.
 
 ## Reglas
 
@@ -259,7 +259,7 @@ La responsabilidad final permanece en las personas.
 
 ## Descripción
 
-AICOS evolucionará mediante iteraciones pequeñas, medibles y documentadas.
+MERCHLY AI evolucionará mediante iteraciones pequeñas, medibles y documentadas.
 
 ## Reglas
 
