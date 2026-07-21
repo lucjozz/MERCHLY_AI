@@ -2,7 +2,7 @@
 
 ---
 
-title: Visión de AICOS
+title: Visión de MERCHLY AI
 document: 000-02
 version: 1.0.0
 status: Approved
@@ -11,7 +11,7 @@ last_updated: 2026-07-20
 next_review: 2027-01-20
 related:
 
-* AICOS_ROOT.md
+* MERCHLY_AI_ROOT.md
 * 01-Mision.md
 * 04-Principios.md
 
@@ -21,7 +21,7 @@ related:
 
 ## Propósito
 
-La visión de AICOS define el estado futuro al que aspira el proyecto y orienta todas las decisiones estratégicas de largo plazo.
+La visión de MERCHLY AI define el estado futuro al que aspira el proyecto y orienta todas las decisiones estratégicas de largo plazo.
 
 Representa el destino del sistema, no las tecnologías utilizadas para alcanzarlo.
 
@@ -29,15 +29,15 @@ Representa el destino del sistema, no las tecnologías utilizadas para alcanzarl
 
 # Declaración de Visión
 
-Convertir a AICOS en una plataforma de referencia para la creación, operación y escalado de negocios digitales autónomos, donde personas y agentes de inteligencia artificial colaboren de forma coordinada para construir empresas más eficientes, sostenibles y adaptables.
+Convertir a MERCHLY AI en una plataforma de referencia para la creación, operación y escalado de negocios digitales autónomos, donde personas y agentes de inteligencia artificial colaboren de forma coordinada para construir empresas más eficientes, sostenibles y adaptables.
 
-AICOS aspira a convertirse en un sistema operativo empresarial capaz de integrar conocimiento, automatización e inteligencia artificial en una arquitectura unificada que permita lanzar nuevos negocios con rapidez, mantener operaciones complejas con mínima intervención humana y evolucionar continuamente mediante aprendizaje y mejora basada en datos.
+MERCHLY AI aspira a convertirse en un sistema operativo empresarial capaz de integrar conocimiento, automatización e inteligencia artificial en una arquitectura unificada que permita lanzar nuevos negocios con rapidez, mantener operaciones complejas con mínima intervención humana y evolucionar continuamente mediante aprendizaje y mejora basada en datos.
 
 ---
 
 # Horizonte de Largo Plazo
 
-En su estado de madurez, AICOS deberá ser capaz de:
+En su estado de madurez, MERCHLY AI deberá ser capaz de:
 
 * Crear nuevos negocios digitales a partir de configuraciones reutilizables.
 * Coordinar múltiples agentes de IA especializados bajo un sistema de orquestación central.
@@ -77,7 +77,7 @@ Cuando la visión se materialice, AICOS deberá funcionar como una plataforma em
 
 # Impacto Esperado
 
-La visión de AICOS busca generar impacto en tres niveles:
+La visión de MERCHLY AI busca generar impacto en tres niveles:
 
 ## Personas
 
@@ -110,7 +110,7 @@ El avance hacia esta visión podrá evaluarse mediante indicadores como:
 
 # Límites de la Visión
 
-La visión de AICOS no contempla:
+La visión de MERCHLY AI no contempla:
 
 * Sustituir completamente la supervisión humana.
 * Centralizar el conocimiento en una única IA o proveedor tecnológico.
@@ -132,7 +132,7 @@ Cuando existan varias alternativas viables, se priorizará aquella que acerque a
 
 # Resumen Ejecutivo para IA
 
-AICOS aspira a convertirse en una plataforma modular y escalable capaz de crear, operar y evolucionar múltiples negocios digitales mediante agentes de inteligencia artificial coordinados, manteniendo siempre la supervisión humana en las decisiones estratégicas y priorizando la reutilización, la automatización y la sostenibilidad de la arquitectura.
+MERCHLY AI aspira a convertirse en una plataforma modular y escalable capaz de crear, operar y evolucionar múltiples negocios digitales mediante agentes de inteligencia artificial coordinados, manteniendo siempre la supervisión humana en las decisiones estratégicas y priorizando la reutilización, la automatización y la sostenibilidad de la arquitectura.
 
 ---
 
