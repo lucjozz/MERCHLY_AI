@@ -1,4 +1,4 @@
-# AICOS
+# MERCHLY AI
 ### AI Commerce Operating System
 
 > **The operating system for autonomous AI-powered e-commerce businesses.**
@@ -7,7 +7,7 @@
 
 # 🚀 Vision
 
-AICOS (AI Commerce Operating System) is an open, modular and AI-native platform designed to build, operate and scale e-commerce businesses with the highest possible level of automation.
+MERCHLY AI (AI Commerce Operating System) is an open, modular and AI-native platform designed to build, operate and scale e-commerce businesses with the highest possible level of automation.
 
 The long-term goal is not to create a single online store, but to develop a reusable platform capable of launching and managing multiple digital businesses with minimal human intervention.
 
@@ -238,7 +238,7 @@ No code is considered complete unless it includes:
 
 # 🤝 Contributing
 
-AICOS follows an engineering-first workflow.
+MERCHLY AI follows an engineering-first workflow.
 
 Every feature must pass through:
 
