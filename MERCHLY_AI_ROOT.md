@@ -1,4 +1,4 @@
-# AICOS_ROOT.md
+# MERCHLY_AI_ROOT.md
 
 > AI Commerce Operating System
 >
@@ -16,7 +16,7 @@
 
 ## Nombre
 
-AICOS
+MERCHLY AI
 
 (AI Commerce Operating System)
 
@@ -24,7 +24,7 @@ AICOS
 
 ## Descripción
 
-AICOS es una plataforma modular impulsada por Inteligencia Artificial diseñada para construir, operar y escalar empresas de comercio electrónico con el menor nivel posible de intervención humana.
+MERCHLY AI es una plataforma modular impulsada por Inteligencia Artificial diseñada para construir, operar y escalar empresas de comercio electrónico con el menor nivel posible de intervención humana.
 
 El sistema está orientado a automatizar procesos de negocio mediante agentes especializados, permitiendo que las personas se concentren únicamente en la supervisión estratégica y la toma de decisiones.
 
