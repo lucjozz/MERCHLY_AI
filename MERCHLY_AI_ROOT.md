@@ -118,7 +118,7 @@ Automatizar contenido.
 
 Administrar múltiples empresas.
 
-Convertir AICOS en una plataforma SaaS.
+Convertir MERCHLY AI en una plataforma SaaS.
 
 Operar internacionalmente.
 
@@ -423,6 +423,14 @@ docs/
 
 018-Assets/
 
+memory/
+
+Estado operativo del proyecto.
+
+prompts/
+
+Instrucciones operativas para agentes IA.
+
 ---
 
 # 16. Uso de Inteligencia Artificial
@@ -541,7 +549,7 @@ En diseño.
 
 Próximo objetivo:
 
-Constitución Oficial de AICOS.
+Constitución Oficial de MERCHLY AI.
 
 ---
 
