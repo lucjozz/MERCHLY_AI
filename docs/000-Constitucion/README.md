@@ -1,4 +1,4 @@
-# Volumen 000 - Constitución de AICOS
+# Volumen 000 - Constitución de MERCHLY AI
 
 > **Versión:** 0.1 Alpha  
 > **Estado:** Activo  
@@ -9,7 +9,7 @@
 
 ## Propósito
 
-La Constitución de AICOS establece los principios, normas y decisiones fundamentales que rigen el diseño, desarrollo y evolución del proyecto.
+La Constitución de MERCHLY AI establece los principios, normas y decisiones fundamentales que rigen el diseño, desarrollo y evolución del proyecto.
 
 Su objetivo es garantizar que todas las decisiones técnicas y de negocio sean coherentes, documentadas y alineadas con la visión a largo plazo.
 
