@@ -2,7 +2,7 @@
 
 ---
 
-title: Valores de AICOS
+title: Valores de MERCHLY AI
 document: 000-03
 version: 1.0.0
 status: Approved
@@ -21,7 +21,7 @@ related:
 
 ## Propósito
 
-Los valores de AICOS representan la cultura permanente del proyecto. Definen la forma en que se toman decisiones, se desarrollan soluciones y se evoluciona la plataforma.
+Los valores de MERCHLY AI representan la cultura permanente del proyecto. Definen la forma en que se toman decisiones, se desarrollan soluciones y se evoluciona la plataforma.
 
 Los valores no describen funcionalidades ni tecnologías. Representan los principios culturales que deben mantenerse independientemente del crecimiento del proyecto.
 
@@ -109,7 +109,7 @@ Cada decisión deberá considerar la capacidad del sistema para crecer en usuari
 
 # Valor 11 — Aprendizaje Permanente
 
-AICOS se desarrollará como un sistema en evolución continua.
+MERCHLY AI se desarrollará como un sistema en evolución continua.
 
 Las nuevas tecnologías, metodologías y herramientas deberán evaluarse de forma objetiva para determinar si aportan ventajas reales al proyecto.
 
@@ -141,7 +141,7 @@ Cuando dos alternativas sean técnicamente equivalentes, se elegirá aquella que
 
 # Resumen Ejecutivo para IA
 
-Los valores de AICOS establecen la cultura permanente del proyecto: pensamiento sistémico, excelencia técnica, automatización inteligente, documentación como activo, reutilización, mejora continua, transparencia, simplicidad, independencia tecnológica, escalabilidad, aprendizaje permanente y colaboración entre personas e inteligencia artificial.
+Los valores de MERCHLY AI establecen la cultura permanente del proyecto: pensamiento sistémico, excelencia técnica, automatización inteligente, documentación como activo, reutilización, mejora continua, transparencia, simplicidad, independencia tecnológica, escalabilidad, aprendizaje permanente y colaboración entre personas e inteligencia artificial.
 
 Toda recomendación generada por una IA deberá respetar estos valores y priorizar soluciones coherentes con ellos.
 
