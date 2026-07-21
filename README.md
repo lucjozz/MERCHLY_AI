@@ -1,110 +1,134 @@
 # MERCHLY AI
-### AI Commerce Operating System
 
-> **The operating system for autonomous AI-powered e-commerce businesses.**
+## AI Commerce Operating System
 
----
-
-# 🚀 Vision
-
-MERCHLY AI (AI Commerce Operating System) is an open, modular and AI-native platform designed to build, operate and scale e-commerce businesses with the highest possible level of automation.
-
-The long-term goal is not to create a single online store, but to develop a reusable platform capable of launching and managing multiple digital businesses with minimal human intervention.
-
-Humans should focus on strategy.
-
-Artificial Intelligence should execute operations.
+> **El sistema operativo para empresas de comercio electrónico autónomas impulsadas por inteligencia artificial.**
 
 ---
 
-# 🎯 Mission
+# 🚀 Visión
 
-Build an engineering-first platform where AI agents collaborate to automate:
+MERCHLY AI (AI Commerce Operating System) es una plataforma abierta, modular y diseñada desde una perspectiva AI-Native para construir, operar y escalar negocios de comercio electrónico con el mayor nivel posible de automatización.
 
-- Product research
-- Supplier management
-- Store management
-- SEO
-- Marketing
-- Advertising
-- Analytics
-- Customer support
-- Business reporting
-- Decision support
+El objetivo a largo plazo no es crear una única tienda online.
 
-while remaining:
+El objetivo es desarrollar una plataforma reutilizable capaz de crear, administrar y escalar múltiples negocios digitales con mínima intervención humana.
 
-- Modular
-- Extensible
-- Vendor-independent
-- Cost-efficient
-- Open for continuous improvement
+Los humanos deben enfocarse en:
 
----
+* Estrategia.
+* Creatividad.
+* Supervisión.
+* Toma de decisiones importantes.
 
-# 🏛 Core Principles
+La Inteligencia Artificial debe ejecutar:
 
-Every decision inside AICOS follows these principles.
-
-1. Automate before hiring.
-2. Document before coding.
-3. Design before implementing.
-4. Build reusable components.
-5. Prefer modular architecture.
-6. Minimize operational costs.
-7. Measure everything.
-8. Optimize continuously.
-9. AI assists humans, humans make strategic decisions.
-10. Every module must be independently replaceable.
+* Operaciones.
+* Análisis.
+* Automatización.
+* Optimización continua.
 
 ---
 
-# 🧠 Project Philosophy
+# 🎯 Misión
 
-MERCHLY AI is developed as if it were a technology company from day one.
+Construir una plataforma orientada a ingeniería donde agentes de inteligencia artificial colaboren para automatizar:
 
-The repository is not only source code.
+* Investigación de productos.
+* Gestión de proveedores.
+* Administración de tiendas.
+* SEO.
+* Marketing.
+* Publicidad.
+* Analítica.
+* Atención al cliente.
+* Reportes empresariales.
+* Soporte para toma de decisiones.
 
-It is the complete knowledge base of the project.
+Manteniendo siempre:
 
-Documentation has the same importance as software.
+* Modularidad.
+* Extensibilidad.
+* Independencia de proveedores.
+* Eficiencia de costos.
+* Mejora continua.
 
 ---
 
-# 🗺 Roadmap
+# 🏛 Principios Fundamentales
+
+Toda decisión dentro de MERCHLY AI sigue estos principios:
+
+1. Automatizar antes que contratar.
+2. Documentar antes de programar.
+3. Diseñar antes de implementar.
+4. Construir componentes reutilizables.
+5. Preferir arquitectura modular.
+6. Minimizar costos operativos.
+7. Medir todo.
+8. Optimizar continuamente.
+9. La IA asiste; los humanos toman decisiones estratégicas.
+10. Todo módulo debe poder reemplazarse independientemente.
+
+---
+
+# 🧠 Filosofía del Proyecto
+
+MERCHLY AI se desarrolla como una empresa tecnológica desde el primer día.
+
+El repositorio no representa únicamente código.
+
+Representa:
+
+* Código.
+* Arquitectura.
+* Procesos.
+* Documentación.
+* Conocimiento acumulado.
+* Historia del proyecto.
+
+La documentación tiene la misma importancia que el software.
+
+---
+
+# 🗺 Roadmap General
 
 ```
-Foundation
+Fundación
         ↓
-Architecture
+Arquitectura
         ↓
-Infrastructure
+Infraestructura
         ↓
-Platform Core
+Núcleo de Plataforma
         ↓
-AI Agents
+Agentes IA
         ↓
-Automation
+Automatización
         ↓
-Marketing Engine
+Motor de Marketing
         ↓
-Analytics
+Analítica
         ↓
-Scalability
+Escalabilidad
         ↓
-Autonomous Enterprise
+Empresa Autónoma
 ```
 
 ---
 
-# 📂 Repository Structure
+# 📂 Estructura del Repositorio
 
 ```text
-MERCHLY AI/
+MERCHLY_AI/
 
 .github/
 
 docs/
+
+memory/
+
+prompts/
 
 backend/
 
@@ -123,153 +147,226 @@ tests/
 tools/
 ```
 
-Detailed documentation lives inside the `docs/` directory.
+---
+
+# 📚 Sistema de Documentación
+
+MERCHLY AI utiliza una arquitectura documental organizada por volúmenes.
+
+| Carpeta            | Descripción                             |
+| ------------------ | --------------------------------------- |
+| 000-Constitucion   | Constitución del proyecto               |
+| 001-Arquitectura   | Arquitectura global del sistema         |
+| 002-CTO            | Manual técnico y dirección tecnológica  |
+| 003-CEO            | Estrategia empresarial                  |
+| 004-Backend        | Documentación backend                   |
+| 005-Frontend       | Documentación frontend                  |
+| 006-BaseDatos      | Diseño y gestión de datos               |
+| 007-Agentes        | Arquitectura de agentes IA              |
+| 008-Automatizacion | Flujos automáticos                      |
+| 009-Marketing      | Sistema de marketing                    |
+| 010-Prompts        | Biblioteca de prompts                   |
+| 011-SOP            | Procedimientos operativos               |
+| 012-Testing        | Control de calidad                      |
+| 013-Seguridad      | Seguridad del sistema                   |
+| 014-Analytics      | Métricas y análisis                     |
+| 015-Bitacora       | Historial de desarrollo                 |
+| 016-Decisiones     | Registros de decisiones arquitectónicas |
+| 017-Roadmap        | Planificación oficial                   |
+| 018-Research       | Investigación y experimentos            |
+| 019-Templates      | Plantillas reutilizables                |
+| 020-Assets         | Recursos visuales y materiales          |
 
 ---
 
-# 📖 Documentation
+# 🧠 Sistema de Memoria del Proyecto
 
-The documentation is organized into independent volumes.
+MERCHLY AI mantiene tres capas principales de información:
 
-| Folder | Description |
-|---------|-------------|
-| 000-Constitucion | Project constitution |
-| 001-Arquitectura | Global architecture |
-| 002-CTO | Technical handbook |
-| 003-CEO | Business handbook |
-| 004-Backend | Backend documentation |
-| 005-Frontend | Frontend documentation |
-| 006-BaseDatos | Database |
-| 007-Agentes | AI agents |
-| 008-Automatizacion | Workflows |
-| 009-Marketing | Marketing system |
-| 010-Prompts | Prompt library |
-| 011-SOP | Standard Operating Procedures |
-| 012-Testing | Quality assurance |
-| 013-Seguridad | Security |
-| 014-Analytics | Metrics |
-| 015-Bitacora | Development journal |
-| 016-Decisiones | Architecture Decision Records (ADR) |
-| 017-Roadmap | Official roadmap |
-| 018-Research | Research and experiments |
-| 019-Templates | Reusable templates |
-| 020-Assets | Images, diagrams and resources |
+## Documentación oficial
+
+Ubicación:
+
+```
+docs/
+```
+
+Contiene:
+
+* Arquitectura.
+* Procesos.
+* Estándares.
+* Especificaciones.
 
 ---
 
-# 🤖 Artificial Intelligence Stack
+## Memoria operativa
 
-Each AI model has a dedicated role.
+Ubicación:
 
-| AI | Primary Responsibility |
-|----|------------------------|
-| ChatGPT | Architecture, engineering, planning and implementation |
-| Claude | Long-form documentation and reviews |
-| Gemini | Research and technical validation |
-| Perplexity | Up-to-date market and technology research |
+```
+memory/
+```
 
-Future versions will support additional AI providers.
+Contiene:
+
+* Estado actual del proyecto.
+* Próximos pasos.
+* Decisiones recientes.
+* Contexto operativo.
 
 ---
 
-# 🛠 Technology Stack
+## Instrucciones para Inteligencia Artificial
+
+Ubicación:
+
+```
+prompts/
+```
+
+Contiene:
+
+* Roles IA.
+* Instrucciones operativas.
+* Contextos especializados.
+
+---
+
+# 🤖 Ecosistema de Inteligencia Artificial
+
+Cada modelo de IA tiene una función especializada.
+
+| IA         | Responsabilidad principal                                |
+| ---------- | -------------------------------------------------------- |
+| ChatGPT    | Arquitectura, ingeniería, planificación e implementación |
+| Claude     | Documentación extensa, análisis y revisión               |
+| Gemini     | Investigación y validación técnica                       |
+| Perplexity | Investigación actualizada de mercado y tecnología        |
+
+En futuras versiones se incorporarán nuevos proveedores de IA.
+
+---
+
+# 🛠 Stack Tecnológico Inicial
 
 ## Backend
 
-- Python
-- FastAPI
+* Python
+* FastAPI
 
 ## Frontend
 
-- Next.js
-- React
-- TypeScript
+* Next.js
+* React
+* TypeScript
 
-## Database
+## Base de Datos
 
-- PostgreSQL
-- pgvector
-- Redis
+* PostgreSQL
+* pgvector
+* Redis
 
-## Infrastructure
+## Infraestructura
 
-- Docker
-- GitHub Actions
+* Docker
+* GitHub Actions
+* Ubuntu
 
-## Automation
+## Automatización
 
-- n8n
+* n8n
 
 ---
 
-# 📊 Current Status
+# 📊 Estado Actual
 
-Version
+## Versión
 
 ```
 0.1 Alpha
 ```
 
-Current Phase
+## Fase actual
 
 ```
-Foundation
+Fundación
 ```
 
-Development Status
+## Estado de desarrollo
 
 ```
-Architecture & Documentation
+Arquitectura y documentación
 ```
 
 ---
 
-# 📚 Documentation First
+# 📚 Documentación Primero
 
-No code is considered complete unless it includes:
+Ningún código será considerado completo si no incluye:
 
-- Technical documentation
-- Tests
-- Acceptance criteria
-- Architecture notes
-- Changelog
+* Documentación técnica.
+* Pruebas.
+* Criterios de aceptación.
+* Notas arquitectónicas.
+* Registro de cambios.
 
 ---
 
-# 🤝 Contributing
+# 🤝 Flujo de Desarrollo
 
-MERCHLY AI follows an engineering-first workflow.
-
-Every feature must pass through:
+MERCHLY AI sigue un proceso de ingeniería estructurado:
 
 ```
 Idea
     ↓
-Specification
+Especificación
     ↓
-Architecture
+Arquitectura
     ↓
-Implementation
+Diseño Técnico
     ↓
-Testing
+Implementación
     ↓
-Documentation
+Pruebas
     ↓
-Review
+Documentación
     ↓
-Merge
+Revisión
+    ↓
+Integración
 ```
 
 ---
 
-# 📄 License
+# 📄 Licencia
 
-License will be defined before the first public release.
+La licencia será definida antes del primer lanzamiento público.
 
 ---
 
-# 🌍 Long-Term Vision
+# 🌍 Visión a Largo Plazo
 
-AICOS aims to become an extensible operating system capable of orchestrating autonomous digital businesses through specialized AI agents.
+MERCHLY AI busca convertirse en un sistema operativo empresarial extensible capaz de coordinar negocios digitales autónomos mediante agentes especializados de inteligencia artificial.
 
-This repository is the foundation of that vision.
+Este repositorio representa la base tecnológica y documental de esa visión.
+
+---
+
+# Estado del Documento
+
+Documento:
+
+README.md
+
+Versión:
+
+1.0.0
+
+Idioma:
+
+Español
+
+Última actualización:
+
+2026-07-21
