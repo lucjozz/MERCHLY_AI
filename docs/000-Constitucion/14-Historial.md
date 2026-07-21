@@ -352,3 +352,106 @@ donde se definirá:
 
 ```
 ```
+# Versión 0.1.1
+
+## Fecha
+
+21/07/2026
+
+
+## Tipo de evento
+
+Mejora estructural y consolidación documental.
+
+
+## Responsable
+
+Dirección de Merchly AI.
+
+
+## Descripción
+
+Se completó la primera etapa de organización documental del proyecto después de la creación de la Constitución y Arquitectura inicial.
+
+Se estableció una estructura de continuidad que permite mantener el conocimiento del proyecto independientemente de la herramienta de inteligencia artificial utilizada.
+
+
+## Cambios realizados
+
+Se incorporaron:
+
+- Actualización del README principal del repositorio.
+- Creación del sistema de memoria operativa del proyecto.
+- Creación del sistema de prompts para agentes IA.
+- Consolidación de GitHub como fuente principal de verdad.
+- Definición de separación entre documentación oficial, memoria operativa e instrucciones IA.
+
+Nuevas estructuras:
+
+memory/
+
+Contiene:
+
+- Contexto operativo.
+- Estado actual.
+- Decisiones recientes.
+- Próximos pasos.
+
+
+prompts/
+
+Contiene:
+
+- Contextos maestros.
+- Instrucciones para agentes IA.
+- Roles especializados.
+
+
+## Decisiones fundamentales
+
+Se estableció que:
+
+- La documentación oficial permanecerá dentro de docs/.
+- memory/ funcionará como memoria operativa y no reemplazará documentación oficial.
+- prompts/ almacenará instrucciones de comportamiento para inteligencias artificiales.
+- MERCHLY AI no dependerá de una única conversación o proveedor de IA.
+- Cualquier IA incorporada al proyecto deberá consultar la documentación base antes de realizar tareas.
+
+
+## Impacto
+
+Se creó una infraestructura documental que permite:
+
+- Mantener continuidad histórica.
+- Reducir pérdida de contexto.
+- Incorporar nuevos agentes IA.
+- Facilitar trabajo colaborativo.
+- Escalar el proyecto manteniendo orden y trazabilidad.
+
+
+## Documentos afectados
+
+Modificados:
+
+- README.md
+- MERCHLY_AI_ROOT.md
+
+
+Añadidos:
+
+- memory/CONTEXT.md
+- memory/CURRENT_STATE.md
+- memory/DECISIONS.md
+- memory/NEXT_STEPS.md
+- prompts/MASTER_CONTEXT_PROMPT.md
+
+
+Relacionados:
+
+- 000-Constitucion/
+- 001-Arquitectura/
+
+
+## Estado
+
+Completado.
