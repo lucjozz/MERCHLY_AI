@@ -1,62 +1,144 @@
-# MERCHLY AI PROJECT CONTEXT
+# MERCHLY AI CURRENT CONTEXT
 
----
-
-# Identidad del Proyecto
-
-## Nombre
+## Proyecto
 
 MERCHLY AI
 
-## Nombre completo
-
 AI Commerce Operating System
 
-## Descripción
 
-MERCHLY AI es una plataforma modular basada en inteligencia artificial diseñada para construir, operar y escalar negocios digitales mediante agentes IA especializados.
+## Documento principal
 
-El objetivo no es crear una única tienda online.
+Toda IA o colaborador debe leer primero:
 
-El objetivo es construir un sistema operativo capaz de lanzar y administrar múltiples negocios digitales con mínima intervención humana.
+MERCHLY_AI_ROOT.md
 
----
 
-# Filosofía Principal
+Después:
 
-Los humanos deben enfocarse en:
+docs/000-Constitucion
 
-- Estrategia.
-- Creatividad.
-- Decisiones críticas.
-- Dirección empresarial.
+docs/001-Arquitectura
 
-La inteligencia artificial debe ejecutar:
-
-- Investigación.
-- Operaciones.
-- Automatización.
-- Análisis.
-- Optimización.
 
 ---
 
-# Estado General
+# Estado actual
 
 Versión:
 
 0.1 Alpha
 
-Fase actual:
-
-Foundation
 
 Estado:
 
-Arquitectura y documentación inicial.
+Fundación
+
+
+Fase:
+
+FASE 0 - Fundación
+
 
 ---
 
-# Estructura Oficial
+# Documentación completada
 
-El proyecto sigue una arquitectura documental por volúmenes:
+## 000-Constitucion
+
+Estado:
+
+Completado
+
+
+Contenido:
+
+- Identidad
+- Misión
+- Visión
+- Valores
+- Principios
+- Gobernanza
+- Normas
+- Seguridad
+- Escalabilidad
+
+
+---
+
+## 001-Arquitectura
+
+Estado:
+
+Completado
+
+
+Contenido:
+
+- Arquitectura general
+- Arquitectura sistema
+- Arquitectura agentes
+- Datos
+- Tecnología
+- Seguridad
+- Automatización
+- Escalabilidad
+
+
+---
+
+# Trabajo actual
+
+Preparación del volumen:
+
+002-CTO
+
+
+Objetivo:
+
+Definir la organización técnica de MERCHLY AI.
+
+
+---
+
+# Próximas acciones
+
+1.
+
+Completar documentación CTO.
+
+
+2.
+
+Definir metodología técnica.
+
+
+3.
+
+Definir infraestructura.
+
+
+4.
+
+Preparar entorno desarrollo.
+
+
+5.
+
+Crear estándares de implementación.
+
+
+---
+
+# Decisiones recientes
+
+Consultar:
+
+memory/DECISIONS.md
+
+
+---
+
+# Última actualización
+
+2026-07-21
