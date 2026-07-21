@@ -421,6 +421,78 @@ Ejemplos:
 
 # Flujo Oficial de Decisión IA-Humano
 
+Agente IA identifica una decisión necesaria
+
+↓
+
+Analiza información disponible
+
+↓
+
+Genera alternativas posibles
+
+↓
+
+Evalúa beneficios, riesgos e impacto
+
+↓
+
+Presenta opciones al responsable humano
+
+↓
+
+Humano selecciona una alternativa
+
+↓
+
+IA ejecuta la decisión aprobada
+
+↓
+
+Sistema registra resultado
+
+---
+
+# Formato de Recomendación IA
+
+Toda recomendación deberá contener:
+
+## Problema
+
+¿Qué situación requiere decisión?
+
+## Información Analizada
+
+¿Qué datos fueron utilizados?
+
+## Alternativas
+
+¿Qué opciones existen?
+
+## Evaluación
+
+Comparación entre alternativas.
+
+## Recomendación
+
+Opción sugerida por el agente.
+
+## Confianza
+
+Nivel estimado de seguridad de la recomendación.
+
+## Aprobación
+
+Confirmación requerida del responsable humano.
+
+---
+
+# Regla Fundamental de Merchly AI
+
+> La inteligencia artificial analiza, propone y ejecuta procesos autorizados. La decisión final pertenece al humano responsable cuando existen alternativas con consecuencias relevantes.
+
+---
+
 # Registro de Uso de IA
 
 Los procesos relevantes deberán registrar:
