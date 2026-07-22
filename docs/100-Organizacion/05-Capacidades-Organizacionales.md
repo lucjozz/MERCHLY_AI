@@ -9,7 +9,8 @@ next_review: 2027-01-22
 related:
   - 02-Estructura-Empresarial.md
   - 04-Departamentos.md
-  - 06-Procesos-Organizacionales.md
+  - 06-Agentes-IA.md
+  - 07-Matriz-RACI.md
   - ../000-Constitucion/04-Principios.md
   - ../000-Constitucion/13-Glosario.md
 ---
