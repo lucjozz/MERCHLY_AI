@@ -176,38 +176,28 @@ La estructura debe permitir incorporar nuevos departamentos, equipos, agentes IA
 ├── 02-Estructura-Empresarial.md
 ├── 03-Roles-Ejecutivos.md
 ├── 04-Departamentos.md
-├── 05-Equipos.md
-├── 06-Roles-IA.md
-├── 07-Matriz-RACI.md
-├── 08-Flujo-de-Decisiones.md
-├── 09-Gobernanza-Operativa.md
-├── 10-Delegacion.md
-├── 11-Comunicacion.md
-├── 12-Crecimiento.md
-├── 13-Evolucion.md
-└── 14-Historial.md
+├── 05-Capacidades-Organizacionales.md
+├── 06-Agentes-IA.md
+└── 07-Matriz-RACI.md
 ```
+
+Esta carpeta usa una estructura condensada de 7 documentos en lugar de un documento por cada subtema, para evitar duplicar contenido entre archivos.
 
 ---
 
 # Descripción de los documentos
 
-| Documento                      | Propósito                                                      |
-| ------------------------------ | -------------------------------------------------------------- |
-| `01-Organigrama.md`            | Representa la estructura jerárquica de la organización.        |
-| `02-Estructura-Empresarial.md` | Define las áreas principales de la empresa.                    |
-| `03-Roles-Ejecutivos.md`       | Define responsabilidades de CEO, CTO y otros roles ejecutivos. |
-| `04-Departamentos.md`          | Describe los departamentos funcionales.                        |
-| `05-Equipos.md`                | Describe los equipos de trabajo dentro de cada departamento.   |
-| `06-Roles-IA.md`               | Define los roles abstractos de inteligencia artificial.        |
-| `07-Matriz-RACI.md`            | Asigna responsabilidades y aprobaciones.                       |
-| `08-Flujo-de-Decisiones.md`    | Define cómo se toman las decisiones.                           |
-| `09-Gobernanza-Operativa.md`   | Define reglas de operación diaria.                             |
-| `10-Delegacion.md`             | Define qué puede delegarse y bajo qué condiciones.             |
-| `11-Comunicacion.md`           | Define canales y reglas de comunicación.                       |
-| `12-Crecimiento.md`            | Define cómo se incorporan nuevas áreas y capacidades.          |
-| `13-Evolucion.md`              | Define cómo puede cambiar la organización.                     |
-| `14-Historial.md`              | Registra cambios organizativos.                                |
+| Documento                            | Propósito                                                      |
+| ------------------------------------- | -------------------------------------------------------------- |
+| `01-Organigrama.md`                  | Representa la estructura jerárquica de la organización.        |
+| `02-Estructura-Empresarial.md`       | Define las áreas principales de la empresa.                    |
+| `03-Roles-Ejecutivos.md`             | Define responsabilidades, autoridad y delegación de CEO, CTO, CMO, COO y CFO. |
+| `04-Departamentos.md`                | Describe los departamentos y los equipos de trabajo dentro de cada Dirección Ejecutiva. |
+| `05-Capacidades-Organizacionales.md` | Define las capacidades permanentes de la organización, independientes de personas o tecnologías. |
+| `06-Agentes-IA.md`                   | Define el catálogo de roles de inteligencia artificial y su independencia de proveedor. |
+| `07-Matriz-RACI.md`                  | Asigna responsables, aprobadores, consultados e informados por tipo de decisión y departamento. |
+
+El flujo de decisiones y la gobernanza operativa se documentan en `../000-Constitucion/07-Gobernanza.md`, para mantener una única fuente de verdad sobre cómo se decide dentro de Merchly AI. El historial de cambios organizativos se registra junto con el resto del proyecto en `../000-Constitucion/14-Historial.md`, sin duplicar un historial por carpeta.
 
 ---
 
@@ -265,3 +255,4 @@ Próximo documento recomendado:
 ---
 
 # Fin del documento
+
