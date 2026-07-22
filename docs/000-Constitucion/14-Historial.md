@@ -455,3 +455,98 @@ Relacionados:
 ## Estado
 
 Completado.
+
+
+# Versión 0.2.0
+
+## Fecha
+
+22/07/2026
+
+
+## Tipo de evento
+
+Creación y consolidación de la estructura organizacional del proyecto.
+
+
+## Responsable
+
+Dirección de Merchly AI.
+
+
+## Descripción
+
+Se creó una segunda dimensión documental, separada de la serie 000-020, para responder a la pregunta "¿quién hace el trabajo?" en lugar de "¿dónde vive el conocimiento?".
+
+Se estableció que la serie 000-020 documenta el conocimiento técnico del proyecto y no debe modificarse por este motivo, mientras que la nueva serie 100+ documenta la organización empresarial.
+
+Se definieron los roles ejecutivos (CEO, CTO, CMO, COO, CFO), los departamentos que reportan a cada uno, la matriz de responsabilidad (RACI) y el catálogo de roles de inteligencia artificial, separando explícitamente el rol que ocupa una IA de el proveedor que lo implementa en un momento dado.
+
+Se aclaró además la identidad oficial del proyecto: Merchly AI es la empresa; AICOS (AI Commerce Operating System) es el producto/plataforma que dicha empresa desarrolla.
+
+
+## Cambios realizados
+
+Se incorporaron:
+
+- Creación del volumen `docs/100-Organizacion/` con: README, Organigrama, Estructura Empresarial, Roles Ejecutivos, Departamentos, Capacidades Organizacionales, Agentes IA y Matriz RACI.
+- Reescritura de `04-Principios.md` (v1.0.0 → v2.0.0), simplificando y alineando el listado de principios con el ya publicado en el README principal.
+- Reescritura de `07-Gobernanza.md` (v1.0.0 → v2.0.0), definiendo niveles de decisión (Estratégico, Táctico, Operativo, Automatizado) y el flujo oficial de decisiones.
+- Actualización de la definición de "Agente IA" en `13-Glosario.md`, enfatizando la independencia de proveedor tecnológico.
+- Sección "Identidad Oficial" añadida en `MERCHLY_AI_ROOT.md`, diferenciando empresa, producto y negocios digitales operados.
+- Actualización de la tabla de índice de documentación en `README.md` y de la "Biblioteca Oficial" en `MERCHLY_AI_ROOT.md` para incluir la serie `100-Organizacion/`.
+
+
+## Decisiones fundamentales
+
+Se estableció que:
+
+- La estructura documental 000-020 no se modifica al crear la organización; se documentan como dimensiones independientes.
+- La serie 100+ queda reservada para documentación organizacional, con numeración separada de la serie 000-020.
+- Merchly AI se organiza por roles de IA, no por proveedores; el proveedor que implementa un rol es un detalle reemplazable y no debe quedar acoplado a ningún proceso o documento.
+- Ningún agente IA puede ocupar el rol de aprobador (A) en la matriz RACI; los agentes IA son siempre responsables de ejecución (R) o consultados (C).
+- Antes de continuar con `002-CTO`, se completó primero la organización empresarial, para que dicho volumen se escriba ya sabiendo qué responsabilidades tiene el CTO y con quién interactúa.
+
+
+## Impacto
+
+Se creó una infraestructura organizacional que permite:
+
+- Distinguir claramente responsabilidad ("quién") de especificación técnica ("cómo").
+- Escalar la incorporación de nuevos roles ejecutivos, departamentos y agentes IA sin ambigüedad.
+- Sustituir proveedores de IA sin rediseñar procesos ni documentación.
+- Mantener sincronizados los índices oficiales (README y ROOT) con el contenido real del repositorio.
+
+
+## Documentos afectados
+
+Modificados:
+
+- README.md
+- MERCHLY_AI_ROOT.md
+- docs/000-Constitucion/04-Principios.md
+- docs/000-Constitucion/07-Gobernanza.md
+- docs/000-Constitucion/13-Glosario.md
+
+
+Añadidos:
+
+- docs/100-Organizacion/README.md
+- docs/100-Organizacion/01-Organigrama.md
+- docs/100-Organizacion/02-Estructura-Empresarial.md
+- docs/100-Organizacion/03-Roles-Ejecutivos.md
+- docs/100-Organizacion/04-Departamentos.md
+- docs/100-Organizacion/05-Capacidades-Organizacionales.md
+- docs/100-Organizacion/06-Agentes-IA.md
+- docs/100-Organizacion/07-Matriz-RACI.md
+
+
+Relacionados:
+
+- docs/000-Constitucion/06-Roles.md
+- prompts/MASTER_CONTEXT_PROMPT.md
+
+
+## Estado
+
+Completado.
