@@ -4,7 +4,9 @@
 
 MERCHLY AI
 
-AI Commerce Operating System
+AI Commerce Operating System (AICOS)
+
+MERCHLY AI es la empresa. AICOS es el producto/plataforma que dicha empresa desarrolla.
 
 
 ## Documento principal
@@ -20,6 +22,8 @@ docs/000-Constitucion
 
 docs/001-Arquitectura
 
+docs/100-Organizacion
+
 
 ---
 
@@ -27,7 +31,7 @@ docs/001-Arquitectura
 
 Versión:
 
-0.1 Alpha
+0.2 Alpha
 
 
 Estado:
@@ -57,11 +61,15 @@ Contenido:
 - Misión
 - Visión
 - Valores
-- Principios
-- Gobernanza
+- Principios (v2.0.0)
+- Gobernanza (v2.0.0)
 - Normas
+- Uso de IA
+- Estándares de Calidad
 - Seguridad
 - Escalabilidad
+- Glosario
+- Historial
 
 
 ---
@@ -87,6 +95,26 @@ Contenido:
 
 ---
 
+## 100-Organizacion
+
+Estado:
+
+Completado
+
+
+Contenido:
+
+- Organigrama
+- Estructura Empresarial
+- Roles Ejecutivos (CEO, CTO, CMO, COO, CFO)
+- Departamentos
+- Capacidades Organizacionales
+- Agentes IA (catálogo de roles, independiente de proveedor)
+- Matriz RACI
+
+
+---
+
 # Trabajo actual
 
 Preparación del volumen:
@@ -96,7 +124,7 @@ Preparación del volumen:
 
 Objetivo:
 
-Definir la organización técnica de MERCHLY AI.
+Definir la dirección técnica completa de MERCHLY AI, ya con la organización empresarial y las responsabilidades del CTO claramente definidas en 100-Organizacion.
 
 
 ---
@@ -105,27 +133,27 @@ Definir la organización técnica de MERCHLY AI.
 
 1.
 
-Completar documentación CTO.
+Definir metodología de desarrollo.
 
 
 2.
 
-Definir metodología técnica.
+Definir stack técnico definitivo.
 
 
 3.
 
-Definir infraestructura.
+Definir flujo de Git y CI.
 
 
 4.
 
-Preparar entorno desarrollo.
+Definir estándares de código.
 
 
 5.
 
-Crear estándares de implementación.
+Preparar entorno de desarrollo.
 
 
 ---
@@ -141,4 +169,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-07-21
+2026-07-22
