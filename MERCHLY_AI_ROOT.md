@@ -441,6 +441,14 @@ docs/
 
 020-Assets/
 
+La serie 000-020 documenta el conocimiento del proyecto.
+
+100-Organizacion/
+
+Estructura organizacional, roles ejecutivos, departamentos, capacidades y agentes IA. Documenta quien es responsable de cada capacidad, no como funciona tecnicamente.
+
+La serie 100+ documenta la organizacion del proyecto y usa una numeracion separada de la serie 000-020.
+
 memory/
 
 Estado operativo del proyecto.
