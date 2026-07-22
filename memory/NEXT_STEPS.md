@@ -24,12 +24,11 @@ docs/002-CTO
 
 Definir:
 
-- Rol CTO.
-- Arquitectura técnica.
-- Metodología desarrollo.
+- Rol CTO (ya definido a nivel organizacional en 100-Organizacion/03-Roles-Ejecutivos.md; aquí se define a nivel técnico-operativo).
+- Metodología de desarrollo.
 - Stack definitivo.
 - Flujo Git.
-- Estándares código.
+- Estándares de código.
 
 
 ---
@@ -38,7 +37,7 @@ Definir:
 
 Preparar:
 
-- Entorno desarrollo.
+- Entorno de desarrollo.
 - Herramientas IA.
 - Automatizaciones internas.
 
@@ -47,4 +46,4 @@ Preparar:
 
 # Objetivo siguiente etapa
 
-Pasar de una arquitectura conceptual a una estructura técnica preparada para implementación.
+Pasar de una arquitectura conceptual a una estructura técnica preparada para implementación, ya con la organización empresarial (100-Organizacion) completa como referencia de responsabilidades.
