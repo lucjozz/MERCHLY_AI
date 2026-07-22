@@ -177,6 +177,14 @@ MERCHLY AI utiliza una arquitectura documental organizada por volúmenes.
 | 019-Templates      | Plantillas reutilizables                |
 | 020-Assets         | Recursos visuales y materiales          |
 
+La serie 000-020 documenta el **conocimiento** del proyecto (arquitectura, procesos, especificaciones).
+
+| Carpeta            | Descripción                             |
+| ------------------ | --------------------------------------- |
+| 100-Organizacion   | Estructura organizacional, roles ejecutivos, departamentos y agentes IA |
+
+La serie 100+ documenta la **organización** del proyecto (quién es responsable de cada capacidad). Responde una pregunta distinta a la serie 000-020 y por eso usa una numeración separada.
+
 ---
 
 # 🧠 Sistema de Memoria del Proyecto
