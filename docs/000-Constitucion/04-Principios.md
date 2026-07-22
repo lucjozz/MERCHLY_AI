@@ -1,309 +1,130 @@
-# 04-Principios.md
-
+---
+title: Principios de Merchly AI
+document: 000-04
+version: 2.0.0
+status: Approved
+owner: CEO & CTO
+last_updated: 2026-07-22
+next_review: 2027-01-22
+related:
+  - 01-Mision.md
+  - 02-Vision.md
+  - 07-Gobernanza.md
+  - 13-Glosario.md
 ---
 
-title: Principios Fundamentales de MERCHLY AI
-document: 000-04
-version: 1.0.0
-status: Approved
-owner: CTO
-reviewers:
+# Principios de Merchly AI
 
-* CEO
-  last_updated: 2026-07-20
-  next_review: 2027-01-20
-  related:
-* 01-Mision.md
-* 02-Vision.md
-* 03-Valores.md
-* 08-Normas-de-Ingenieria.md
+## Propósito
+
+Este documento establece los principios fundamentales que guían todas las decisiones estratégicas, técnicas y operativas de Merchly AI.
+
+Estos principios son permanentes y prevalecen sobre cualquier decisión técnica o tecnológica.
 
 ---
 
 # Principios Fundamentales
 
-## Propósito
+## 1. Automatizar antes que contratar
 
-Los principios fundamentales establecen las reglas obligatorias que deben guiar todas las decisiones técnicas, funcionales y estratégicas dentro de MERCHLY AI.
-
-A diferencia de los valores, los principios son verificables y deben aplicarse de forma consistente durante todo el ciclo de vida del proyecto.
-
-El incumplimiento de un principio deberá justificarse explícitamente mediante una decisión arquitectónica documentada (ADR).
+Toda actividad repetitiva deberá evaluarse para su automatización antes de asignar recursos humanos.
 
 ---
 
-# Principio 1 — Arquitectura antes que Implementación
+## 2. Documentar antes que programar
 
-## Descripción
-
-Ningún desarrollo comenzará sin una definición clara de su propósito, alcance y arquitectura.
-
-## Justificación
-
-El diseño previo reduce la deuda técnica, facilita la reutilización y mejora la calidad del sistema.
-
-## Reglas
-
-* Toda funcionalidad deberá contar con una especificación técnica.
-* Los componentes deberán diseñarse antes de implementarse.
-* Los cambios arquitectónicos requerirán documentación.
-
-## Indicadores
-
-* Porcentaje de módulos con especificación previa.
-* Número de cambios arquitectónicos no documentados.
+Ningún desarrollo comenzará sin una especificación y documentación adecuadas.
 
 ---
 
-# Principio 2 — Documentación como Fuente de Verdad
+## 3. Diseñar antes que implementar
 
-## Descripción
-
-La documentación oficial constituye la referencia principal del proyecto.
-
-El conocimiento nunca deberá depender exclusivamente de conversaciones, memoria humana o herramientas de IA.
-
-## Reglas
-
-* Toda decisión importante deberá documentarse.
-* Cada módulo tendrá documentación propia.
-* Toda modificación relevante actualizará la documentación correspondiente.
-
-## Indicadores
-
-* Cobertura documental.
-* Tiempo necesario para comprender un módulo sin asistencia externa.
+Toda solución deberá analizarse y diseñarse antes de iniciar su desarrollo.
 
 ---
 
-# Principio 3 — Modularidad
+## 4. Reutilizar antes que crear
 
-## Descripción
-
-El sistema estará compuesto por módulos independientes con responsabilidades claramente definidas.
-
-## Reglas
-
-* Cada módulo tendrá un único propósito principal.
-* Las dependencias entre módulos deberán minimizarse.
-* Los componentes deberán poder sustituirse sin afectar al resto del sistema.
-
-## Indicadores
-
-* Nivel de acoplamiento.
-* Reutilización entre módulos.
+Siempre que exista una solución reutilizable, deberá preferirse frente al desarrollo de una nueva.
 
 ---
 
-# Principio 4 — Automatización Progresiva
+## 5. Modularizar antes que optimizar
 
-## Descripción
-
-Todo proceso repetitivo será candidato a automatización cuando el beneficio supere el costo de implementación y mantenimiento.
-
-## Reglas
-
-* Automatizar primero las tareas repetitivas.
-* Mantener supervisión humana en decisiones estratégicas.
-* Medir el impacto de cada automatización.
-
-## Indicadores
-
-* Horas de trabajo operativo reducidas.
-* Número de procesos automatizados.
+Los sistemas deberán diseñarse como componentes independientes y desacoplados.
 
 ---
 
-# Principio 5 — Reutilización
+## 6. Medir antes que modificar
 
-## Descripción
-
-Antes de desarrollar una nueva solución se evaluará si existe un componente reutilizable.
-
-## Reglas
-
-* Evitar duplicación de código.
-* Crear componentes genéricos siempre que sea posible.
-* Centralizar la lógica compartida.
-
-## Indicadores
-
-* Porcentaje de reutilización.
-* Reducción de duplicidad.
+Toda mejora deberá fundamentarse en métricas y evidencia objetiva.
 
 ---
 
-# Principio 6 — Escalabilidad desde el Diseño
+## 7. Escalar antes que reemplazar
 
-## Descripción
-
-Las decisiones actuales no deberán limitar el crecimiento futuro del sistema.
-
-## Reglas
-
-* Diseñar pensando en múltiples negocios.
-* Evitar soluciones específicas para un único caso.
-* Mantener interfaces extensibles.
-
-## Indicadores
-
-* Tiempo requerido para incorporar nuevos módulos.
-* Capacidad de crecimiento sin rediseño.
+La arquitectura deberá facilitar el crecimiento continuo sin necesidad de rediseños frecuentes.
 
 ---
 
-# Principio 7 — Independencia Tecnológica
+## 8. Simplificar antes que añadir complejidad
 
-## Descripción
-
-MERCHLY AI minimizará la dependencia de proveedores específicos.
-
-## Reglas
-
-* Preferir estándares abiertos.
-* Aislar integraciones mediante interfaces.
-* Facilitar el reemplazo de servicios externos.
-
-## Indicadores
-
-* Número de dependencias críticas.
-* Esfuerzo estimado para sustituir un proveedor.
+La solución más simple que satisfaga los requisitos será la opción preferida.
 
 ---
 
-# Principio 8 — Calidad Medible
+## 9. Las personas definen la estrategia
 
-## Descripción
+Las decisiones estratégicas corresponden exclusivamente a los responsables humanos.
 
-Toda funcionalidad deberá cumplir criterios objetivos antes de considerarse finalizada.
-
-## Reglas
-
-Una funcionalidad solo podrá aprobarse cuando incluya:
-
-* Especificación.
-* Implementación.
-* Documentación.
-* Pruebas.
-* Validación.
-
-## Indicadores
-
-* Cobertura de pruebas.
-* Incidencias posteriores al despliegue.
+La inteligencia artificial actúa como apoyo para el análisis, la generación de alternativas y la ejecución de tareas delegadas.
 
 ---
 
-# Principio 9 — Seguridad por Diseño
+## 10. La IA asiste, no sustituye la responsabilidad
 
-## Descripción
+Los agentes IA no poseen autoridad propia.
 
-La seguridad será considerada desde la etapa de diseño y no como una mejora posterior.
-
-## Reglas
-
-* Proteger credenciales y datos sensibles.
-* Aplicar el principio de mínimo privilegio.
-* Registrar eventos relevantes.
-
-## Indicadores
-
-* Vulnerabilidades detectadas.
-* Tiempo medio de resolución.
+Toda responsabilidad recae sobre el rol humano correspondiente.
 
 ---
 
-# Principio 10 — Decisiones Basadas en Evidencia
+## 11. Diseñar por capacidades, no por herramientas
 
-## Descripción
+Merchly AI se diseña y documenta en torno a capacidades, responsabilidades y procesos.
 
-Las decisiones importantes deberán apoyarse en datos, experimentos o análisis documentados.
-
-## Reglas
-
-* Medir antes de optimizar.
-* Validar hipótesis mediante pruebas.
-* Registrar el resultado de los experimentos.
-
-## Indicadores
-
-* Número de decisiones respaldadas por métricas.
-* Experimentos documentados.
+Las tecnologías utilizadas representan únicamente la implementación actual de dichas capacidades y podrán sustituirse sin modificar la arquitectura conceptual.
 
 ---
 
-# Principio 11 — Colaboración entre Personas e IA
+## 12. Independencia tecnológica
 
-## Descripción
+Ningún proveedor, framework o modelo de inteligencia artificial deberá convertirse en una dependencia estructural del proyecto.
 
-Las personas definen objetivos, prioridades y estrategia.
-
-Los agentes de IA ejecutan tareas, analizan información y proponen mejoras.
-
-La responsabilidad final permanece en las personas.
-
-## Reglas
-
-* Toda automatización crítica deberá poder auditarse.
-* Las decisiones estratégicas requerirán aprobación humana.
-* La IA actuará como apoyo, no como autoridad.
-
-## Indicadores
-
-* Procesos auditables.
-* Decisiones críticas con validación humana.
+Toda implementación deberá poder reemplazarse manteniendo la funcionalidad del sistema.
 
 ---
 
-# Principio 12 — Mejora Continua
+# Aplicación
 
-## Descripción
+Estos principios deberán considerarse en:
 
-MERCHLY AI evolucionará mediante iteraciones pequeñas, medibles y documentadas.
-
-## Reglas
-
-* Revisar periódicamente arquitectura y procesos.
-* Corregir deuda técnica de forma planificada.
-* Incorporar mejoras basadas en evidencia.
-
-## Indicadores
-
-* Frecuencia de revisiones.
-* Reducción de deuda técnica.
-* Evolución de los indicadores del proyecto.
+- Arquitectura.
+- Desarrollo.
+- Automatización.
+- Organización.
+- Operación.
+- Documentación.
+- Toma de decisiones.
 
 ---
 
 # Resumen Ejecutivo para IA
 
-Toda recomendación realizada dentro del proyecto deberá respetar estos principios:
+Toda IA deberá priorizar el cumplimiento de estos principios sobre cualquier decisión técnica específica.
 
-* Diseñar antes de implementar.
-* Documentar antes de finalizar.
-* Modularizar antes de optimizar.
-* Automatizar cuando sea beneficioso.
-* Reutilizar antes de crear.
-* Escalar desde el diseño.
-* Evitar dependencias innecesarias.
-* Medir la calidad mediante criterios objetivos.
-* Incorporar seguridad desde el inicio.
-* Basar decisiones en evidencia.
-* Mantener supervisión humana.
-* Mejorar continuamente.
+Cuando exista conflicto entre una herramienta y un principio, prevalecerá el principio.
 
 ---
 
-# Criterio de Precedencia
-
-Cuando exista conflicto entre soluciones técnicamente válidas, se elegirá aquella que cumpla un mayor número de principios fundamentales.
-
-Cuando un principio no pueda cumplirse, la excepción deberá documentarse mediante un Architecture Decision Record (ADR), incluyendo la justificación y las consecuencias esperadas.
-
----
-
-# Vigencia
-
-Este documento constituye la base normativa del desarrollo de AICOS.
-
-Todos los módulos, procesos, agentes de IA y decisiones arquitectónicas deberán alinearse con estos principios mientras permanezcan vigentes.
+# Fin del Documento
