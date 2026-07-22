@@ -18,7 +18,7 @@
 
 MERCHLY AI
 
-(AI Commerce Operating System)
+AICOS(AI Commerce Operating System)
 
 ---
 
@@ -27,6 +27,20 @@ MERCHLY AI
 MERCHLY AI es una plataforma modular impulsada por Inteligencia Artificial diseñada para construir, operar y escalar empresas de comercio electrónico con el menor nivel posible de intervención humana.
 
 El sistema está orientado a automatizar procesos de negocio mediante agentes especializados, permitiendo que las personas se concentren únicamente en la supervisión estratégica y la toma de decisiones.
+
+---
+
+## Identidad Oficial
+
+MERCHLY AI es una empresa tecnológica AI-First.
+
+Su producto principal es el AI Commerce Operating System (AICOS), una plataforma modular diseñada para construir, operar y escalar negocios digitales mediante inteligencia artificial y automatización.
+
+Toda la documentación deberá diferenciar claramente entre:
+
+- La empresa (MERCHLY AI).
+- La plataforma (AICOS).
+- Los negocios digitales operados mediante la plataforma.
 
 ---
 
