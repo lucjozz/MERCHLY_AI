@@ -31,7 +31,10 @@ Su objetivo es garantizar un lenguaje común entre humanos, agentes de inteligen
 
 ## Agente IA
 
-Sistema basado en inteligencia artificial diseñado para cumplir un objetivo específico mediante análisis, generación de información, ejecución de tareas y utilización de herramientas autorizadas.
+Entidad lógica especializada que ejecuta responsabilidades concretas dentro de MERCHLY AI.
+Un agente IA representa una capacidad del sistema y puede estar implementado mediante uno o varios modelos de inteligencia artificial.
+Los agentes son independientes del proveedor tecnológico utilizado.
+Un mismo agente podrá migrar entre distintos modelos sin modificar su función ni sus responsabilidades.
 
 Un agente IA debe tener:
 
