@@ -14,7 +14,7 @@ Foundation
 
 Versión:
 
-0.3 Alpha
+0.4 Alpha
 
 
 ---
@@ -28,16 +28,12 @@ Estado:
 COMPLETADO
 
 
----
-
 ## 001-Arquitectura
 
 Estado:
 
 COMPLETADO
 
-
----
 
 ## 100-Organizacion
 
@@ -46,8 +42,6 @@ Estado:
 COMPLETADO
 
 
----
-
 ## 002-CTO
 
 Estado:
@@ -55,21 +49,26 @@ Estado:
 COMPLETADO
 
 
+## 003-CEO
+
+Estado:
+
+COMPLETADO (documentación base; decisión de modelo de negocio queda PENDIENTE de aprobación explícita del CEO)
+
+
 Documentos:
 
 ✅ README (índice del volumen)
 
-✅ Rol Técnico-Operativo del CTO
+✅ Rol Operativo del CEO
 
-✅ Metodología de Desarrollo
+✅ Modelo de Negocio Inicial (propuesta A/B/C, pendiente de elección)
 
-✅ Stack Técnico Definitivo
+✅ Criterios de Éxito de la Fase 0
 
-✅ Flujo de Git y CI/CD
+✅ Estrategia Comercial Preliminar
 
-✅ Estándares de Código
-
-✅ Entorno de Desarrollo
+✅ Métricas y Seguimiento
 
 
 ---
@@ -81,34 +80,43 @@ Ninguno.
 
 ---
 
+# Pendientes críticos identificados (no bloquean pero deben resolverse antes de cerrar Fase 0)
+
+1. ROADMAP.md está vacío. Se usó docs/003-CEO/03-Criterios-de-Exito-Fase0.md como referencia operativa temporal.
+
+2. CHANGELOG.md prácticamente vacío (solo título).
+
+3. Decisión de modelo de negocio (Opción A/B/C en docs/003-CEO/02-Modelo-de-Negocio.md) no está tomada, solo propuesta.
+
+
+---
+
 # Próxima fase
 
-003-CEO
+Definir entre:
 
+(a) completar ROADMAP.md con hitos y fechas, o
+(b) iniciar docs/007-Agentes (contrato técnico de agentes) antes de tocar código en 004-Backend.
 
-Objetivo:
-
-Definir la dirección estratégica y de negocio operativa: modelo de negocio, prioridades comerciales, métricas de éxito de la Fase 0 y criterios de avance a Fase 1 (Infraestructura).
+Recomendación: (a) primero por ser más rápido y desbloquear seguimiento, luego (b).
 
 
 ---
 
 # Última acción realizada
 
-Se completó docs/002-CTO: definición del rol técnico-operativo del CTO, metodología de desarrollo, stack técnico definitivo (heredado de README.md y 001-Arquitectura/05), flujo de Git/CI, estándares de código por lenguaje y entorno de desarrollo de referencia. Se registraron DEC-009, DEC-010 y DEC-011 en memory/DECISIONS.md.
+Se completó docs/003-CEO: rol operativo del CEO, modelo de negocio (propuesta, pendiente de decisión), criterios de éxito de Fase 0, estrategia comercial preliminar y métricas de seguimiento. Se identificó que ROADMAP.md y CHANGELOG.md están vacíos.
 
 
 ---
 
 # Próxima acción
 
-Completar carpeta:
-
-docs/003-CEO
+Completar ROADMAP.md, luego iniciar docs/007-Agentes.
 
 
 ---
 
 # Bloqueos
 
-Ninguno.
+Ninguno técnico. Bloqueo de decisión: el CEO debe elegir modelo de negocio (A/B/C) antes de que 004-Backend defina si el sistema es multi-tenant.
