@@ -189,3 +189,75 @@ Mantener el control humano sobre decisiones con consecuencias relevantes, confor
 Estado:
 
 Aprobada.
+
+
+---
+
+## DEC-009
+
+Fecha:
+
+2026-07-25
+
+
+Decisión:
+
+El stack técnico definitivo de Fase 0 queda fijado en: Python + FastAPI (backend), Next.js + React + TypeScript (frontend), PostgreSQL + pgvector + Redis (datos), Docker + GitHub Actions + Ubuntu (infraestructura), n8n (automatización). Documentado en docs/002-CTO/03-Stack-Tecnico.md.
+
+
+Motivo:
+
+Evitar deriva tecnológica: cualquier cambio futuro de stack debe ser una decisión consciente y registrada, no una elección ad hoc durante la implementación.
+
+
+Estado:
+
+Aprobada.
+
+
+---
+
+## DEC-010
+
+Fecha:
+
+2026-07-25
+
+
+Decisión:
+
+Se adopta Conventional Commits (en español) y un modelo de ramas main + feature/fix/docs/chore. Todo cambio no trivial requiere pull request con al menos una aprobación humana, incluyendo el trabajo producido por agentes IA.
+
+
+Motivo:
+
+Unificar el flujo de trabajo entre colaboradores humanos y agentes IA, y mantener el control humano sobre lo que se integra al proyecto (coherente con DEC-003).
+
+
+Estado:
+
+Aprobada.
+
+
+---
+
+## DEC-011
+
+Fecha:
+
+2026-07-25
+
+
+Decisión:
+
+docs/002-CTO se documenta como volumen técnico-operativo (metodología, stack, flujo Git, estándares de código, entorno de desarrollo), separado del rol organizacional del CTO ya definido en 100-Organizacion/03-Roles-Ejecutivos.md.
+
+
+Motivo:
+
+Mismo criterio que DEC-005: separar "quién es responsable" (100-Organizacion) de "cómo se ejecuta" (002-CTO), evitando duplicar contenido entre volúmenes.
+
+
+Estado:
+
+Aprobada.
