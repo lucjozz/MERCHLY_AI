@@ -24,6 +24,8 @@ docs/001-Arquitectura
 
 docs/100-Organizacion
 
+docs/002-CTO
+
 
 ---
 
@@ -31,7 +33,7 @@ docs/100-Organizacion
 
 Versión:
 
-0.2 Alpha
+0.3 Alpha
 
 
 Estado:
@@ -115,16 +117,35 @@ Contenido:
 
 ---
 
+## 002-CTO
+
+Estado:
+
+Completado
+
+
+Contenido:
+
+- Rol técnico-operativo del CTO
+- Metodología de desarrollo
+- Stack técnico definitivo
+- Flujo de Git y CI/CD
+- Estándares de código
+- Entorno de desarrollo
+
+
+---
+
 # Trabajo actual
 
 Preparación del volumen:
 
-002-CTO
+003-CEO
 
 
 Objetivo:
 
-Definir la dirección técnica completa de MERCHLY AI, ya con la organización empresarial y las responsabilidades del CTO claramente definidas en 100-Organizacion.
+Definir la ejecución práctica del rol CEO y los criterios de negocio para avanzar de Fundación a la siguiente fase del roadmap.
 
 
 ---
@@ -133,27 +154,22 @@ Definir la dirección técnica completa de MERCHLY AI, ya con la organización e
 
 1.
 
-Definir metodología de desarrollo.
+Crear docs/003-CEO.
 
 
 2.
 
-Definir stack técnico definitivo.
+Definir modelo de negocio inicial de AICOS.
 
 
 3.
 
-Definir flujo de Git y CI.
+Definir criterios de éxito de Fase 0 y paso a Fase 1.
 
 
 4.
 
-Definir estándares de código.
-
-
-5.
-
-Preparar entorno de desarrollo.
+Vincular explícitamente ROADMAP.md con las fases documentales.
 
 
 ---
@@ -169,4 +185,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-07-22
+2026-07-25
