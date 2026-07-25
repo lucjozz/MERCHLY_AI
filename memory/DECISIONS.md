@@ -261,3 +261,51 @@ Mismo criterio que DEC-005: separar "quién es responsable" (100-Organizacion) d
 Estado:
 
 Aprobada.
+
+
+---
+
+## DEC-012
+
+Fecha:
+
+2026-07-25
+
+
+Decisión:
+
+Se documenta un modelo de negocio propuesto en tres opciones (tiendas propias / SaaS a terceros / híbrido) en docs/003-CEO/02-Modelo-de-Negocio.md, recomendando el híbrido. La elección final entre las tres queda PENDIENTE de aprobación explícita del CEO.
+
+
+Motivo:
+
+Es una decisión estratégica que, conforme a DEC-003, requiere aprobación humana explícita y no puede darse por asumida solo porque exista una recomendación documentada.
+
+
+Estado:
+
+Pendiente de aprobación.
+
+
+---
+
+## DEC-013
+
+Fecha:
+
+2026-07-25
+
+
+Decisión:
+
+Se establecen criterios verificables de cierre de la Fase 0 (Fundación) en docs/003-CEO/03-Criterios-de-Exito-Fase0.md, como referencia operativa temporal mientras ROADMAP.md permanezca vacío.
+
+
+Motivo:
+
+Sin criterios explícitos de cierre de fase, no hay forma objetiva de saber cuándo avanzar a Fase 1, lo que genera riesgo de extender la Fundación indefinidamente.
+
+
+Estado:
+
+Aprobada.
