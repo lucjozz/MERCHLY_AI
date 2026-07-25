@@ -2,7 +2,7 @@
 
 Fecha:
 
-2026-07-22
+2026-07-25
 
 
 # Estado del Proyecto
@@ -14,7 +14,7 @@ Foundation
 
 Versión:
 
-0.2 Alpha
+0.3 Alpha
 
 
 ---
@@ -28,37 +28,6 @@ Estado:
 COMPLETADO
 
 
-Documentos:
-
-✅ Misión
-
-✅ Visión
-
-✅ Valores
-
-✅ Principios (v2.0.0)
-
-✅ Objetivos
-
-✅ Roles
-
-✅ Gobernanza (v2.0.0)
-
-✅ Normas de Ingeniería
-
-✅ Uso de IA
-
-✅ Estándares de Calidad
-
-✅ Seguridad
-
-✅ Escalabilidad
-
-✅ Glosario
-
-✅ Historial (incluye versión 0.1.0, 0.1.1 y 0.2.0)
-
-
 ---
 
 ## 001-Arquitectura
@@ -66,31 +35,6 @@ Documentos:
 Estado:
 
 COMPLETADO
-
-
-Documentos:
-
-✅ Arquitectura General
-
-✅ Arquitectura Sistema
-
-✅ Arquitectura Agentes
-
-✅ Arquitectura Datos
-
-✅ Arquitectura Tecnología
-
-✅ Flujos Información
-
-✅ Modelo Comunicación
-
-✅ Seguridad
-
-✅ Automatización
-
-✅ Escalabilidad
-
-✅ Decisiones Arquitectónicas
 
 
 ---
@@ -102,23 +46,30 @@ Estado:
 COMPLETADO
 
 
+---
+
+## 002-CTO
+
+Estado:
+
+COMPLETADO
+
+
 Documentos:
 
-✅ README (índice ajustado a la estructura real de 7 documentos)
+✅ README (índice del volumen)
 
-✅ Organigrama
+✅ Rol Técnico-Operativo del CTO
 
-✅ Estructura Empresarial
+✅ Metodología de Desarrollo
 
-✅ Roles Ejecutivos
+✅ Stack Técnico Definitivo
 
-✅ Departamentos
+✅ Flujo de Git y CI/CD
 
-✅ Capacidades Organizacionales
+✅ Estándares de Código
 
-✅ Agentes IA
-
-✅ Matriz RACI
+✅ Entorno de Desarrollo
 
 
 ---
@@ -132,30 +83,19 @@ Ninguno.
 
 # Próxima fase
 
-002-CTO
+003-CEO
 
 
 Objetivo:
 
-Definir la dirección técnica completa de MERCHLY AI.
-
-
-Incluye:
-
-- Metodología desarrollo.
-- Herramientas.
-- Infraestructura.
-- Gestión código.
-- Ambientes.
-- Procesos técnicos.
-- Estándares ingeniería.
+Definir la dirección estratégica y de negocio operativa: modelo de negocio, prioridades comerciales, métricas de éxito de la Fase 0 y criterios de avance a Fase 1 (Infraestructura).
 
 
 ---
 
 # Última acción realizada
 
-Cierre de 100-Organizacion: se completó 04-Departamentos.md, se crearon 06-Agentes-IA.md y 07-Matriz-RACI.md, se corrigió el índice del README local y un enlace roto en 05-Capacidades-Organizacionales.md, y se registró todo en 14-Historial.md (Versión 0.2.0).
+Se completó docs/002-CTO: definición del rol técnico-operativo del CTO, metodología de desarrollo, stack técnico definitivo (heredado de README.md y 001-Arquitectura/05), flujo de Git/CI, estándares de código por lenguaje y entorno de desarrollo de referencia. Se registraron DEC-009, DEC-010 y DEC-011 en memory/DECISIONS.md.
 
 
 ---
@@ -164,7 +104,7 @@ Cierre de 100-Organizacion: se completó 04-Departamentos.md, se crearon 06-Agen
 
 Completar carpeta:
 
-docs/002-CTO
+docs/003-CEO
 
 
 ---
