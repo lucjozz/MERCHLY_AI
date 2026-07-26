@@ -1,380 +1,180 @@
-# MERCHLY AI
-
-## AI Commerce Operating System
-
-> **El sistema operativo para empresas de comercio electrónico autónomas impulsadas por inteligencia artificial.**
+# ROADMAP.md
 
 ---
 
-# 🚀 Visión
+title: Roadmap General de Merchly AI (AICOS)
+document: ROADMAP
+version: 1.0.0
+status: Aprobado
+owner: CEO & CTO
+last_updated: 2026-07-26
+next_review: 2027-01-26
+related:
 
-MERCHLY AI (AI Commerce Operating System) es una plataforma abierta, modular y diseñada desde una perspectiva AI-Native para construir, operar y escalar negocios de comercio electrónico con el mayor nivel posible de automatización.
-
-El objetivo a largo plazo no es crear una única tienda online.
-
-El objetivo es desarrollar una plataforma reutilizable capaz de crear, administrar y escalar múltiples negocios digitales con mínima intervención humana.
-
-Los humanos deben enfocarse en:
-
-* Estrategia.
-* Creatividad.
-* Supervisión.
-* Toma de decisiones importantes.
-
-La Inteligencia Artificial debe ejecutar:
-
-* Operaciones.
-* Análisis.
-* Automatización.
-* Optimización continua.
+* README.md (raíz del proyecto)
+* docs/000-Constitucion/05-Objetivos.md
+* docs/003-CEO/03-Criterios-de-Exito-Fase0.md
+* memory/CURRENT_STATE.md
+* memory/DECISIONS.md
+* memory/NEXT_STEPS.md
 
 ---
 
-# 🎯 Misión
+# Roadmap General de AICOS
 
-Construir una plataforma orientada a ingeniería donde agentes de inteligencia artificial colaboren para automatizar:
+## Propósito
 
-* Investigación de productos.
-* Gestión de proveedores.
-* Administración de tiendas.
-* SEO.
-* Marketing.
-* Publicidad.
-* Analítica.
-* Atención al cliente.
-* Reportes empresariales.
-* Soporte para toma de decisiones.
+Este documento traduce el roadmap general descrito en `README.md` (Fundación → Arquitectura → Infraestructura → Núcleo de Plataforma → Agentes IA → Automatización → Motor de Marketing → Analítica → Escalabilidad → Empresa Autónoma) en fases concretas, con volúmenes documentales asociados, criterios de cierre verificables y estimaciones de tiempo.
 
-Manteniendo siempre:
-
-* Modularidad.
-* Extensibilidad.
-* Independencia de proveedores.
-* Eficiencia de costos.
-* Mejora continua.
+Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase se decide por **criterios verificables**, no únicamente por fecha calendario. Las fechas aquí son estimaciones de planificación, sujetas a ajuste; los criterios son la referencia real de avance.
 
 ---
 
-# 🏛 Principios Fundamentales
+# 1. Estado Actual
 
-Toda decisión dentro de MERCHLY AI sigue estos principios:
-
-1. Automatizar antes que contratar.
-2. Documentar antes de programar.
-3. Diseñar antes de implementar.
-4. Construir componentes reutilizables.
-5. Preferir arquitectura modular.
-6. Minimizar costos operativos.
-7. Medir todo.
-8. Optimizar continuamente.
-9. La IA asiste; los humanos toman decisiones estratégicas.
-10. Todo módulo debe poder reemplazarse independientemente.
-
----
-
-# 🧠 Filosofía del Proyecto
-
-MERCHLY AI se desarrolla como una empresa tecnológica desde el primer día.
-
-El repositorio no representa únicamente código.
-
-Representa:
-
-* Código.
-* Arquitectura.
-* Procesos.
-* Documentación.
-* Conocimiento acumulado.
-* Historia del proyecto.
-
-La documentación tiene la misma importancia que el software.
+| Fase | Nombre | Estado |
+|---|---|---|
+| 0 | Fundación | En cierre (ver sección 2) |
+| 1 | Infraestructura | No iniciada |
+| 2 | Núcleo de Plataforma | No iniciada |
+| 3 | Agentes IA | No iniciada |
+| 4 | Automatización | No iniciada |
+| 5 | Motor de Marketing | No iniciada |
+| 6 | Analítica | No iniciada |
+| 7 | Escalabilidad | No iniciada |
+| 8 | Empresa Autónoma | No iniciada |
 
 ---
 
-# 🗺 Roadmap General
+# 2. Fase 0 — Fundación (incluye Arquitectura documental)
 
-```
-Fundación
-        ↓
-Arquitectura
-        ↓
-Infraestructura
-        ↓
-Núcleo de Plataforma
-        ↓
-Agentes IA
-        ↓
-Automatización
-        ↓
-Motor de Marketing
-        ↓
-Analítica
-        ↓
-Escalabilidad
-        ↓
-Empresa Autónoma
-```
+**Objetivo:** establecer la base documental, organizacional y de decisión antes de escribir código (OBJ-001, OBJ-002).
 
----
+**Volúmenes:** `000-Constitucion`, `001-Arquitectura`, `100-Organizacion`, `002-CTO`, `003-CEO`.
 
-# 📂 Estructura del Repositorio
+**Periodo real:** 2026-07-20 – 2026-07-26.
 
-```text
-MERCHLY_AI/
+**Criterios de cierre** (detalle completo en `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`):
 
-.github/
+* [x] `000-Constitucion` completo
+* [x] `001-Arquitectura` completo
+* [x] `100-Organizacion` completo
+* [x] `002-CTO` completo
+* [x] `003-CEO` completo, incluyendo decisión de modelo de negocio (Opción C — Híbrido, DEC-014)
+* [x] `ROADMAP.md` completado (este documento)
+* [ ] `CHANGELOG.md` completado
+* [ ] Entorno local mínimo funcional (`docker compose up -d`)
+* [ ] Al menos un endpoint `/health` funcionando
+* [ ] Al menos un agente IA con contrato técnico completo (depende de `docs/007-Agentes`)
 
-docs/
-
-memory/
-
-prompts/
-
-backend/
-
-frontend/
-
-agents/
-
-automation/
-
-infrastructure/
-
-scripts/
-
-tests/
-
-tools/
-```
+**Estado:** los criterios documentales están cumplidos. Faltan los criterios técnicos mínimos y `CHANGELOG.md` para declarar el cierre formal de Fase 0.
 
 ---
 
-# 📚 Sistema de Documentación
+# 3. Fase 1 — Infraestructura
 
-MERCHLY AI utiliza una arquitectura documental organizada por volúmenes.
+**Objetivo:** dejar un entorno técnico mínimo reproducible, sin todavía construir funcionalidad de negocio.
 
-| Carpeta            | Descripción                             |
-| ------------------ | --------------------------------------- |
-| 000-Constitucion   | Constitución del proyecto               |
-| 001-Arquitectura   | Arquitectura global del sistema         |
-| 002-CTO            | Manual técnico y dirección tecnológica  |
-| 003-CEO            | Estrategia empresarial                  |
-| 004-Backend        | Documentación backend                   |
-| 005-Frontend       | Documentación frontend                  |
-| 006-BaseDatos      | Diseño y gestión de datos               |
-| 007-Agentes        | Arquitectura de agentes IA              |
-| 008-Automatizacion | Flujos automáticos                      |
-| 009-Marketing      | Sistema de marketing                    |
-| 010-Prompts        | Biblioteca de prompts                   |
-| 011-SOP            | Procedimientos operativos               |
-| 012-Testing        | Control de calidad                      |
-| 013-Seguridad      | Seguridad del sistema                   |
-| 014-Analytics      | Métricas y análisis                     |
-| 015-Bitacora       | Historial de desarrollo                 |
-| 016-Decisiones     | Registros de decisiones arquitectónicas |
-| 017-Roadmap        | Planificación oficial                   |
-| 018-Research       | Investigación y experimentos            |
-| 019-Templates      | Plantillas reutilizables                |
-| 020-Assets         | Recursos visuales y materiales          |
+**Volúmenes:** `007-Agentes` (contrato técnico, no implementación completa), inicio de `004-Backend` y `006-BaseDatos`.
 
-La serie 000-020 documenta el **conocimiento** del proyecto (arquitectura, procesos, especificaciones).
+**Hitos:**
 
-| Carpeta            | Descripción                             |
-| ------------------ | --------------------------------------- |
-| 100-Organizacion   | Estructura organizacional, roles ejecutivos, departamentos y agentes IA |
+1. Definir el contrato técnico de agentes IA (entradas, salidas, límites) en `docs/007-Agentes`.
+2. Levantar entorno local con Docker (`docker compose up -d`) conforme a `002-CTO/06-Entorno-Desarrollo.md`.
+3. Primer endpoint de backend (`/health`) funcionando en FastAPI.
+4. Base de datos PostgreSQL + pgvector conectada, sin esquema de negocio aún.
 
-La serie 100+ documenta la **organización** del proyecto (quién es responsable de cada capacidad). Responde una pregunta distinta a la serie 000-020 y por eso usa una numeración separada.
+**Estimación:** 2–3 semanas desde el cierre de Fase 0.
+
+**Criterio de cierre:** los 3 criterios técnicos pendientes de Fase 0 (Docker, `/health`, contrato de agente) quedan resueltos y versionados.
 
 ---
 
-# 🧠 Sistema de Memoria del Proyecto
+# 4. Fase 2 — Núcleo de Plataforma
 
-MERCHLY AI mantiene tres capas principales de información:
+**Objetivo:** primera versión funcional de AICOS operando una tienda propia (OBJ-003), coherente con Opción C del modelo de negocio.
 
-## Documentación oficial
+**Volúmenes:** `004-Backend`, `005-Frontend`, `006-BaseDatos` completos; inicio de `012-Testing`.
 
-Ubicación:
+**Hitos:**
 
-```
-docs/
-```
+1. Backend operativo con API principal.
+2. Frontend funcional (Next.js) para operación básica.
+3. Sistema de autenticación.
+4. Al menos una tienda propia operando en entorno controlado (no producción con ventas reales todavía).
 
-Contiene:
-
-* Arquitectura.
-* Procesos.
-* Estándares.
-* Especificaciones.
+**Estimación:** 4–8 semanas desde el cierre de Fase 1.
 
 ---
 
-## Memoria operativa
+# 5. Fase 3 — Agentes IA
 
-Ubicación:
+**Objetivo:** implementar agentes especializados con responsabilidades claras (OBJ-004).
 
-```
-memory/
-```
+**Volúmenes:** `007-Agentes` (implementación completa), `010-Prompts`.
 
-Contiene:
+**Áreas iniciales:** investigación de productos, SEO, contenido, atención al cliente de primer nivel, analítica básica.
 
-* Estado actual del proyecto.
-* Próximos pasos.
-* Decisiones recientes.
-* Contexto operativo.
+**Estimación:** 6–10 semanas desde el cierre de Fase 2, en paralelo parcial con Fase 4.
 
 ---
 
-## Instrucciones para Inteligencia Artificial
+# 6. Fase 4 — Automatización
 
-Ubicación:
+**Objetivo:** reducir progresivamente la intervención humana mediante flujos supervisados (OBJ-005).
 
-```
-prompts/
-```
+**Volúmenes:** `008-Automatizacion` (n8n), `011-SOP`.
 
-Contiene:
-
-* Roles IA.
-* Instrucciones operativas.
-* Contextos especializados.
+**Estimación:** en paralelo con Fase 3, consolidándose 2–4 semanas después.
 
 ---
 
-# 🤖 Ecosistema de Inteligencia Artificial
+# 7. Fase 5 — Motor de Marketing
 
-Cada modelo de IA tiene una función especializada.
+**Objetivo:** automatizar marketing y publicidad sobre la base de agentes ya operativos.
 
-| IA         | Responsabilidad principal                                |
-| ---------- | -------------------------------------------------------- |
-| ChatGPT    | Arquitectura, ingeniería, planificación e implementación |
-| Claude     | Documentación extensa, análisis y revisión               |
-| Gemini     | Investigación y validación técnica                       |
-| Perplexity | Investigación actualizada de mercado y tecnología        |
+**Volúmenes:** `009-Marketing`.
 
-En futuras versiones se incorporarán nuevos proveedores de IA.
+**Estimación:** a definir una vez cerradas Fases 3-4; depende de tracción real de la(s) tienda(s) propia(s).
 
 ---
 
-# 🛠 Stack Tecnológico Inicial
+# 8. Fase 6 — Analítica
 
-## Backend
+**Objetivo:** métricas y seguimiento de negocio y plataforma a escala (OBJ-004, OBJ-005).
 
-* Python
-* FastAPI
+**Volúmenes:** `014-Analytics`.
 
-## Frontend
-
-* Next.js
-* React
-* TypeScript
-
-## Base de Datos
-
-* PostgreSQL
-* pgvector
-* Redis
-
-## Infraestructura
-
-* Docker
-* GitHub Actions
-* Ubuntu
-
-## Automatización
-
-* n8n
+**Estimación:** a definir; puede adelantarse parcialmente si hay necesidad temprana de métricas (ya existe una versión mínima en `003-CEO/05-Metricas-y-Seguimiento.md`).
 
 ---
 
-# 📊 Estado Actual
+# 9. Fase 7 — Escalabilidad
 
-## Versión
+**Objetivo:** evaluar formalmente la apertura de AICOS como plataforma a terceros (Opción B), conforme a lo previsto en la Opción C del modelo de negocio (DEC-014). Esta fase **no se ejecuta automáticamente** — requiere nueva decisión explícita del CEO basada en tracción real.
 
-```
-0.1 Alpha
-```
+**Volúmenes:** `013-Seguridad` (reforzada para multi-tenant), revisión de `006-BaseDatos` para soportar multi-tenancy si se aprueba.
 
-## Fase actual
-
-```
-Fundación
-```
-
-## Estado de desarrollo
-
-```
-Arquitectura y documentación
-```
+**Estimación:** condicionada a resultados de Fases 2-6. Sin fecha objetivo mientras no exista la decisión.
 
 ---
 
-# 📚 Documentación Primero
+# 10. Fase 8 — Empresa Autónoma
 
-Ningún código será considerado completo si no incluye:
+**Objetivo:** visión de largo plazo (OBJ-009 a OBJ-012) — sistema operativo empresarial con máxima automatización.
 
-* Documentación técnica.
-* Pruebas.
-* Criterios de aceptación.
-* Notas arquitectónicas.
-* Registro de cambios.
+**Estimación:** 1–3+ años, sujeta a revisión continua conforme evoluciona el proyecto.
 
 ---
 
-# 🤝 Flujo de Desarrollo
+# 11. Principios de Planificación
 
-MERCHLY AI sigue un proceso de ingeniería estructurado:
-
-```
-Idea
-    ↓
-Especificación
-    ↓
-Arquitectura
-    ↓
-Diseño Técnico
-    ↓
-Implementación
-    ↓
-Pruebas
-    ↓
-Documentación
-    ↓
-Revisión
-    ↓
-Integración
-```
+* Ninguna fase avanza sin cerrar los criterios verificables de la fase anterior (coherente con DEC-003: control humano sobre decisiones estratégicas).
+* Las estimaciones de tiempo son orientativas; los criterios de cierre son la referencia real de avance.
+* La Fase 7 (Escalabilidad hacia terceros) es la única que depende de una decisión de negocio adicional, no solo de trabajo técnico completado.
 
 ---
 
-# 📄 Licencia
+# Resumen Ejecutivo para IA
 
-La licencia será definida antes del primer lanzamiento público.
-
----
-
-# 🌍 Visión a Largo Plazo
-
-MERCHLY AI busca convertirse en un sistema operativo empresarial extensible capaz de coordinar negocios digitales autónomos mediante agentes especializados de inteligencia artificial.
-
-Este repositorio representa la base tecnológica y documental de esa visión.
-
----
-
-# Estado del Documento
-
-Documento:
-
-README.md
-
-Versión:
-
-1.0.0
-
-Idioma:
-
-Español
-
-Última actualización:
-
-2026-07-21
+El roadmap define 9 fases (0 a 8) desde Fundación hasta Empresa Autónoma. La Fase 0 está prácticamente cerrada (falta `CHANGELOG.md` y 3 criterios técnicos mínimos). Las Fases 1-6 construyen y operan AICOS sobre tiendas propias, conforme a la Opción C del modelo de negocio. La Fase 7 (apertura a terceros) requiere una decisión explícita adicional del CEO y no se asume por defecto. Toda fase se cierra por criterios verificables, no solo por fecha.
