@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Entornos virtuales
+.venv/
+venv/
+
+# Variables de entorno reales (Norma 11, Seguridad por Diseño)
+.env
+backend/.env
+
+# Docker
+*.log
+
+# Node (futuro frontend)
+node_modules/
+.next/
+
+# Sistema
+.DS_Store
