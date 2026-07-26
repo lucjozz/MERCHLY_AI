@@ -5,7 +5,7 @@
 title: Modelo de Negocio Inicial de AICOS
 document: 003-02
 version: 1.0.0
-status: Draft — pendiente de aprobación del CEO
+status: Aprobado — Opción C (Híbrido) seleccionada por el CEO
 owner: CEO
 last_updated: 2026-07-25
 next_review: 2027-01-25
@@ -68,12 +68,17 @@ Fase 2+: si el modelo demuestra tracción, se evalúa abrir AICOS como plataform
 
 ---
 
-# 4. Decisión Pendiente
+# 4. Decisión Adoptada
 
-Este documento no fija todavía cuál opción (A, B o C) se adopta. Requiere aprobación explícita del CEO, registrada en `memory/DECISIONS.md`, antes de que `004-Backend` diseñe el modelo de datos (multi-tenant o no cambia sustancialmente esa decisión).
+El CEO aprueba la **Opción C (Híbrido)** como modelo de negocio de AICOS:
+
+* **Fase 0-1:** AICOS opera exclusivamente tiendas propias de Merchly, sirviendo como banco de pruebas con datos reales.
+* **Fase 2+:** si el modelo demuestra tracción, se evalúa abrir AICOS como plataforma a terceros (Opción B), reutilizando lo ya construido.
+
+Esta decisión queda registrada en `memory/DECISIONS.md` (DEC-014, que sustituye el estado "pendiente" de DEC-012). Consecuencia directa para `004-Backend`: el sistema **no** necesita diseñarse multi-tenant desde el día uno; esa necesidad se evalúa recién al entrar en Fase 2, si corresponde.
 
 ---
 
 # Resumen Ejecutivo para IA
 
-Existen tres opciones de modelo de negocio (tiendas propias / SaaS a terceros / híbrido). Se recomienda el híbrido por simplicidad, pero la decisión final es del CEO y debe registrarse antes de iniciar `004-Backend`, porque afecta si el sistema se diseña multi-tenant desde el principio.
+Se evaluaron tres opciones de modelo de negocio (tiendas propias / SaaS a terceros / híbrido). El CEO aprobó la **Opción C (Híbrido)**: Fase 0-1 con tiendas propias como banco de pruebas, evaluando apertura a terceros recién en Fase 2+. `004-Backend` no requiere diseño multi-tenant desde el inicio.
