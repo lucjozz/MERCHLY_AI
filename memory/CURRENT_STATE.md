@@ -49,6 +49,13 @@ Estado:
 COMPLETADO
 
 
+## 007-Agentes
+
+Estado:
+
+COMPLETADO (contrato técnico estándar, ciclo de vida, primer agente con contrato completo: Agente Investigador de Producto)
+
+
 ## 003-CEO
 
 Estado:
@@ -84,28 +91,27 @@ Ninguno.
 
 1. Entorno local mínimo funcional (`docker compose up -d`) — pendiente, corresponde a Fase 1.
 2. Endpoint `/health` de backend — pendiente, corresponde a Fase 1.
-3. Al menos un agente IA con contrato técnico completo — pendiente, depende de `docs/007-Agentes`.
 
 
 ---
 
 # Próxima fase
 
-Iniciar docs/007-Agentes (contrato técnico de agentes) como primer hito de Fase 1 — Infraestructura, según ROADMAP.md.
+Cerrar Fase 0 completando los 2 criterios técnicos restantes (Docker, /health), luego avanzar a Fase 1 — Infraestructura según ROADMAP.md.
 
 
 ---
 
 # Última acción realizada
 
-Se completó ROADMAP.md (9 fases, de Fundación a Empresa Autónoma, con volúmenes, hitos y criterios de cierre) y CHANGELOG.md (historial de versiones 0.1.0 a 0.4.0-alpha). Con esto, todos los criterios documentales de cierre de Fase 0 quedan cumplidos; solo restan los 3 criterios técnicos mínimos (Docker, /health, contrato de agente IA).
+Se completó docs/007-Agentes: contrato técnico estándar (10 secciones), ciclo de vida de agentes (8 etapas) y el primer agente con contrato técnico completo (Agente Investigador de Producto). Con esto, el criterio técnico de "al menos un agente IA con contrato técnico completo" queda cumplido. Solo restan 2 criterios técnicos para cerrar Fase 0: Docker funcional y endpoint /health.
 
 
 ---
 
 # Próxima acción
 
-Iniciar docs/007-Agentes para definir el contrato técnico de agentes IA (entradas, salidas, límites), primer hito de Fase 1 — Infraestructura.
+Levantar el entorno local mínimo (docker compose up -d) y un endpoint /health en FastAPI, conforme a 002-CTO/06-Entorno-Desarrollo.md, para cerrar los 2 criterios técnicos restantes de Fase 0.
 
 
 ---
