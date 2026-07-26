@@ -53,7 +53,7 @@ COMPLETADO
 
 Estado:
 
-COMPLETADO (documentación base; decisión de modelo de negocio queda PENDIENTE de aprobación explícita del CEO)
+COMPLETADO (incluye decisión de modelo de negocio ya aprobada: Opción C — Híbrido, ver DEC-014)
 
 
 Documentos:
@@ -86,8 +86,6 @@ Ninguno.
 
 2. CHANGELOG.md prácticamente vacío (solo título).
 
-3. Decisión de modelo de negocio (Opción A/B/C en docs/003-CEO/02-Modelo-de-Negocio.md) no está tomada, solo propuesta.
-
 
 ---
 
@@ -119,4 +117,4 @@ Completar ROADMAP.md, luego iniciar docs/007-Agentes.
 
 # Bloqueos
 
-Ninguno técnico. Bloqueo de decisión: el CEO debe elegir modelo de negocio (A/B/C) antes de que 004-Backend defina si el sistema es multi-tenant.
+Ninguno. El CEO eligió Opción C (Híbrido) — ver DEC-014. 004-Backend queda liberado para diseñarse sin necesidad de multi-tenancy desde el inicio.
