@@ -349,3 +349,23 @@ ROADMAP.md estaba vacío desde el inicio del proyecto; sin él no había forma d
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-016
+
+Fecha:
+
+2026-07-26
+
+Decisión:
+
+Se crea el volumen docs/007-Agentes, que define el contrato técnico estándar de agentes IA (10 secciones: identidad, entradas, salidas, herramientas, memoria, permisos, límites, errores, métricas, registro), el ciclo de vida de un agente (8 etapas) y el primer agente con contrato técnico completo: el Agente Investigador de Producto.
+
+Motivo:
+
+Cumplir el criterio técnico de cierre de Fase 0 establecido en docs/003-CEO/03-Criterios-de-Exito-Fase0.md: contar con al menos un agente IA con contrato técnico completo (entradas, salidas, límites), antes de iniciar la implementación en 004-Backend.
+
+Estado:
+
+Aprobada.
