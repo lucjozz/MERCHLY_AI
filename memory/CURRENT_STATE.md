@@ -82,35 +82,30 @@ Ninguno.
 
 # Pendientes críticos identificados (no bloquean pero deben resolverse antes de cerrar Fase 0)
 
-1. ROADMAP.md está vacío. Se usó docs/003-CEO/03-Criterios-de-Exito-Fase0.md como referencia operativa temporal.
-
-2. CHANGELOG.md prácticamente vacío (solo título).
+1. Entorno local mínimo funcional (`docker compose up -d`) — pendiente, corresponde a Fase 1.
+2. Endpoint `/health` de backend — pendiente, corresponde a Fase 1.
+3. Al menos un agente IA con contrato técnico completo — pendiente, depende de `docs/007-Agentes`.
 
 
 ---
 
 # Próxima fase
 
-Definir entre:
-
-(a) completar ROADMAP.md con hitos y fechas, o
-(b) iniciar docs/007-Agentes (contrato técnico de agentes) antes de tocar código en 004-Backend.
-
-Recomendación: (a) primero por ser más rápido y desbloquear seguimiento, luego (b).
+Iniciar docs/007-Agentes (contrato técnico de agentes) como primer hito de Fase 1 — Infraestructura, según ROADMAP.md.
 
 
 ---
 
 # Última acción realizada
 
-Se completó docs/003-CEO: rol operativo del CEO, modelo de negocio (propuesta, pendiente de decisión), criterios de éxito de Fase 0, estrategia comercial preliminar y métricas de seguimiento. Se identificó que ROADMAP.md y CHANGELOG.md están vacíos.
+Se completó ROADMAP.md (9 fases, de Fundación a Empresa Autónoma, con volúmenes, hitos y criterios de cierre) y CHANGELOG.md (historial de versiones 0.1.0 a 0.4.0-alpha). Con esto, todos los criterios documentales de cierre de Fase 0 quedan cumplidos; solo restan los 3 criterios técnicos mínimos (Docker, /health, contrato de agente IA).
 
 
 ---
 
 # Próxima acción
 
-Completar ROADMAP.md, luego iniciar docs/007-Agentes.
+Iniciar docs/007-Agentes para definir el contrato técnico de agentes IA (entradas, salidas, límites), primer hito de Fase 1 — Infraestructura.
 
 
 ---
