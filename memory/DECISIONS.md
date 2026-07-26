@@ -329,3 +329,23 @@ Sin criterios explícitos de cierre de fase, no hay forma objetiva de saber cuá
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-015
+
+Fecha:
+
+2026-07-26
+
+Decisión:
+
+Se completa ROADMAP.md con 9 fases (Fundación a Empresa Autónoma), cada una con volúmenes documentales asociados, hitos y criterios de cierre verificables. El cierre de cada fase se rige por criterios, no solo por fecha calendario, conforme al criterio ya establecido en docs/003-CEO/03-Criterios-de-Exito-Fase0.md.
+
+Motivo:
+
+ROADMAP.md estaba vacío desde el inicio del proyecto; sin él no había forma de secuenciar formalmente el trabajo más allá de Fase 0.
+
+Estado:
+
+Aprobada.
