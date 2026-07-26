@@ -284,7 +284,27 @@ Es una decisión estratégica que, conforme a DEC-003, requiere aprobación huma
 
 Estado:
 
-Pendiente de aprobación.
+Superada por DEC-014.
+
+---
+
+## DEC-014
+
+Fecha:
+
+2026-07-26
+
+Decisión:
+
+Se aprueba la Opción C (Híbrido) como modelo de negocio de AICOS: Fase 0-1 con AICOS operando exclusivamente tiendas propias de Merchly como banco de pruebas; Fase 2+ se evalúa abrir AICOS como plataforma a terceros (Opción B), reutilizando lo ya construido. Se descarta, por ahora, un camino inicial de white-label a terceros. Documentado en docs/003-CEO/02-Modelo-de-Negocio.md.
+
+Motivo:
+
+Coherente con el Principio de Simplicidad (Norma 4 de 000-Constitucion/08-Normas-de-Ingenieria.md): no construir multi-tenancy antes de tener una sola tienda propia funcionando. Consecuencia directa: 004-Backend no necesita diseñarse multi-tenant desde el día uno.
+
+Estado:
+
+Aprobada.
 
 
 ---
