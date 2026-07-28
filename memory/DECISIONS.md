@@ -286,26 +286,6 @@ Estado:
 
 Superada por DEC-014.
 
----
-
-## DEC-014
-
-Fecha:
-
-2026-07-26
-
-Decisión:
-
-Se aprueba la Opción C (Híbrido) como modelo de negocio de AICOS: Fase 0-1 con AICOS operando exclusivamente tiendas propias de Merchly como banco de pruebas; Fase 2+ se evalúa abrir AICOS como plataforma a terceros (Opción B), reutilizando lo ya construido. Se descarta, por ahora, un camino inicial de white-label a terceros. Documentado en docs/003-CEO/02-Modelo-de-Negocio.md.
-
-Motivo:
-
-Coherente con el Principio de Simplicidad (Norma 4 de 000-Constitucion/08-Normas-de-Ingenieria.md): no construir multi-tenancy antes de tener una sola tienda propia funcionando. Consecuencia directa: 004-Backend no necesita diseñarse multi-tenant desde el día uno.
-
-Estado:
-
-Aprobada.
-
 
 ---
 
@@ -325,6 +305,26 @@ Motivo:
 
 Sin criterios explícitos de cierre de fase, no hay forma objetiva de saber cuándo avanzar a Fase 1, lo que genera riesgo de extender la Fundación indefinidamente.
 
+
+Estado:
+
+Aprobada.
+
+---
+
+## DEC-014
+
+Fecha:
+
+2026-07-26
+
+Decisión:
+
+Se aprueba la Opción C (Híbrido) como modelo de negocio de AICOS: Fase 0-1 con AICOS operando exclusivamente tiendas propias de Merchly como banco de pruebas; Fase 2+ se evalúa abrir AICOS como plataforma a terceros (Opción B), reutilizando lo ya construido. Se descarta, por ahora, un camino inicial de white-label a terceros. Documentado en docs/003-CEO/02-Modelo-de-Negocio.md.
+
+Motivo:
+
+Coherente con el Principio de Simplicidad (Norma 4 de 000-Constitucion/08-Normas-de-Ingenieria.md): no construir multi-tenancy antes de tener una sola tienda propia funcionando. Consecuencia directa: 004-Backend no necesita diseñarse multi-tenant desde el día uno.
 
 Estado:
 
@@ -365,6 +365,26 @@ Se crea el volumen docs/007-Agentes, que define el contrato técnico estándar d
 Motivo:
 
 Cumplir el criterio técnico de cierre de Fase 0 establecido en docs/003-CEO/03-Criterios-de-Exito-Fase0.md: contar con al menos un agente IA con contrato técnico completo (entradas, salidas, límites), antes de iniciar la implementación en 004-Backend.
+
+Estado:
+
+Aprobada.
+
+---
+
+## DEC-017
+
+Fecha:
+
+2026-07-26
+
+Decisión:
+
+Se implementa el primer código funcional del proyecto: backend FastAPI mínimo (backend/) con endpoint /health, y docker-compose.yml en la raíz que levanta backend, PostgreSQL (con extensión pgvector) y Redis. El endpoint /health fue probado localmente (pytest y solicitud HTTP real) y responde 200 con estado "ok".
+
+Motivo:
+
+Cumplir los 2 criterios técnicos restantes de cierre de Fase 0, definidos en docs/003-CEO/03-Criterios-de-Exito-Fase0.md: entorno local funcional vía docker compose y al menos un endpoint de backend funcionando.
 
 Estado:
 
