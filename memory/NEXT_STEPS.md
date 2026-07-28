@@ -3,7 +3,7 @@
 
 ## Prioridad actual
 
-Fase 1 — Infraestructura: dejar el backend conectado de verdad a PostgreSQL/pgvector y Redis, e implementar el primer agente en código.
+Implementar el Agente Investigador de Producto en código, sobre el contrato técnico ya aprobado en docs/007-Agentes.
 
 
 ---
@@ -13,25 +13,16 @@ Fase 1 — Infraestructura: dejar el backend conectado de verdad a PostgreSQL/pg
 
 ## 1
 
-Conectar el backend a PostgreSQL/pgvector y Redis:
-
-- El contenedor de base de datos y Redis ya existen en docker-compose.yml, pero backend/app/main.py todavía no ejecuta ninguna consulta ni usa esas conexiones.
-- Agregar cliente de base de datos (SQLAlchemy o equivalente) y cliente de Redis en backend/app/core.
-
-
----
-
-## 2
-
 Implementar el Agente Investigador de Producto:
 
 - Seguir estrictamente el contrato técnico ya aprobado en docs/007-Agentes/03-Agente-Investigador-de-Producto.md (entradas, salidas, herramientas permitidas, límites).
+- El backend ya está conectado a PostgreSQL/pgvector y Redis (ver DEC-018); falta el esquema de datos y la lógica del agente en sí.
 - Registrar el avance de etapa (Implementado, En Prueba) en docs/007-Agentes/04-Registro-de-Agentes.md, conforme al ciclo de vida definido en docs/007-Agentes/02-Ciclo-de-Vida-de-Agentes.md.
 
 
 ---
 
-## 3
+## 2
 
 Iniciar docs/006-BaseDatos:
 
@@ -41,6 +32,15 @@ Iniciar docs/006-BaseDatos:
 
 ---
 
+## 3
+
+Iniciar docs/010-Prompts:
+
+- El contrato técnico del agente ya define entradas/salidas/límites; falta el prompt concreto que lo instruye.
+
+
+---
+
 # Objetivo siguiente etapa
 
-Con la Fase 0 (Fundación) cerrada —incluyendo Constitución, Arquitectura, Organización, CTO, CEO, Agentes y el entorno técnico mínimo— el proyecto pasa de "documentación y diseño" a "implementación real" en Fase 1. El primer entregable funcional debe ser el Agente Investigador de Producto operando de punta a punta: entrada → investigación → salida persistida en base de datos.
+Con la Fase 0 (Fundación) cerrada y el backend ya conectado a PostgreSQL/pgvector y Redis (primer hito de Fase 1), el siguiente entregable funcional es el Agente Investigador de Producto operando de punta a punta: entrada → investigación → salida persistida en base de datos.
