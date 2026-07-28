@@ -411,22 +411,27 @@ MERCHLY AI
 
 Versión:
 
-0.1 Alpha
+0.5 Alpha
 
 
 Fase:
 
-Foundation
+Infraestructura (Fase 1, recién iniciada; Fase 0 - Fundación cerrada)
 
 
 Estado:
 
-Arquitectura inicial completada.
+Fundación completa: Constitución, Arquitectura, Organización, CTO, CEO y Agentes documentados; entorno técnico mínimo (Docker + endpoint /health) funcionando.
 
 
 Siguiente fase:
 
-002-CTO
+Conectar el backend a PostgreSQL/pgvector y Redis, e implementar el Agente Investigador de Producto en código sobre el contrato ya aprobado en docs/007-Agentes.
+
+
+Nota para cualquier IA que use este prompt:
+
+Este documento no se actualiza automáticamente. Antes de asumir el estado del proyecto, siempre verificar memory/CONTEXT.md y memory/CURRENT_STATE.md, que son la fuente de verdad más reciente.
 
 
 ---
