@@ -5,13 +5,6 @@
 MERCHLY AI
 
 AI Commerce Operating System (AICOS)
-# MERCHLY AI CURRENT CONTEXT
-
-## Proyecto
-
-MERCHLY AI
-
-AI Commerce Operating System (AICOS)
 
 MERCHLY AI es la empresa. AICOS es el producto/plataforma que dicha empresa desarrolla.
 
@@ -44,17 +37,17 @@ docs/007-Agentes
 
 Versión:
 
-0.5 Alpha
+0.6 Alpha
 
 
 Estado:
 
-Fundación cerrada
+Fundación cerrada; backend conectado a PostgreSQL/pgvector y Redis
 
 
 Fase:
 
-FASE 1 - Infraestructura (recién iniciada)
+FASE 1 - Infraestructura (en curso)
 
 
 ---
@@ -186,25 +179,27 @@ Contenido:
 
 Estado:
 
-Completado (criterios técnicos de cierre de Fase 0)
+Completado (criterios técnicos de cierre de Fase 0) + conexión real a dependencias (Fase 1)
 
 
 Contenido:
 
 - Backend FastAPI mínimo (backend/) con endpoint /health, probado con pytest y solicitud HTTP real (200 OK)
 - docker-compose.yml en la raíz: backend + PostgreSQL/pgvector + Redis
+- Backend conectado realmente a PostgreSQL/pgvector (SQLAlchemy async + psycopg 3) y Redis (redis.asyncio)
+- Endpoint /health/ready (readiness) que verifica ambas conexiones
 
 
 ---
 
 # Trabajo actual
 
-Inicio de Fase 1 — Infraestructura.
+Implementación del Agente Investigador de Producto en código, sobre el contrato ya aprobado en docs/007-Agentes.
 
 
 Objetivo:
 
-Conectar el backend realmente a PostgreSQL/pgvector y Redis, y comenzar la implementación del Agente Investigador de Producto sobre el contrato ya aprobado en docs/007-Agentes.
+Tener el primer agente operando de punta a punta: entrada → investigación → salida persistida en base de datos.
 
 
 ---
@@ -213,17 +208,17 @@ Conectar el backend realmente a PostgreSQL/pgvector y Redis, y comenzar la imple
 
 1.
 
-Conectar el backend a PostgreSQL/pgvector y Redis (más allá de que los contenedores existan en docker-compose.yml).
+Implementar el Agente Investigador de Producto en backend/, siguiendo su contrato técnico.
 
 
 2.
 
-Implementar el Agente Investigador de Producto en código, siguiendo su contrato técnico (docs/007-Agentes/03-Agente-Investigador-de-Producto.md).
+Iniciar docs/006-BaseDatos con el esquema mínimo necesario para persistir sus resultados.
 
 
 3.
 
-Iniciar docs/006-BaseDatos con el esquema mínimo necesario para el agente investigador.
+Definir en docs/010-Prompts el prompt concreto que usará el agente (el contrato técnico ya existe; falta el prompt en sí).
 
 
 ---
@@ -239,4 +234,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-07-26
+2026-07-27
