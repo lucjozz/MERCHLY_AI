@@ -4,16 +4,14 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 
 ---
 
-## [0.4.0-alpha] - 2026-07-26
+## [0.6.0-alpha] - 2026-07-27
 
-### docs
-- Se completa `ROADMAP.md` con las 9 fases del proyecto (Fundación a Empresa Autónoma), volúmenes asociados, criterios de cierre e hitos estimados.
-- Se aprueba el modelo de negocio de AICOS: Opción C (Híbrido) — tiendas propias en Fase 0-1, evaluación de apertura a terceros en Fase 2+ (DEC-014).
-- Se completa `docs/003-CEO` (rol operativo del CEO, modelo de negocio, criterios de éxito de Fase 0, estrategia comercial preliminar, métricas y seguimiento).# AICOS
+### feat
+- El backend se conecta realmente a PostgreSQL/pgvector (SQLAlchemy 2.0 async + psycopg 3) y a Redis (redis.asyncio).
+- Se agrega el endpoint `/health/ready` (readiness), separado de `/health` (liveness): verifica ambas conexiones y responde "ok" o "degraded" sin caerse si alguna dependencia falla.
 
-Todas las entradas relevantes de este proyecto se documentan en este archivo, en orden cronológico descendente. El formato sigue el criterio de Conventional Commits (DEC-010), agrupando por tipo de cambio.
-
----
+### test
+- Se agregan 3 tests para `/health/ready` con dependencias mockeadas, sin requerir PostgreSQL/Redis reales.
 
 ## [0.5.0-alpha] - 2026-07-26
 
