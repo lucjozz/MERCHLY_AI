@@ -5,6 +5,13 @@
 MERCHLY AI
 
 AI Commerce Operating System (AICOS)
+# MERCHLY AI CURRENT CONTEXT
+
+## Proyecto
+
+MERCHLY AI
+
+AI Commerce Operating System (AICOS)
 
 MERCHLY AI es la empresa. AICOS es el producto/plataforma que dicha empresa desarrolla.
 
@@ -26,6 +33,10 @@ docs/100-Organizacion
 
 docs/002-CTO
 
+docs/003-CEO
+
+docs/007-Agentes
+
 
 ---
 
@@ -33,17 +44,17 @@ docs/002-CTO
 
 Versión:
 
-0.3 Alpha
+0.5 Alpha
 
 
 Estado:
 
-Fundación
+Fundación cerrada
 
 
 Fase:
 
-FASE 0 - Fundación
+FASE 1 - Infraestructura (recién iniciada)
 
 
 ---
@@ -136,16 +147,64 @@ Contenido:
 
 ---
 
+## 003-CEO
+
+Estado:
+
+Completado
+
+
+Contenido:
+
+- Rol operativo del CEO
+- Modelo de negocio (Opción C — Híbrido, aprobado, ver DEC-014)
+- Criterios de éxito de Fase 0
+- Estrategia comercial preliminar
+- Métricas y seguimiento
+
+
+---
+
+## 007-Agentes
+
+Estado:
+
+Completado
+
+
+Contenido:
+
+- Contrato técnico estándar de agentes IA (10 secciones)
+- Ciclo de vida de agentes (8 etapas)
+- Primer agente con contrato técnico completo: Agente Investigador de Producto
+- Registro de agentes
+
+
+---
+
+# Entorno técnico
+
+Estado:
+
+Completado (criterios técnicos de cierre de Fase 0)
+
+
+Contenido:
+
+- Backend FastAPI mínimo (backend/) con endpoint /health, probado con pytest y solicitud HTTP real (200 OK)
+- docker-compose.yml en la raíz: backend + PostgreSQL/pgvector + Redis
+
+
+---
+
 # Trabajo actual
 
-Preparación del volumen:
-
-003-CEO
+Inicio de Fase 1 — Infraestructura.
 
 
 Objetivo:
 
-Definir la ejecución práctica del rol CEO y los criterios de negocio para avanzar de Fundación a la siguiente fase del roadmap.
+Conectar el backend realmente a PostgreSQL/pgvector y Redis, y comenzar la implementación del Agente Investigador de Producto sobre el contrato ya aprobado en docs/007-Agentes.
 
 
 ---
@@ -154,22 +213,17 @@ Definir la ejecución práctica del rol CEO y los criterios de negocio para avan
 
 1.
 
-Crear docs/003-CEO.
+Conectar el backend a PostgreSQL/pgvector y Redis (más allá de que los contenedores existan en docker-compose.yml).
 
 
 2.
 
-Definir modelo de negocio inicial de AICOS.
+Implementar el Agente Investigador de Producto en código, siguiendo su contrato técnico (docs/007-Agentes/03-Agente-Investigador-de-Producto.md).
 
 
 3.
 
-Definir criterios de éxito de Fase 0 y paso a Fase 1.
-
-
-4.
-
-Vincular explícitamente ROADMAP.md con las fases documentales.
+Iniciar docs/006-BaseDatos con el esquema mínimo necesario para el agente investigador.
 
 
 ---
@@ -185,4 +239,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-07-25
+2026-07-26
