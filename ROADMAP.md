@@ -35,7 +35,7 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 | Fase | Nombre | Estado |
 |---|---|---|
 | 0 | Fundación | Cerrada |
-| 1 | Infraestructura | No iniciada |
+| 1 | Infraestructura | Cerrada |
 | 2 | Núcleo de Plataforma | No iniciada |
 | 3 | Agentes IA | No iniciada |
 | 4 | Automatización | No iniciada |
@@ -82,11 +82,11 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 1. ~~Definir el contrato técnico de agentes IA (entradas, salidas, límites) en `docs/007-Agentes`.~~ Completado anticipadamente dentro de Fase 0 (ver `docs/007-Agentes`).
 2. ~~Levantar entorno local con Docker (`docker compose up -d`) conforme a `002-CTO/06-Entorno-Desarrollo.md`.~~ Completado anticipadamente dentro de Fase 0 (`docker-compose.yml`, ver DEC-017).
 3. ~~Primer endpoint de backend (`/health`) funcionando en FastAPI.~~ Completado anticipadamente dentro de Fase 0 (`backend/app/api/health.py`, ver DEC-017).
-4. Base de datos PostgreSQL + pgvector conectada desde el código del backend (hoy el contenedor existe en `docker-compose.yml`, pero el backend todavía no ejecuta consultas reales), sin esquema de negocio aún.
+4. ~~Base de datos PostgreSQL + pgvector conectada desde el código del backend.~~ Completado: conexión real vía SQLAlchemy async + psycopg 3, y Redis vía redis.asyncio, con endpoint `/health/ready` (ver DEC-018).
 
 **Estimación:** 2–3 semanas desde el cierre de Fase 0.
 
-**Criterio de cierre:** el backend se conecta realmente a PostgreSQL/pgvector y Redis (más allá de que los contenedores existan).
+**Criterio de cierre:** todos los hitos de esta fase están completos. Fase 1 queda cerrada; el siguiente paso es la Fase 2 (Núcleo de Plataforma) o, según lo acordado, avanzar directo con la implementación del primer agente sobre esta base.
 
 ---
 
