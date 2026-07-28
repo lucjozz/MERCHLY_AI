@@ -9,12 +9,12 @@ Fecha:
 
 Fase:
 
-Foundation (cerrada; lista para pasar a Infraestructura)
+Infraestructura (Fase 1, en curso)
 
 
 Versión:
 
-0.5 Alpha
+0.6 Alpha
 
 
 ---
@@ -65,6 +65,15 @@ COMPLETADO
 Backend FastAPI mínimo en backend/ con endpoint /health (probado con pytest y con solicitud HTTP real, responde 200). docker-compose.yml en la raíz levanta backend + PostgreSQL/pgvector + Redis. Ver DEC-017.
 
 
+## Conexión Real a PostgreSQL y Redis (Fase 1)
+
+Estado:
+
+COMPLETADO
+
+Backend conectado a PostgreSQL/pgvector (SQLAlchemy 2.0 async + psycopg 3) y Redis (redis.asyncio). Nuevo endpoint /health/ready que verifica ambas conexiones y responde "ok" o "degraded" sin caerse si alguna falla. 3 tests con dependencias mockeadas, más verificación manual sin infraestructura real (responde 200 "degraded" correctamente). Ver DEC-018. Todavía no hay esquema de negocio (tablas); eso corresponde a docs/006-BaseDatos.
+
+
 ## 003-CEO
 
 Estado:
@@ -112,14 +121,14 @@ Fase 1 — Infraestructura, según ROADMAP.md: ampliar el backend con conexión 
 
 # Última acción realizada
 
-Se implementó el primer código del proyecto: backend FastAPI mínimo (backend/) con endpoint /health, y docker-compose.yml en la raíz (backend + PostgreSQL/pgvector + Redis). Probado localmente: pytest en verde y respuesta HTTP 200 real desde el servidor. Con esto, TODOS los criterios de cierre de Fase 0 quedan cumplidos (ver docs/003-CEO/03-Criterios-de-Exito-Fase0.md). Se realizó además una auditoría general del repositorio que detectó y corrigió desincronización en memory/DECISIONS.md, memory/CURRENT_STATE.md, memory/CONTEXT.md, memory/NEXT_STEPS.md, ROADMAP.md, CHANGELOG.md y prompts/MASTER_CONTEXT_PROMPT.md.
+Se conectó el backend realmente a PostgreSQL/pgvector y Redis (antes solo existían los contenedores en docker-compose.yml, sin uso real desde el código). Se agregó el endpoint /health/ready (readiness) separado de /health (liveness), con 3 tests nuevos y verificación manual. Ver DEC-018.
 
 
 ---
 
 # Próxima acción
 
-Declarar formalmente iniciada la Fase 1 (Infraestructura) e iniciar la implementación del Agente Investigador de Producto en backend/, sobre el contrato ya aprobado en docs/007-Agentes.
+Implementar el Agente Investigador de Producto en código (backend/), sobre el contrato ya aprobado en docs/007-Agentes/03-Agente-Investigador-de-Producto.md, e iniciar docs/006-BaseDatos con el esquema mínimo para persistir sus resultados.
 
 
 ---
