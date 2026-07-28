@@ -9,6 +9,30 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 ### docs
 - Se completa `ROADMAP.md` con las 9 fases del proyecto (Fundación a Empresa Autónoma), volúmenes asociados, criterios de cierre e hitos estimados.
 - Se aprueba el modelo de negocio de AICOS: Opción C (Híbrido) — tiendas propias en Fase 0-1, evaluación de apertura a terceros en Fase 2+ (DEC-014).
+- Se completa `docs/003-CEO` (rol operativo del CEO, modelo de negocio, criterios de éxito de Fase 0, estrategia comercial preliminar, métricas y seguimiento).# AICOS
+
+Todas las entradas relevantes de este proyecto se documentan en este archivo, en orden cronológico descendente. El formato sigue el criterio de Conventional Commits (DEC-010), agrupando por tipo de cambio.
+
+---
+
+## [0.5.0-alpha] - 2026-07-26
+
+### feat
+- Se agrega el backend mínimo (`backend/`) en FastAPI, con endpoint `/health` probado (pytest + solicitud HTTP real, 200 OK).
+- Se agrega `docker-compose.yml` en la raíz, levantando backend, PostgreSQL con extensión `pgvector` y Redis en un solo paso.
+
+### docs
+- Se completa `docs/007-Agentes`: contrato técnico estándar de agentes IA, ciclo de vida de agentes, y el primer agente con contrato técnico completo (Agente Investigador de Producto).
+- Se declara el cierre formal de la Fase 0 (Fundación): todos los criterios documentales y técnicos de `docs/003-CEO/03-Criterios-de-Exito-Fase0.md` quedan cumplidos.
+
+### chore
+- Auditoría general del repositorio: se corrige el orden y se completan entradas faltantes en `memory/DECISIONS.md` (DEC-014, DEC-017), se sincronizan `memory/CURRENT_STATE.md`, `memory/CONTEXT.md`, `memory/NEXT_STEPS.md` y `prompts/MASTER_CONTEXT_PROMPT.md` con el estado real del proyecto, y se elimina un archivo suelto (`backend/test`).
+
+## [0.4.0-alpha] - 2026-07-26
+
+### docs
+- Se completa `ROADMAP.md` con las 9 fases del proyecto (Fundación a Empresa Autónoma), volúmenes asociados, criterios de cierre e hitos estimados.
+- Se aprueba el modelo de negocio de AICOS: Opción C (Híbrido) — tiendas propias en Fase 0-1, evaluación de apertura a terceros en Fase 2+ (DEC-014).
 - Se completa `docs/003-CEO` (rol operativo del CEO, modelo de negocio, criterios de éxito de Fase 0, estrategia comercial preliminar, métricas y seguimiento).
 - Se completa `docs/002-CTO` (rol técnico-operativo, metodología de desarrollo, stack tecnológico, flujo Git/CI, estándares de código, entorno de desarrollo).
 
