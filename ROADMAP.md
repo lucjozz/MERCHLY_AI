@@ -34,7 +34,7 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 
 | Fase | Nombre | Estado |
 |---|---|---|
-| 0 | Fundación | En cierre (ver sección 2) |
+| 0 | Fundación | Cerrada |
 | 1 | Infraestructura | No iniciada |
 | 2 | Núcleo de Plataforma | No iniciada |
 | 3 | Agentes IA | No iniciada |
@@ -63,11 +63,11 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 * [x] `003-CEO` completo, incluyendo decisión de modelo de negocio (Opción C — Híbrido, DEC-014)
 * [x] `ROADMAP.md` completado (este documento)
 * [x] `CHANGELOG.md` completado
-* [ ] Entorno local mínimo funcional (`docker compose up -d`)
-* [ ] Al menos un endpoint `/health` funcionando
+* [x] Entorno local mínimo funcional (`docker compose up -d`) — `docker-compose.yml` + `backend/` con FastAPI
+* [x] Al menos un endpoint `/health` funcionando — probado con pytest y solicitud HTTP real (200 OK)
 * [x] Al menos un agente IA con contrato técnico completo (Agente Investigador de Producto, `docs/007-Agentes/03-Agente-Investigador-de-Producto.md`)
 
-**Estado:** los criterios documentales están cumplidos. Faltan los criterios técnicos mínimos y `CHANGELOG.md` para declarar el cierre formal de Fase 0.
+**Estado:** Fase 0 cerrada. Todos los criterios documentales y técnicos de `docs/003-CEO/03-Criterios-de-Exito-Fase0.md` están cumplidos (ver DEC-017).
 
 ---
 
@@ -80,13 +80,13 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 **Hitos:**
 
 1. ~~Definir el contrato técnico de agentes IA (entradas, salidas, límites) en `docs/007-Agentes`.~~ Completado anticipadamente dentro de Fase 0 (ver `docs/007-Agentes`).
-2. Levantar entorno local con Docker (`docker compose up -d`) conforme a `002-CTO/06-Entorno-Desarrollo.md`.
-3. Primer endpoint de backend (`/health`) funcionando en FastAPI.
-4. Base de datos PostgreSQL + pgvector conectada, sin esquema de negocio aún.
+2. ~~Levantar entorno local con Docker (`docker compose up -d`) conforme a `002-CTO/06-Entorno-Desarrollo.md`.~~ Completado anticipadamente dentro de Fase 0 (`docker-compose.yml`, ver DEC-017).
+3. ~~Primer endpoint de backend (`/health`) funcionando en FastAPI.~~ Completado anticipadamente dentro de Fase 0 (`backend/app/api/health.py`, ver DEC-017).
+4. Base de datos PostgreSQL + pgvector conectada desde el código del backend (hoy el contenedor existe en `docker-compose.yml`, pero el backend todavía no ejecuta consultas reales), sin esquema de negocio aún.
 
 **Estimación:** 2–3 semanas desde el cierre de Fase 0.
 
-**Criterio de cierre:** los 3 criterios técnicos pendientes de Fase 0 (Docker, `/health`, contrato de agente) quedan resueltos y versionados.
+**Criterio de cierre:** el backend se conecta realmente a PostgreSQL/pgvector y Redis (más allá de que los contenedores existan).
 
 ---
 
@@ -177,4 +177,4 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 
 # Resumen Ejecutivo para IA
 
-El roadmap define 9 fases (0 a 8) desde Fundación hasta Empresa Autónoma. La Fase 0 está prácticamente cerrada (falta `CHANGELOG.md` y 3 criterios técnicos mínimos). Las Fases 1-6 construyen y operan AICOS sobre tiendas propias, conforme a la Opción C del modelo de negocio. La Fase 7 (apertura a terceros) requiere una decisión explícita adicional del CEO y no se asume por defecto. Toda fase se cierra por criterios verificables, no solo por fecha.
+El roadmap define 9 fases (0 a 8) desde Fundación hasta Empresa Autónoma. La Fase 0 está **cerrada**: los 3 volúmenes documentales, `ROADMAP.md`, `CHANGELOG.md`, el entorno Docker y el endpoint `/health` están completos. Las Fases 1-6 construyen y operan AICOS sobre tiendas propias, conforme a la Opción C del modelo de negocio. La Fase 7 (apertura a terceros) requiere una decisión explícita adicional del CEO y no se asume por defecto. Toda fase se cierra por criterios verificables, no solo por fecha.
