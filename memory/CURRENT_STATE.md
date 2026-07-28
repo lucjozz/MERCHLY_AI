@@ -2,19 +2,19 @@
 
 Fecha:
 
-2026-07-25
+2026-07-26
 
 
 # Estado del Proyecto
 
 Fase:
 
-Foundation
+Foundation (cerrada; lista para pasar a Infraestructura)
 
 
 Versión:
 
-0.4 Alpha
+0.5 Alpha
 
 
 ---
@@ -56,6 +56,15 @@ Estado:
 COMPLETADO (contrato técnico estándar, ciclo de vida, primer agente con contrato completo: Agente Investigador de Producto)
 
 
+## Entorno Técnico Mínimo (Fase 0)
+
+Estado:
+
+COMPLETADO
+
+Backend FastAPI mínimo en backend/ con endpoint /health (probado con pytest y con solicitud HTTP real, responde 200). docker-compose.yml en la raíz levanta backend + PostgreSQL/pgvector + Redis. Ver DEC-017.
+
+
 ## 003-CEO
 
 Estado:
@@ -89,33 +98,32 @@ Ninguno.
 
 # Pendientes críticos identificados (no bloquean pero deben resolverse antes de cerrar Fase 0)
 
-1. Entorno local mínimo funcional (`docker compose up -d`) — pendiente, corresponde a Fase 1.
-2. Endpoint `/health` de backend — pendiente, corresponde a Fase 1.
+Ninguno. Todos los criterios documentales y técnicos de cierre de Fase 0 (docs/003-CEO/03-Criterios-de-Exito-Fase0.md) están cumplidos.
 
 
 ---
 
 # Próxima fase
 
-Cerrar Fase 0 completando los 2 criterios técnicos restantes (Docker, /health), luego avanzar a Fase 1 — Infraestructura según ROADMAP.md.
+Fase 1 — Infraestructura, según ROADMAP.md: ampliar el backend con conexión real a PostgreSQL/Redis, y comenzar la implementación del primer agente (Investigador de Producto) sobre el contrato ya aprobado en docs/007-Agentes.
 
 
 ---
 
 # Última acción realizada
 
-Se completó docs/007-Agentes: contrato técnico estándar (10 secciones), ciclo de vida de agentes (8 etapas) y el primer agente con contrato técnico completo (Agente Investigador de Producto). Con esto, el criterio técnico de "al menos un agente IA con contrato técnico completo" queda cumplido. Solo restan 2 criterios técnicos para cerrar Fase 0: Docker funcional y endpoint /health.
+Se implementó el primer código del proyecto: backend FastAPI mínimo (backend/) con endpoint /health, y docker-compose.yml en la raíz (backend + PostgreSQL/pgvector + Redis). Probado localmente: pytest en verde y respuesta HTTP 200 real desde el servidor. Con esto, TODOS los criterios de cierre de Fase 0 quedan cumplidos (ver docs/003-CEO/03-Criterios-de-Exito-Fase0.md). Se realizó además una auditoría general del repositorio que detectó y corrigió desincronización en memory/DECISIONS.md, memory/CURRENT_STATE.md, memory/CONTEXT.md, memory/NEXT_STEPS.md, ROADMAP.md, CHANGELOG.md y prompts/MASTER_CONTEXT_PROMPT.md.
 
 
 ---
 
 # Próxima acción
 
-Levantar el entorno local mínimo (docker compose up -d) y un endpoint /health en FastAPI, conforme a 002-CTO/06-Entorno-Desarrollo.md, para cerrar los 2 criterios técnicos restantes de Fase 0.
+Declarar formalmente iniciada la Fase 1 (Infraestructura) e iniciar la implementación del Agente Investigador de Producto en backend/, sobre el contrato ya aprobado en docs/007-Agentes.
 
 
 ---
 
 # Bloqueos
 
-Ninguno. El CEO eligió Opción C (Híbrido) — ver DEC-014. 004-Backend queda liberado para diseñarse sin necesidad de multi-tenancy desde el inicio.
+Ninguno.
