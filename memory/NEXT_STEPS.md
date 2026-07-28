@@ -3,7 +3,7 @@
 
 ## Prioridad actual
 
-Preparar la fase CEO (docs/003-CEO).
+Fase 1 — Infraestructura: dejar el backend conectado de verdad a PostgreSQL/pgvector y Redis, e implementar el primer agente en código.
 
 
 ---
@@ -13,35 +13,34 @@ Preparar la fase CEO (docs/003-CEO).
 
 ## 1
 
-Crear:
+Conectar el backend a PostgreSQL/pgvector y Redis:
 
-docs/003-CEO
+- El contenedor de base de datos y Redis ya existen en docker-compose.yml, pero backend/app/main.py todavía no ejecuta ninguna consulta ni usa esas conexiones.
+- Agregar cliente de base de datos (SQLAlchemy o equivalente) y cliente de Redis en backend/app/core.
 
 
 ---
 
 ## 2
 
-Definir:
+Implementar el Agente Investigador de Producto:
 
-- Rol CEO a nivel operativo (ya definido a nivel organizacional en 100-Organizacion/03-Roles-Ejecutivos.md; aquí se define su ejecución práctica).
-- Modelo de negocio inicial de AICOS.
-- Criterios de éxito de la Fase 0 (Fundación) y condiciones de paso a Fase 1 (Infraestructura).
-- Estrategia comercial preliminar (aunque no exista producto aún).
+- Seguir estrictamente el contrato técnico ya aprobado en docs/007-Agentes/03-Agente-Investigador-de-Producto.md (entradas, salidas, herramientas permitidas, límites).
+- Registrar el avance de etapa (Implementado, En Prueba) en docs/007-Agentes/04-Registro-de-Agentes.md, conforme al ciclo de vida definido en docs/007-Agentes/02-Ciclo-de-Vida-de-Agentes.md.
 
 
 ---
 
 ## 3
 
-Preparar:
+Iniciar docs/006-BaseDatos:
 
-- Métricas mínimas de seguimiento del proyecto (docs/014-Analytics, aún no iniciado).
-- Enlace explícito entre ROADMAP.md y las fases documentales.
+- Esquema mínimo necesario para persistir resultados del Agente Investigador de Producto (tabla de productos candidatos).
+- Coherente con el stack ya definido (PostgreSQL + pgvector) en docs/002-CTO/03-Stack-Tecnico.md.
 
 
 ---
 
 # Objetivo siguiente etapa
 
-Con la organización (100-Organizacion) y la dirección técnica (002-CTO) ya definidas, cerrar el círculo de dirección ejecutiva completando 003-CEO, dejando el proyecto listo para avanzar de "arquitectura y organización" a "ejecución" en la Fase 1.
+Con la Fase 0 (Fundación) cerrada —incluyendo Constitución, Arquitectura, Organización, CTO, CEO, Agentes y el entorno técnico mínimo— el proyecto pasa de "documentación y diseño" a "implementación real" en Fase 1. El primer entregable funcional debe ser el Agente Investigador de Producto operando de punta a punta: entrada → investigación → salida persistida en base de datos.
