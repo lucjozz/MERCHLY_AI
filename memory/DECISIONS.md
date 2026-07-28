@@ -389,3 +389,23 @@ Cumplir los 2 criterios técnicos restantes de cierre de Fase 0, definidos en do
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-018
+
+Fecha:
+
+2026-07-27
+
+Decisión:
+
+Se conecta el backend realmente a PostgreSQL/pgvector (vía SQLAlchemy 2.0 async + psycopg 3, en backend/app/core/database.py) y a Redis (vía redis.asyncio, en backend/app/core/redis.py). Se separa el endpoint /health original (liveness, sin dependencias) de un nuevo endpoint /health/ready (readiness), que verifica ambas conexiones y responde "ok" o "degraded" sin lanzar error 5xx si alguna dependencia falla. Se agregan 3 tests con dependencias mockeadas (sin requerir Postgres/Redis reales) y se valida manualmente que /health/ready responde 200 con "degraded" cuando no hay servicios reales disponibles.
+
+Motivo:
+
+Primer hito técnico de Fase 1 (Infraestructura) según ROADMAP.md: los contenedores de PostgreSQL y Redis ya existían en docker-compose.yml desde el cierre de Fase 0, pero el backend no los usaba todavía. Separar liveness de readiness sigue la práctica estándar de la industria y evita que un problema temporal de base de datos tumbe el proceso completo.
+
+Estado:
+
+Aprobada.
