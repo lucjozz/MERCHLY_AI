@@ -28,6 +28,18 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    @property
+    def database_url_async(self) -> str:
+        """Return ``database_url`` rewritten for SQLAlchemy's async psycopg driver.
+
+        Returns:
+            str: the same connection string with the ``postgresql+psycopg://``
+            scheme, required by ``create_async_engine`` when using psycopg 3.
+        """
+        if self.database_url.startswith("postgresql+psycopg://"):
+            return self.database_url
+        return self.database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
 
 @lru_cache
 def get_settings() -> Settings:
