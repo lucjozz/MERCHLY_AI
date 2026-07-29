@@ -75,7 +75,7 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 
 **Objetivo:** dejar un entorno técnico mínimo reproducible, sin todavía construir funcionalidad de negocio.
 
-**Volúmenes:** `007-Agentes` (contrato técnico, no implementación completa), inicio de `004-Backend` y `006-BaseDatos`.
+**Volúmenes:** `007-Agentes` (contrato técnico) y `006-BaseDatos` — ambos completados dentro de esta fase; inicio de `004-Backend`.
 
 **Hitos:**
 
@@ -94,7 +94,7 @@ Conforme a `docs/003-CEO/03-Criterios-de-Exito-Fase0.md`, el cierre de cada fase
 
 **Objetivo:** primera versión funcional de AICOS operando una tienda propia (OBJ-003), coherente con Opción C del modelo de negocio.
 
-**Volúmenes:** `004-Backend`, `005-Frontend`, `006-BaseDatos` completos; inicio de `012-Testing`.
+**Volúmenes:** `004-Backend`, `005-Frontend` completos (`006-BaseDatos` ya completado en Fase 1); inicio de `012-Testing`.
 
 **Hitos:**
 
