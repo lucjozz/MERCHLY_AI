@@ -8,6 +8,7 @@ the technical closure criteria of Fase 0 (Fundación):
 
 from fastapi import FastAPI
 
+from app.api.agentes import router as agentes_router
 from app.api.health import router as health_router
 from app.core.config import get_settings
 
@@ -20,3 +21,4 @@ app = FastAPI(
 )
 
 app.include_router(health_router)
+app.include_router(agentes_router)
