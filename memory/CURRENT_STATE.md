@@ -14,7 +14,7 @@ Infraestructura (Fase 1, en curso)
 
 Versión:
 
-0.6 Alpha
+0.8 Alpha
 
 
 ---
@@ -74,6 +74,24 @@ COMPLETADO
 Backend conectado a PostgreSQL/pgvector (SQLAlchemy 2.0 async + psycopg 3) y Redis (redis.asyncio). Nuevo endpoint /health/ready que verifica ambas conexiones y responde "ok" o "degraded" sin caerse si alguna falla. 3 tests con dependencias mockeadas, más verificación manual sin infraestructura real (responde 200 "degraded" correctamente). Ver DEC-018. Todavía no hay esquema de negocio (tablas); eso corresponde a docs/006-BaseDatos.
 
 
+## 006-BaseDatos
+
+Estado:
+
+COMPLETADO
+
+Convenciones de base de datos, esquema real de Fase 1 (tabla productos_candidatos), estrategia de migraciones (Alembic) y política de backups/retención. Implementado en código: modelo SQLAlchemy y primera migración, validados sin necesitar una base PostgreSQL real conectada (DDL compilado + "alembic upgrade head --sql" en modo offline). Ver DEC-019.
+
+
+## Agente Investigador de Producto (implementación)
+
+Estado:
+
+COMPLETADO (con proveedor provisional simulado)
+
+Schemas Pydantic, proveedor abstracto + implementación simulada, orquestación completa (validación, reintentos, persistencia, salida) y endpoint POST /agentes/investigador-producto. 18 tests en total en el proyecto, todos en verde. Pendiente: reemplazar el proveedor simulado por una integración real con Gemini antes de usarlo en decisiones de negocio reales. Ver DEC-020.
+
+
 ## 003-CEO
 
 Estado:
@@ -121,14 +139,14 @@ Fase 1 — Infraestructura, según ROADMAP.md: ampliar el backend con conexión 
 
 # Última acción realizada
 
-Se conectó el backend realmente a PostgreSQL/pgvector y Redis (antes solo existían los contenedores en docker-compose.yml, sin uso real desde el código). Se agregó el endpoint /health/ready (readiness) separado de /health (liveness), con 3 tests nuevos y verificación manual. Ver DEC-018.
+Se implementó en código el Agente Investigador de Producto (adelantado desde Fase 2 a Fase 1): validación, proveedor simulado, orquestación con reintentos, persistencia y endpoint HTTP. 12 tests nuevos, 18 en total, todos en verde. Ver DEC-020.
 
 
 ---
 
 # Próxima acción
 
-Implementar el Agente Investigador de Producto en código (backend/), sobre el contrato ya aprobado en docs/007-Agentes/03-Agente-Investigador-de-Producto.md, e iniciar docs/006-BaseDatos con el esquema mínimo para persistir sus resultados.
+Reemplazar el proveedor simulado del Agente Investigador de Producto por una integración real (Gemini, conforme a docs/100-Organizacion/06-Agentes-IA.md), o avanzar con el siguiente agente/volumen según prioridad de negocio.
 
 
 ---
