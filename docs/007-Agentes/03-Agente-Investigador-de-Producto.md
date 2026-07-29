@@ -27,7 +27,9 @@ Especificar, bajo el esquema de `01-Contrato-Tecnico-Estandar.md`, el primer age
 * Es el punto de partida natural de cualquier tienda: sin investigación de producto no hay catálogo que operar.
 * Tiene entradas y salidas simples de especificar (no depende de otros agentes todavía construidos), lo que lo hace apto como primer contrato de referencia.
 
-Este agente todavía **no está implementado en código** (etapa "Contrato Aprobado" del ciclo de vida, ver `02-Ciclo-de-Vida-de-Agentes.md`). Su implementación corresponde a Fase 2 (Núcleo de Plataforma).
+Este agente **ya está implementado en código** (etapa "Implementado" del ciclo de vida, ver `02-Ciclo-de-Vida-de-Agentes.md`). Su implementación se adelantó a Fase 2, dentro de Fase 1, apoyándose en el esquema ya modelado en `006-BaseDatos`. Ver `backend/app/services/agente_investigador_producto.py` y el endpoint `POST /agentes/investigador-producto` (`backend/app/api/agentes.py`).
+
+**Nota importante:** el proveedor de investigación usado hoy (`backend/app/services/proveedores/simulado.py`) es un placeholder que devuelve resultados sintéticos, claramente marcados como tales. Todavía no existe una integración real con Gemini (proveedor asignado en la sección 1). Usar este agente para decisiones de negocio reales requiere primero reemplazar ese proveedor — ver `04-Registro-de-Agentes.md`.
 
 ---
 
