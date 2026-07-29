@@ -4,6 +4,26 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 
 ---
 
+## [0.8.0-alpha] - 2026-07-27
+
+### feat
+- Se implementa en código el Agente Investigador de Producto (`backend/app/services/agente_investigador_producto.py`), adelantado desde Fase 2 a Fase 1: validación de entrada (schemas Pydantic replicando el contrato técnico), proveedor abstracto con implementación provisional simulada, reintentos según el contrato (sección 8), persistencia en `productos_candidatos` y endpoint `POST /agentes/investigador-producto`.
+
+### test
+- Se agregan 12 tests nuevos (18 en total en el proyecto): validaciones de entrada, comportamiento del proveedor simulado, orquestación del agente (persistencia, agrupación por `investigacion_id`, manejo de fallas) y el endpoint HTTP.
+
+### docs
+- Se actualiza `docs/007-Agentes/03-Agente-Investigador-de-Producto.md` y `04-Registro-de-Agentes.md` reflejando la etapa "Implementado" y el pendiente de reemplazar el proveedor simulado por una integración real con Gemini.
+
+## [0.7.0-alpha] - 2026-07-27
+
+### docs
+- Se completa `docs/006-BaseDatos`: convenciones de base de datos, esquema real de Fase 1 (`productos_candidatos`), estrategia de migraciones con Alembic y política de backups/retención.
+
+### feat
+- Se agrega el modelo SQLAlchemy `ProductoCandidato` (`backend/app/models/`), con clase base compartida (`Base`, `ConMarcaDeTiempo`) que implementa las convenciones de UUID, timestamps y borrado lógico.
+- Se configura Alembic (`backend/alembic/`) y se agrega la primera migración (`productos_candidatos`), validada en modo offline sin requerir una base PostgreSQL real conectada.
+
 ## [0.6.0-alpha] - 2026-07-27
 
 ### feat
