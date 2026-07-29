@@ -409,3 +409,43 @@ Primer hito técnico de Fase 1 (Infraestructura) según ROADMAP.md: los contened
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-019
+
+Fecha:
+
+2026-07-27
+
+Decisión:
+
+Se completa el volumen docs/006-BaseDatos: convenciones de base de datos (nombres, UUID como PK, timestamps con borrado lógico, tipos de datos, pgvector, sin multi-tenancy hasta Fase 7), el esquema real de Fase 1 (tabla productos_candidatos), la estrategia de migraciones con Alembic y la política de backups/retención. Se implementa el código correspondiente: modelo SQLAlchemy (backend/app/models/), configuración de Alembic (backend/alembic/) y la primera migración (productos_candidatos). El modelo fue validado compilando su DDL real de PostgreSQL sin necesitar una base conectada, y la migración fue validada con "alembic upgrade head --sql" (modo offline), coincidiendo exactamente con el esquema documentado.
+
+Motivo:
+
+El Agente Investigador de Producto (docs/007-Agentes) necesita un lugar donde persistir sus resultados antes de poder implementarse en código, conforme a la sección 3 ("Salidas") de su contrato técnico.
+
+Estado:
+
+Aprobada.
+
+---
+
+## DEC-020
+
+Fecha:
+
+2026-07-27
+
+Decisión:
+
+Se implementa en código el Agente Investigador de Producto, adelantando su implementación (prevista para Fase 2) dentro de Fase 1: schemas Pydantic que replican exactamente las secciones 2 y 3 de su contrato técnico (validación de mercado_objetivo ISO 3166-1, rechazo de categorías prohibidas, truncado de cantidad_resultados a 50), un proveedor abstracto (ProveedorInvestigacion) con una implementación provisional simulada (ProveedorInvestigacionSimulado, claramente marcada como no apta para decisiones reales), la orquestación completa (AgenteInvestigadorProducto: validación, reintentos según sección 8 del contrato, persistencia en productos_candidatos, salida estructurada) y el endpoint POST /agentes/investigador-producto. Se agregan 12 tests nuevos (18 en total en el proyecto), todos en verde, más verificación manual del servidor real (incluyendo el caso sin PostgreSQL disponible, que falla de forma esperada por resolución de hostname, no por un error de código).
+
+Motivo:
+
+Con el esquema de datos ya modelado en docs/006-BaseDatos, el siguiente paso natural es el propio agente. Se usa un proveedor simulado en lugar de esperar a la integración real con Gemini para no bloquear el resto de la arquitectura (validación, persistencia, API) con una dependencia externa todavía no configurada.
+
+Estado:
+
+Aprobada.
