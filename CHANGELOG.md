@@ -4,6 +4,21 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 
 ---
 
+## [0.9.0-alpha] - 2026-07-30
+
+### docs
+- Se completa `docs/010-Prompts`: convenciones de prompts, el prompt real del Agente Investigador de Producto, y su registro.
+
+### feat
+- Se implementa `ProveedorInvestigacionGemini` (`backend/app/services/proveedores/gemini.py`): integración real con Gemini vía el SDK `google-genai`, con salida estructurada nativa (`response_schema`) en vez de parseo de texto libre.
+- El endpoint `POST /agentes/investigador-producto` elige automáticamente entre el proveedor real (si `GEMINI_API_KEY` está configurada) y el proveedor simulado (si no).
+
+### test
+- Se agregan 5 tests nuevos (23 en total) con un cliente de Gemini mockeado, sin llamar a la API real de Google.
+
+### pendiente
+- Verificación final del proveedor Gemini contra la API real, no realizable desde este entorno de ejecución (sin acceso de red a Google). Debe correrse con una `GEMINI_API_KEY` válida en la máquina del usuario o en CI/CD.
+
 ## [0.8.0-alpha] - 2026-07-27
 
 ### feat
