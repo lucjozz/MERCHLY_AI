@@ -29,7 +29,11 @@ Especificar, bajo el esquema de `01-Contrato-Tecnico-Estandar.md`, el primer age
 
 Este agente **ya está implementado en código** (etapa "Implementado" del ciclo de vida, ver `02-Ciclo-de-Vida-de-Agentes.md`). Su implementación se adelantó a Fase 2, dentro de Fase 1, apoyándose en el esquema ya modelado en `006-BaseDatos`. Ver `backend/app/services/agente_investigador_producto.py` y el endpoint `POST /agentes/investigador-producto` (`backend/app/api/agentes.py`).
 
-**Nota importante:** el proveedor de investigación usado hoy (`backend/app/services/proveedores/simulado.py`) es un placeholder que devuelve resultados sintéticos, claramente marcados como tales. Todavía no existe una integración real con Gemini (proveedor asignado en la sección 1). Usar este agente para decisiones de negocio reales requiere primero reemplazar ese proveedor — ver `04-Registro-de-Agentes.md`.
+**Proveedor:** el endpoint elige automáticamente entre dos implementaciones de `ProveedorInvestigacion`:
+* `ProveedorInvestigacionGemini` (`backend/app/services/proveedores/gemini.py`) — integración real con Gemini, usando el prompt documentado en `010-Prompts/02-Prompt-Investigador-de-Producto.md` y salida estructurada nativa. Se activa automáticamente cuando `GEMINI_API_KEY` está configurada.
+* `ProveedorInvestigacionSimulado` (`backend/app/services/proveedores/simulado.py`) — devuelve resultados sintéticos, claramente marcados como tales. Se usa por defecto mientras no haya `GEMINI_API_KEY` configurada (ej. en este entorno de desarrollo sin la key todavía cargada).
+
+La integración con Gemini fue validada con pruebas automatizadas usando un cliente mockeado (no se llamó a la API real de Google desde este entorno). La verificación final contra la API real de Gemini queda pendiente de correrse en un entorno con acceso de red a Google y una API key válida.
 
 ---
 
