@@ -18,6 +18,11 @@ class Settings(BaseSettings):
         environment: Deployment environment (local, staging, production).
         database_url: Connection string for PostgreSQL + pgvector.
         redis_url: Connection string for Redis.
+        gemini_api_key: API key for Google Gemini (Investigador IA
+            provider, see docs/100-Organizacion/06-Agentes-IA.md). None
+            in local/dev environments where only the simulated provider
+            is used.
+        gemini_model: Gemini model name used by ProveedorInvestigacionGemini.
     """
 
     app_name: str = "MERCHLY AI Backend"
@@ -25,6 +30,8 @@ class Settings(BaseSettings):
     environment: str = "local"
     database_url: str = "postgresql://merchly:merchly@db:5432/merchly"
     redis_url: str = "redis://redis:6379/0"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
