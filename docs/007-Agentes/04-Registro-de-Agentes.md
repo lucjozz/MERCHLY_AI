@@ -10,6 +10,18 @@ owner: CTO
 last_updated: 2026-07-26
 next_review: 2027-01-26
 related:
+# 04-Registro-de-Agentes.md
+
+---
+
+title: Registro de Agentes con Contrato Técnico
+document: 007-04
+version: 1.0.0
+status: Aprobado
+owner: CTO
+last_updated: 2026-07-26
+next_review: 2027-01-26
+related:
 
 * 01-Contrato-Tecnico-Estandar.md
 * 02-Ciclo-de-Vida-de-Agentes.md
@@ -31,7 +43,7 @@ Este registro es el punto de entrada rápido; el detalle completo de cada agente
 
 | Agente | Rol organizacional (100-06) | Documento de contrato | Versión | Etapa actual |
 |---|---|---|---|---|
-| Agente Investigador de Producto | Investigador IA | `03-Agente-Investigador-de-Producto.md` | 1.0.0 | Implementado (con proveedor provisional simulado) |
+| Agente Investigador de Producto | Investigador IA | `03-Agente-Investigador-de-Producto.md` | 1.0.0 | Implementado (proveedor real Gemini + fallback simulado) |
 
 ---
 
@@ -39,7 +51,8 @@ Este registro es el punto de entrada rápido; el detalle completo de cada agente
 
 ## Agente Investigador de Producto
 
-* El proveedor real de investigación (Gemini) todavía no está integrado. `backend/app/services/proveedores/simulado.py` devuelve resultados sintéticos, marcados explícitamente como tales en `riesgos_identificados`. **No usar en decisiones de negocio reales hasta reemplazarlo.**
+* La integración real con Gemini (`ProveedorInvestigacionGemini`) fue validada solo con un cliente mockeado en este entorno (sin acceso de red a Google). **Falta la verificación final contra la API real**, con una `GEMINI_API_KEY` válida, en un entorno con acceso a internet.
+* Mientras no haya `GEMINI_API_KEY` configurada en el entorno, el endpoint sigue usando `ProveedorInvestigacionSimulado` automáticamente (ver `backend/app/api/agentes.py`, `_obtener_proveedor`).
 * La lista de categorías prohibidas (`CATEGORIAS_PROHIBIDAS` en `backend/app/schemas/investigador_producto.py`) es provisional y corta; debe evolucionar junto con una política formal en `013-Seguridad` o un anexo de `000-Constitucion/03-Valores.md`.
 
 ---
