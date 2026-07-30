@@ -473,3 +473,23 @@ La verificación final contra la API real de Gemini (con una GEMINI_API_KEY vál
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-022
+
+Fecha:
+
+2026-07-30
+
+Decisión:
+
+Se restaura backend/alembic/env.py, que faltaba en el repositorio (se había escrito en la sesión de docs/006-BaseDatos pero no llegó al ZIP entregado, probablemente perdido en una fusión manual). Sin este archivo, Alembic no podía ejecutar ninguna migración ("ImportError: Can't find Python file alembic/env.py"). Se verificó con "alembic upgrade head --sql" que, restaurado, genera el SQL correcto y coincide con docs/006-BaseDatos/02-Esquema-Fase1.md. Se sincronizan además memory/CONTEXT.md, memory/NEXT_STEPS.md y prompts/MASTER_CONTEXT_PROMPT.md, que habían quedado desactualizados (versión 0.5-0.6 Alpha) en las últimas rondas de trabajo mientras memory/CURRENT_STATE.md y memory/DECISIONS.md sí se mantuvieron al día.
+
+Motivo:
+
+Una auditoría solicitada por el usuario detectó ambos problemas. El archivo faltante es un bug funcional real (Alembic no arranca); la memoria desactualizada es un riesgo de continuidad si otra sesión o instancia de IA confía en esos documentos como fuente de verdad sin cruzarlos con memory/CURRENT_STATE.md.
+
+Estado:
+
+Aprobada.
