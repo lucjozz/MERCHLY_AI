@@ -28,7 +28,11 @@ docs/002-CTO
 
 docs/003-CEO
 
+docs/006-BaseDatos
+
 docs/007-Agentes
+
+docs/010-Prompts
 
 
 ---
@@ -37,17 +41,17 @@ docs/007-Agentes
 
 Versión:
 
-0.6 Alpha
+0.9 Alpha
 
 
 Estado:
 
-Fundación cerrada; backend conectado a PostgreSQL/pgvector y Redis
+Fundación e Infraestructura cerradas; primer agente implementado con integración real a Gemini (pendiente de verificación final contra la API real)
 
 
 Fase:
 
-FASE 1 - Infraestructura (en curso)
+FASE 1 - Infraestructura (cerrada); trabajo actual corresponde a funcionalidad adelantada de Fase 2-3
 
 
 ---
@@ -61,45 +65,12 @@ Estado:
 Completado
 
 
-Contenido:
-
-- Identidad
-- Misión
-- Visión
-- Valores
-- Principios (v2.0.0)
-- Gobernanza (v2.0.0)
-- Normas
-- Uso de IA
-- Estándares de Calidad
-- Seguridad
-- Escalabilidad
-- Glosario
-- Historial
-
-
----
-
 ## 001-Arquitectura
 
 Estado:
 
 Completado
 
-
-Contenido:
-
-- Arquitectura general
-- Arquitectura sistema
-- Arquitectura agentes
-- Datos
-- Tecnología
-- Seguridad
-- Automatización
-- Escalabilidad
-
-
----
 
 ## 100-Organizacion
 
@@ -108,19 +79,6 @@ Estado:
 Completado
 
 
-Contenido:
-
-- Organigrama
-- Estructura Empresarial
-- Roles Ejecutivos (CEO, CTO, CMO, COO, CFO)
-- Departamentos
-- Capacidades Organizacionales
-- Agentes IA (catálogo de roles, independiente de proveedor)
-- Matriz RACI
-
-
----
-
 ## 002-CTO
 
 Estado:
@@ -128,35 +86,21 @@ Estado:
 Completado
 
 
-Contenido:
-
-- Rol técnico-operativo del CTO
-- Metodología de desarrollo
-- Stack técnico definitivo
-- Flujo de Git y CI/CD
-- Estándares de código
-- Entorno de desarrollo
-
-
----
-
 ## 003-CEO
+
+Estado:
+
+Completado (incluye decisión de modelo de negocio: Opción C — Híbrido, DEC-014)
+
+
+## 006-BaseDatos
 
 Estado:
 
 Completado
 
+Convenciones de base de datos, esquema real de Fase 1 (tabla productos_candidatos), estrategia de migraciones (Alembic) y política de backups/retención. Implementado en código: modelo SQLAlchemy y primera migración.
 
-Contenido:
-
-- Rol operativo del CEO
-- Modelo de negocio (Opción C — Híbrido, aprobado, ver DEC-014)
-- Criterios de éxito de Fase 0
-- Estrategia comercial preliminar
-- Métricas y seguimiento
-
-
----
 
 ## 007-Agentes
 
@@ -164,13 +108,16 @@ Estado:
 
 Completado
 
+Contrato técnico estándar (10 secciones), ciclo de vida de agentes (8 etapas), y el Agente Investigador de Producto — implementado en código, con proveedor real (Gemini) y fallback simulado.
 
-Contenido:
 
-- Contrato técnico estándar de agentes IA (10 secciones)
-- Ciclo de vida de agentes (8 etapas)
-- Primer agente con contrato técnico completo: Agente Investigador de Producto
-- Registro de agentes
+## 010-Prompts
+
+Estado:
+
+Completado
+
+Convenciones de prompts, el prompt real del Agente Investigador de Producto, y su registro.
 
 
 ---
@@ -179,27 +126,24 @@ Contenido:
 
 Estado:
 
-Completado (criterios técnicos de cierre de Fase 0) + conexión real a dependencias (Fase 1)
+Completado (Fase 0 y Fase 1)
 
 
 Contenido:
 
-- Backend FastAPI mínimo (backend/) con endpoint /health, probado con pytest y solicitud HTTP real (200 OK)
-- docker-compose.yml en la raíz: backend + PostgreSQL/pgvector + Redis
+- Backend FastAPI con /health (liveness) y /health/ready (readiness, verifica PostgreSQL y Redis)
+- docker-compose.yml: backend + PostgreSQL/pgvector + Redis
 - Backend conectado realmente a PostgreSQL/pgvector (SQLAlchemy async + psycopg 3) y Redis (redis.asyncio)
-- Endpoint /health/ready (readiness) que verifica ambas conexiones
+- Modelo SQLAlchemy productos_candidatos + primera migración de Alembic (validada en modo offline)
+- Agente Investigador de Producto implementado: validación, proveedor Gemini real + proveedor simulado (fallback automático), reintentos, persistencia, endpoint POST /agentes/investigador-producto
+- 23 tests automatizados, todos en verde
 
 
 ---
 
 # Trabajo actual
 
-Implementación del Agente Investigador de Producto en código, sobre el contrato ya aprobado en docs/007-Agentes.
-
-
-Objetivo:
-
-Tener el primer agente operando de punta a punta: entrada → investigación → salida persistida en base de datos.
+Verificación final del proveedor Gemini contra la API real de Google (con GEMINI_API_KEY válida). No se puede completar desde este entorno de ejecución (sin acceso de red a Google) — corresponde al usuario, en su máquina o en CI/CD.
 
 
 ---
@@ -208,17 +152,17 @@ Tener el primer agente operando de punta a punta: entrada → investigación →
 
 1.
 
-Implementar el Agente Investigador de Producto en backend/, siguiendo su contrato técnico.
+El usuario verifica ProveedorInvestigacionGemini contra la API real de Gemini.
 
 
 2.
 
-Iniciar docs/006-BaseDatos con el esquema mínimo necesario para persistir sus resultados.
+Definir el siguiente agente a especificar (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md, "Próximos Agentes a Especificar").
 
 
 3.
 
-Definir en docs/010-Prompts el prompt concreto que usará el agente (el contrato técnico ya existe; falta el prompt en sí).
+Evaluar si conviene avanzar con docs/004-Backend y docs/005-Frontend (Fase 2 formal) o seguir profundizando agentes sobre la base ya construida.
 
 
 ---
@@ -234,4 +178,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-07-27
+2026-07-30
