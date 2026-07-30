@@ -14,7 +14,7 @@ Infraestructura (Fase 1, en curso)
 
 Versión:
 
-0.8 Alpha
+0.9 Alpha
 
 
 ---
@@ -92,6 +92,15 @@ COMPLETADO (con proveedor provisional simulado)
 Schemas Pydantic, proveedor abstracto + implementación simulada, orquestación completa (validación, reintentos, persistencia, salida) y endpoint POST /agentes/investigador-producto. 18 tests en total en el proyecto, todos en verde. Pendiente: reemplazar el proveedor simulado por una integración real con Gemini antes de usarlo en decisiones de negocio reales. Ver DEC-020.
 
 
+## 010-Prompts + Integración Real con Gemini
+
+Estado:
+
+COMPLETADO (proveedor real; pendiente verificación final contra la API de Gemini)
+
+docs/010-Prompts completo (convenciones, prompt del Agente Investigador de Producto, registro). ProveedorInvestigacionGemini implementado con el SDK google-genai y salida estructurada nativa. El endpoint POST /agentes/investigador-producto elige automáticamente entre Gemini real (si GEMINI_API_KEY está configurada) y el proveedor simulado (si no). 23 tests en total, todos en verde, usando un cliente de Gemini mockeado (sin acceso de red a Google desde este entorno). Ver DEC-021.
+
+
 ## 003-CEO
 
 Estado:
@@ -139,14 +148,14 @@ Fase 1 — Infraestructura, según ROADMAP.md: ampliar el backend con conexión 
 
 # Última acción realizada
 
-Se implementó en código el Agente Investigador de Producto (adelantado desde Fase 2 a Fase 1): validación, proveedor simulado, orquestación con reintentos, persistencia y endpoint HTTP. 12 tests nuevos, 18 en total, todos en verde. Ver DEC-020.
+Se completó docs/010-Prompts y se implementó ProveedorInvestigacionGemini (integración real con Gemini, salida estructurada, 5 tests nuevos con cliente mockeado). El endpoint elige automáticamente entre proveedor real y simulado según haya o no GEMINI_API_KEY. Pendiente: verificación final contra la API real de Gemini, no realizable desde este entorno sin acceso de red a Google. Ver DEC-021.
 
 
 ---
 
 # Próxima acción
 
-Reemplazar el proveedor simulado del Agente Investigador de Producto por una integración real (Gemini, conforme a docs/100-Organizacion/06-Agentes-IA.md), o avanzar con el siguiente agente/volumen según prioridad de negocio.
+El usuario debe correr la verificación final del proveedor Gemini contra la API real (con GEMINI_API_KEY válida, en su máquina o en CI/CD). En paralelo, se puede avanzar con el siguiente agente o volumen según prioridad de negocio.
 
 
 ---
