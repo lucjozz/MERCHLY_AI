@@ -449,3 +449,27 @@ Con el esquema de datos ya modelado en docs/006-BaseDatos, el siguiente paso nat
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-021
+
+Fecha:
+
+2026-07-30
+
+Decisión:
+
+Se completa el volumen docs/010-Prompts (convenciones de prompts, el prompt real del Agente Investigador de Producto, y su registro), y se implementa ProveedorInvestigacionGemini (backend/app/services/proveedores/gemini.py): integración real con la API de Gemini vía el SDK google-genai, usando salida estructurada nativa (response_schema) en vez de parseo de texto libre. El endpoint POST /agentes/investigador-producto elige automáticamente entre el proveedor real (si GEMINI_API_KEY está configurada) y el proveedor simulado (si no). Se agregan 5 tests nuevos (23 en total en el proyecto) con un cliente de Gemini mockeado, sin llamar a la API real de Google desde este entorno.
+
+Motivo:
+
+Cerrar el pendiente registrado en DEC-020: reemplazar el proveedor simulado por una integración real, siguiendo la disciplina "documentación antes que código" (primero el prompt en 010-Prompts, después el proveedor en código).
+
+Pendiente:
+
+La verificación final contra la API real de Gemini (con una GEMINI_API_KEY válida y acceso de red a Google) no pudo hacerse desde este entorno de ejecución. Debe correrse en la máquina del usuario o en un entorno de CI/CD con acceso a internet, antes de usar este agente en decisiones de negocio reales.
+
+Estado:
+
+Aprobada.
