@@ -10,18 +10,6 @@ owner: CTO
 last_updated: 2026-07-26
 next_review: 2027-01-26
 related:
-# 04-Registro-de-Agentes.md
-
----
-
-title: Registro de Agentes con Contrato Técnico
-document: 007-04
-version: 1.0.0
-status: Aprobado
-owner: CTO
-last_updated: 2026-07-26
-next_review: 2027-01-26
-related:
 
 * 01-Contrato-Tecnico-Estandar.md
 * 02-Ciclo-de-Vida-de-Agentes.md
