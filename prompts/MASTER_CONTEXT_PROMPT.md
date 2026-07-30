@@ -411,22 +411,22 @@ MERCHLY AI
 
 Versión:
 
-0.5 Alpha
+0.9 Alpha
 
 
 Fase:
 
-Infraestructura (Fase 1, recién iniciada; Fase 0 - Fundación cerrada)
+Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde Fase 2-3
 
 
 Estado:
 
-Fundación completa: Constitución, Arquitectura, Organización, CTO, CEO y Agentes documentados; entorno técnico mínimo (Docker + endpoint /health) funcionando.
+Fundación e Infraestructura cerradas: Constitución, Arquitectura, Organización, CTO, CEO, BaseDatos, Agentes y Prompts documentados; backend conectado realmente a PostgreSQL/pgvector y Redis; Agente Investigador de Producto implementado con proveedor real (Gemini) y fallback simulado.
 
 
 Siguiente fase:
 
-Conectar el backend a PostgreSQL/pgvector y Redis, e implementar el Agente Investigador de Producto en código sobre el contrato ya aprobado en docs/007-Agentes.
+Verificar el proveedor Gemini contra la API real de Google (requiere GEMINI_API_KEY y acceso de red — corresponde al usuario). En paralelo, especificar el siguiente agente o documentar docs/004-Backend con lo ya construido.
 
 
 Nota para cualquier IA que use este prompt:
