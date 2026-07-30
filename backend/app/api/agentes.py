@@ -10,12 +10,31 @@ solo persiste candidatos en estado ``'candidato'``.
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.database import get_db_session
 from app.schemas.investigador_producto import InvestigacionInput, InvestigacionOutput
 from app.services.agente_investigador_producto import AgenteInvestigadorProducto
+from app.services.proveedores.base import ProveedorInvestigacion
+from app.services.proveedores.gemini import ProveedorInvestigacionGemini
 from app.services.proveedores.simulado import ProveedorInvestigacionSimulado
 
 router = APIRouter(prefix="/agentes", tags=["agentes"])
+
+
+def _obtener_proveedor() -> ProveedorInvestigacion:
+    """Elige el proveedor de investigación según configuración.
+
+    Returns:
+        ProveedorInvestigacion: ``ProveedorInvestigacionGemini`` si
+        ``GEMINI_API_KEY`` está configurada; de lo contrario,
+        ``ProveedorInvestigacionSimulado`` (ver
+        ``docs/007-Agentes/04-Registro-de-Agentes.md`` para el estado de
+        este pendiente).
+    """
+    settings = get_settings()
+    if settings.gemini_api_key:
+        return ProveedorInvestigacionGemini()
+    return ProveedorInvestigacionSimulado()
 
 
 @router.post(
@@ -39,9 +58,7 @@ async def investigar_producto(
         InvestigacionOutput: productos candidatos encontrados y su
         metadata (sección 3 del contrato).
     """
-    # Proveedor provisional (ver app/services/proveedores/simulado.py):
-    # todavía no hay integración real con Gemini.
-    proveedor = ProveedorInvestigacionSimulado()
+    proveedor = _obtener_proveedor()
     agente = AgenteInvestigadorProducto(proveedor=proveedor, db_session=db_session)
 
     return await agente.ejecutar(entrada)
