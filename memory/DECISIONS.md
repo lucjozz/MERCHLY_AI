@@ -493,3 +493,21 @@ Una auditoría solicitada por el usuario detectó ambos problemas. El archivo fa
 Estado:
 
 Aprobada.
+
+## DEC-023
+
+Fecha:
+
+2026-08-03
+
+Decisión:
+
+Se cierra el pendiente registrado en DEC-021: el usuario verificó ProveedorInvestigacionGemini contra la API real de Gemini (con GEMINI_API_KEY válida y acceso de red a Google), confirmando que responde con datos reales (no el proveedor simulado) y que el contenido respeta el prompt documentado en docs/010-Prompts/02-Prompt-Investigador-de-Producto.md (evidencia real, sin inventar productos). En paralelo, se corrige docker-compose.yml: el servicio backend cargaba env_file: ./backend/.env.example en vez de ./backend/.env, por lo que cualquier valor puesto en backend/.env (incluida GEMINI_API_KEY) nunca llegaba al contenedor — el backend arrancaba siempre con ProveedorInvestigacionSimulado sin ningún error visible. Se actualizan docs/007-Agentes/04-Registro-de-Agentes.md y docs/010-Prompts/03-Registro-de-Prompts.md quitando la nota de "pendiente verificación final" (Estado del prompt: Activo), conforme a memory/NEXT_STEPS.md, tarea 1. Se corrige además docs/002-CTO/06-Entorno-Desarrollo.md (sección "Levantamiento Local" con los comandos reales, incluyendo `alembic upgrade head` manual) y README.md (nueva sección "Cómo Empezar" y "Estado Actual" sincronizado con memory/CURRENT_STATE.md, que seguía en 0.1 Alpha / Fundación).
+
+Motivo:
+
+La separación entre backend/.env (secretos reales, en .gitignore) y backend/.env.example (plantilla pública, sin secretos) era y sigue siendo correcta por Norma 11 (Seguridad por Diseño). El bug estaba un nivel más abajo: docker-compose.yml apuntaba al archivo equivocado, lo cual habría bloqueado silenciosamente la verificación de Gemini que pedía memory/NEXT_STEPS.md como prioridad actual.
+
+Estado:
+
+Aprobada.
