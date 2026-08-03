@@ -50,8 +50,7 @@ En Fase 1 (actual) solo existe el entorno local; no hay aún staging ni producci
 # 3. Variables de Entorno
 
 * Nunca se versiona un archivo `.env` con secretos reales (Norma 11, Seguridad por Diseño). `backend/.env` está en `.gitignore`.
-* `backend/.env.example` es la plantilla versionada, con valores ficticios o vacíos (ej. `GEMINI_API_KEY` vacío). Para overrides locales reales, copiá ese archivo a `backend/.env` y completá ahí los valores reales — nunca en `.env.example`.
-* **Incidencia conocida:** `docker-compose.yml` define actualmente `env_file: ./backend/.env.example` para el servicio `backend`, en vez de `./backend/.env`. Mientras esto no se corrija, cualquier valor que pongas en `backend/.env` (por ejemplo `GEMINI_API_KEY`) **no llega al contenedor**: el backend va a seguir arrancando con `ProveedorInvestigacionSimulado` sin ningún error visible. Corregir esto es un prerequisito para poder probar `ProveedorInvestigacionGemini` localmente vía Docker Compose.
+* `backend/.env.example` es la plantilla versionada, con valores ficticios o vacíos (ej. `GEMINI_API_KEY` vacío). Para overrides locales reales, copiá ese archivo a `backend/.env` y completá ahí los valores reales — nunca en `.env.example`. `docker-compose.yml` carga `backend/.env` (no `.env.example`) para el servicio `backend`, así que estos valores sí llegan al contenedor.
 
 ---
 
@@ -93,7 +92,7 @@ Se habilitará GitHub Codespaces como entorno alternativo, evitando fricción de
 
 ☐ `docker compose up -d` levanta `backend`, `db` y `redis` sin errores.
 
-☐ `backend/.env` existe y sus valores efectivamente llegan al contenedor (ver incidencia de la sección 3).
+☐ `backend/.env` existe y sus valores llegan al contenedor.
 
 ☐ El backend responde en su endpoint de salud (`GET /health`).
 
@@ -109,4 +108,4 @@ Se habilitará GitHub Codespaces como entorno alternativo, evitando fricción de
 
 # Resumen Ejecutivo para IA
 
-Entorno objetivo: Docker Compose como punto de entrada único (`docker compose up -d`), con Codespaces como alternativa en la nube (pendiente). Ningún secreto real se versiona: los valores reales van en `backend/.env`, nunca en `.env.example` — aunque hoy `docker-compose.yml` todavía no lee ese archivo (incidencia conocida, sección 3). Las migraciones nunca corren automáticamente al levantar el backend, por diseño (`006-BaseDatos/03-Estrategia-de-Migraciones.md`); siempre hay que aplicarlas a mano con `docker compose exec backend alembic upgrade head` antes de usar cualquier endpoint que toque la base de datos. Este documento se ampliará cuando exista `frontend/`.
+Entorno objetivo: Docker Compose como punto de entrada único (`docker compose up -d`), con Codespaces como alternativa en la nube (pendiente). Ningún secreto real se versiona: los valores reales van en `backend/.env`, nunca en `.env.example`; `docker-compose.yml` carga `backend/.env` para el servicio backend. Las migraciones nunca corren automáticamente al levantar el backend, por diseño (`006-BaseDatos/03-Estrategia-de-Migraciones.md`); siempre hay que aplicarlas a mano con `docker compose exec backend alembic upgrade head` antes de usar cualquier endpoint que toque la base de datos. Este documento se ampliará cuando exista `frontend/`.
