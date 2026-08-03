@@ -2,7 +2,7 @@
 
 Fecha:
 
-2026-07-26
+2026-08-03
 
 
 # Estado del Proyecto
@@ -96,9 +96,9 @@ Schemas Pydantic, proveedor abstracto + implementación simulada, orquestación 
 
 Estado:
 
-COMPLETADO (proveedor real; pendiente verificación final contra la API de Gemini)
+COMPLETADO Y VERIFICADO
 
-docs/010-Prompts completo (convenciones, prompt del Agente Investigador de Producto, registro). ProveedorInvestigacionGemini implementado con el SDK google-genai y salida estructurada nativa. El endpoint POST /agentes/investigador-producto elige automáticamente entre Gemini real (si GEMINI_API_KEY está configurada) y el proveedor simulado (si no). 23 tests en total, todos en verde, usando un cliente de Gemini mockeado (sin acceso de red a Google desde este entorno). Ver DEC-021.
+docs/010-Prompts completo (convenciones, prompt del Agente Investigador de Producto, registro). ProveedorInvestigacionGemini implementado con el SDK google-genai y salida estructurada nativa. El endpoint POST /agentes/investigador-producto elige automáticamente entre Gemini real (si GEMINI_API_KEY está configurada) y el proveedor simulado (si no). 23 tests en total, todos en verde, usando un cliente de Gemini mockeado. El usuario verificó además el proveedor contra la API real de Gemini: responde con datos reales y respeta el prompt (evidencia real, sin inventar productos). Ver DEC-021 y DEC-023.
 
 
 ## 003-CEO
@@ -148,14 +148,14 @@ Fase 1 — Infraestructura, según ROADMAP.md: ampliar el backend con conexión 
 
 # Última acción realizada
 
-Se completó docs/010-Prompts y se implementó ProveedorInvestigacionGemini (integración real con Gemini, salida estructurada, 5 tests nuevos con cliente mockeado). El endpoint elige automáticamente entre proveedor real y simulado según haya o no GEMINI_API_KEY. Pendiente: verificación final contra la API real de Gemini, no realizable desde este entorno sin acceso de red a Google. Ver DEC-021.
+Se verificó ProveedorInvestigacionGemini contra la API real de Gemini (confirmado: responde con datos reales, respeta el prompt, no inventa evidencia). Se corrigió docker-compose.yml (env_file apuntaba a .env.example en vez de .env, dejando GEMINI_API_KEY sin efecto en el contenedor sin ningún error visible) y se sincronizaron docs/007-Agentes/04-Registro-de-Agentes.md, docs/010-Prompts/03-Registro-de-Prompts.md, docs/002-CTO/06-Entorno-Desarrollo.md y README.md. Ver DEC-023.
 
 
 ---
 
 # Próxima acción
 
-El usuario debe correr la verificación final del proveedor Gemini contra la API real (con GEMINI_API_KEY válida, en su máquina o en CI/CD). En paralelo, se puede avanzar con el siguiente agente o volumen según prioridad de negocio.
+Elegir entre: (a) especificar el siguiente agente (SEO, contenido, atención al cliente, analítica básica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), o (b) documentar docs/004-Backend con lo ya construido antes de seguir agregando funcionalidad. Ver memory/NEXT_STEPS.md.
 
 
 ---
