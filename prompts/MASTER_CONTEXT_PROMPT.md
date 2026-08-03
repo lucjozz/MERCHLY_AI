@@ -421,12 +421,12 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 Estado:
 
-Fundación e Infraestructura cerradas: Constitución, Arquitectura, Organización, CTO, CEO, BaseDatos, Agentes y Prompts documentados; backend conectado realmente a PostgreSQL/pgvector y Redis; Agente Investigador de Producto implementado con proveedor real (Gemini) y fallback simulado.
+Fundación e Infraestructura cerradas: Constitución, Arquitectura, Organización, CTO, CEO, BaseDatos, Agentes y Prompts documentados; backend conectado realmente a PostgreSQL/pgvector y Redis; Agente Investigador de Producto implementado con proveedor real (Gemini, verificado contra la API real) y fallback simulado.
 
 
 Siguiente fase:
 
-Verificar el proveedor Gemini contra la API real de Google (requiere GEMINI_API_KEY y acceso de red — corresponde al usuario). En paralelo, especificar el siguiente agente o documentar docs/004-Backend con lo ya construido.
+Especificar el siguiente agente (SEO, contenido, atención al cliente, analítica o marketing) o documentar docs/004-Backend con lo ya construido. Sin pendientes bloqueantes conocidos (ver DEC-023).
 
 
 Nota para cualquier IA que use este prompt:
