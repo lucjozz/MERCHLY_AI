@@ -29,7 +29,7 @@ Mantener un catálogo vivo de qué prompt está activo por agente, en qué versi
 
 | Agente | Documento de prompt | Versión | Proveedor destino | Estado |
 |---|---|---|---|---|
-| Agente Investigador de Producto | `02-Prompt-Investigador-de-Producto.md` | 1.0.0 | Gemini (`ProveedorInvestigacionGemini`) | Activo en código (validado con cliente mockeado); pendiente verificación final contra la API real de Gemini. |
+| Agente Investigador de Producto | `02-Prompt-Investigador-de-Producto.md` | 1.0.0 | Gemini (`ProveedorInvestigacionGemini`) | Activo — verificado contra la API real de Gemini (2026-08-03). |
 
 ---
 
@@ -43,4 +43,4 @@ Mantener un catálogo vivo de qué prompt está activo por agente, en qué versi
 
 # Resumen Ejecutivo para IA
 
-Este documento es el índice de prompts documentados. Hoy hay un solo prompt: el del Agente Investigador de Producto, en estado "Documentado" — existe el texto pero el proveedor real (Gemini) todavía no está implementado en código; el agente sigue operando con un proveedor simulado que no usa este prompt. Cuando se implemente `ProveedorInvestigacionGemini`, este registro debe actualizarse a "Activo".
+Este documento es el índice de prompts documentados. Hoy hay un solo prompt: el del Agente Investigador de Producto, en estado "Activo" — el proveedor real (`ProveedorInvestigacionGemini`) ya está implementado en código y verificado contra la API real de Gemini. Cuando no hay `GEMINI_API_KEY` configurada, el agente usa un proveedor simulado que no consume este prompt; eso es comportamiento esperado de fallback, no una limitación del prompt en sí.
