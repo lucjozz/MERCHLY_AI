@@ -39,8 +39,8 @@ Este registro es el punto de entrada rápido; el detalle completo de cada agente
 
 ## Agente Investigador de Producto
 
-* La integración real con Gemini (`ProveedorInvestigacionGemini`) fue validada solo con un cliente mockeado en este entorno (sin acceso de red a Google). **Falta la verificación final contra la API real**, con una `GEMINI_API_KEY` válida, en un entorno con acceso a internet.
-* Mientras no haya `GEMINI_API_KEY` configurada en el entorno, el endpoint sigue usando `ProveedorInvestigacionSimulado` automáticamente (ver `backend/app/api/agentes.py`, `_obtener_proveedor`).
+* La integración real con Gemini (`ProveedorInvestigacionGemini`) fue verificada contra la API real (2026-08-03), además de los tests con cliente mockeado. Ya no hay pendiente de verificación.
+* Mientras no haya `GEMINI_API_KEY` configurada en el entorno, el endpoint sigue usando `ProveedorInvestigacionSimulado` automáticamente (ver `backend/app/api/agentes.py`, `_obtener_proveedor`) — esto es comportamiento esperado, no una limitación pendiente.
 * La lista de categorías prohibidas (`CATEGORIAS_PROHIBIDAS` en `backend/app/schemas/investigador_producto.py`) es provisional y corta; debe evolucionar junto con una política formal en `013-Seguridad` o un anexo de `000-Constitucion/03-Valores.md`.
 
 ---
@@ -69,4 +69,4 @@ Ninguno de estos agentes se implementa en `004-Backend` sin pasar primero por es
 
 # Resumen Ejecutivo para IA
 
-Este documento es el índice de agentes con contrato técnico completo. Actualmente hay un agente registrado: el Agente Investigador de Producto, en etapa "Contrato Aprobado". Todo nuevo agente debe agregarse aquí al momento de aprobar su contrato, y su etapa debe mantenerse sincronizada con el ciclo de vida definido en `02-Ciclo-de-Vida-de-Agentes.md`.
+Este documento es el índice de agentes con contrato técnico completo. Actualmente hay un agente registrado: el Agente Investigador de Producto, en etapa "Implementado" (proveedor real Gemini verificado + fallback simulado). Todo nuevo agente debe agregarse aquí al momento de aprobar su contrato, y su etapa debe mantenerse sincronizada con el ciclo de vida definido en `02-Ciclo-de-Vida-de-Agentes.md`.
