@@ -46,7 +46,7 @@ Versión:
 
 Estado:
 
-Fundación e Infraestructura cerradas; primer agente implementado con integración real a Gemini (pendiente de verificación final contra la API real)
+Fundación e Infraestructura cerradas; primer agente implementado con integración real a Gemini, verificada contra la API real (DEC-023)
 
 
 Fase:
@@ -134,7 +134,7 @@ Contenido:
 - Backend FastAPI con /health (liveness) y /health/ready (readiness, verifica PostgreSQL y Redis)
 - docker-compose.yml: backend + PostgreSQL/pgvector + Redis
 - Backend conectado realmente a PostgreSQL/pgvector (SQLAlchemy async + psycopg 3) y Redis (redis.asyncio)
-- Modelo SQLAlchemy productos_candidatos + primera migración de Alembic (validada en modo offline)
+- Modelo SQLAlchemy productos_candidatos + primera migración de Alembic (aplicada realmente contra el Postgres de docker-compose, no solo en modo offline)
 - Agente Investigador de Producto implementado: validación, proveedor Gemini real + proveedor simulado (fallback automático), reintentos, persistencia, endpoint POST /agentes/investigador-producto
 - 23 tests automatizados, todos en verde
 
@@ -143,7 +143,7 @@ Contenido:
 
 # Trabajo actual
 
-Verificación final del proveedor Gemini contra la API real de Google (con GEMINI_API_KEY válida). No se puede completar desde este entorno de ejecución (sin acceso de red a Google) — corresponde al usuario, en su máquina o en CI/CD.
+Sin pendientes bloqueantes conocidos. Se corrigió docker-compose.yml (env_file apuntaba a backend/.env.example en vez de backend/.env) y se verificó ProveedorInvestigacionGemini contra la API real de Gemini (ver DEC-023).
 
 
 ---
@@ -152,15 +152,10 @@ Verificación final del proveedor Gemini contra la API real de Google (con GEMIN
 
 1.
 
-El usuario verifica ProveedorInvestigacionGemini contra la API real de Gemini.
-
-
-2.
-
 Definir el siguiente agente a especificar (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md, "Próximos Agentes a Especificar").
 
 
-3.
+2.
 
 Evaluar si conviene avanzar con docs/004-Backend y docs/005-Frontend (Fase 2 formal) o seguir profundizando agentes sobre la base ya construida.
 
