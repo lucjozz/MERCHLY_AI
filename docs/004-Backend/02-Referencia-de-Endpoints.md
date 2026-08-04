@@ -1,9 +1,9 @@
-# 01-Arquitectura-del-Backend.md
+# 02-Referencia-de-Endpoints.md
 
 ---
 
-title: Arquitectura del Backend
-document: 004-01
+title: Referencia de Endpoints
+document: 004-02
 version: 1.0.0
 status: Aprobado
 owner: CTO
@@ -11,95 +11,134 @@ last_updated: 2026-08-04
 next_review: 2027-02-04
 related:
 
-* ../002-CTO/03-Stack-Tecnologico.md
-* ../002-CTO/05-Estandares-Codigo.md
-* 02-Referencia-de-Endpoints.md
+* 01-Arquitectura-del-Backend.md
+* ../007-Agentes/03-Agente-Investigador-de-Producto.md
 
 ---
 
-# Arquitectura del Backend
+# Referencia de Endpoints
 
 ## Propósito
 
-Documentar cómo está organizado el código en `backend/` hoy, y cómo fluye una request a través de sus capas.
+Catálogo real de los endpoints HTTP que expone el backend hoy. Se actualiza en el mismo cambio que agrega o modifica un endpoint — no es una API pública versionada todavía (eso corresponde a una decisión futura, cuando exista Fase 7 o consumidores externos reales).
 
 ---
 
-# 1. Estructura de Módulos
+# 1. `GET /health`
 
-```text
-backend/
-├── alembic/              # Migraciones de base de datos (docs/006-BaseDatos)
-│   ├── env.py
-│   └── versions/
-├── app/
-│   ├── main.py            # Punto de entrada: crea la app FastAPI, registra routers
-│   ├── api/                # Endpoints HTTP (routers de FastAPI)
-│   │   ├── health.py       # /health, /health/ready
-│   │   └── agentes.py      # /agentes/investigador-producto
-│   ├── core/                # Infraestructura transversal
-│   │   ├── config.py        # Settings (variables de entorno)
-│   │   ├── database.py      # Motor SQLAlchemy async + sesión por request
-│   │   └── redis.py         # Cliente Redis async
-│   ├── models/               # Modelos SQLAlchemy (esquema real de la BD)
-│   │   ├── base.py           # Base declarativa + mixin de timestamps/UUID
-│   │   └── producto_candidato.py
-│   ├── schemas/               # Modelos Pydantic (contratos de entrada/salida de la API)
-│   │   └── investigador_producto.py
-│   ├── services/                # Lógica de negocio, independiente de HTTP
-│   │   ├── agente_investigador_producto.py   # Orquestación del agente
-│   │   └── proveedores/                       # Proveedores de IA intercambiables
-│   │       ├── base.py         # Interfaz abstracta (ProveedorInvestigacion)
-│   │       ├── simulado.py     # Implementación de prueba, sin IA real
-│   │       └── gemini.py       # Implementación real, vía Gemini
-│   └── tests/                  # Tests automatizados (pytest)
-├── requirements.txt
-├── pyproject.toml               # Config de black/isort/ruff/mypy/pytest
-├── alembic.ini
-├── Dockerfile
-└── .env.example
+**Propósito:** liveness — confirma que el proceso está corriendo, sin depender de nada externo.
+
+**Respuesta 200:**
+
+```json
+{
+  "status": "ok",
+  "service": "MERCHLY AI Backend",
+  "version": "0.1.0",
+  "environment": "local",
+  "timestamp": "2026-08-04T12:00:00+00:00"
+}
 ```
 
-Esta estructura sigue al pie de la letra la definida en `002-CTO/05-Estandares-Codigo.md`.
+No requiere autenticación. No consulta PostgreSQL ni Redis — para eso existe `/health/ready`.
 
 ---
 
-# 2. Responsabilidad de Cada Capa
+# 2. `GET /health/ready`
 
-* **`api/`** — traduce HTTP a llamadas de dominio y de vuelta. No contiene lógica de negocio; valida vía Pydantic (`schemas/`) y delega a `services/`.
-* **`core/`** — infraestructura que no pertenece a ningún dominio en particular: configuración, conexión a base de datos, conexión a Redis. Cualquier módulo puede importar de acá; `core/` no importa de `services/` ni de `api/`.
-* **`models/`** — la verdad del esquema de base de datos, en código. Corresponde exactamente a `006-BaseDatos/02-Esquema-Fase1.md`.
-* **`schemas/`** — contratos de entrada/salida de la API, en Pydantic. Corresponden exactamente a las secciones 2 y 3 del contrato técnico del agente en `007-Agentes`. **No se reutilizan como modelos de base de datos** — `schemas/` y `models/` son deliberadamente dos cosas distintas, aunque hoy tengan campos parecidos, porque lo que la API expone y lo que se persiste no siempre deben evolucionar juntos.
-* **`services/`** — la lógica real: validación de negocio más allá de lo que Pydantic puede expresar, orquestación (reintentos, persistencia), y los proveedores de IA. Es la capa que se testea más exhaustivamente, porque no depende de HTTP ni de infraestructura para poder testearse (ver `04-Manejo-de-Errores-y-Configuracion.md`, sección sobre tests).
+**Propósito:** readiness — confirma que las dependencias reales (PostgreSQL, Redis) están alcanzables.
+
+**Respuesta 200 (todo bien):**
+
+```json
+{
+  "status": "ok",
+  "database": "ok",
+  "redis": "ok",
+  "timestamp": "2026-08-04T12:00:00+00:00"
+}
+```
+
+**Respuesta 200 (alguna dependencia falla — no es un 5xx):**
+
+```json
+{
+  "status": "degraded",
+  "database": "error",
+  "redis": "ok",
+  "timestamp": "2026-08-04T12:00:00+00:00"
+}
+```
+
+Este endpoint siempre responde `200`, incluso si `status` es `"degraded"` — el código HTTP indica que el propio endpoint funcionó; el campo `status` indica el resultado del chequeo. Un orquestador (Kubernetes, Docker healthcheck) debe mirar el campo `status`, no solo el código HTTP.
 
 ---
 
-# 3. Ciclo de Vida de una Request
+# 3. `POST /agentes/investigador-producto`
 
-Usando `POST /agentes/investigador-producto` como ejemplo concreto:
+**Propósito:** ejecuta una investigación de producto con el Agente Investigador de Producto (`007-Agentes/03-...`).
 
-1. FastAPI recibe el request y valida el cuerpo contra `InvestigacionInput` (`app/schemas/investigador_producto.py`). Si falla, devuelve `422` automáticamente, sin que el código del endpoint se ejecute.
-2. El endpoint (`app/api/agentes.py`) resuelve sus dependencias vía `Depends`: una sesión de base de datos (`get_db_session`, `app/core/database.py`) y elige el proveedor de IA (`_obtener_proveedor`, según haya o no `GEMINI_API_KEY`).
-3. Se instancia `AgenteInvestigadorProducto` (`app/services/agente_investigador_producto.py`) con esa sesión y ese proveedor, y se llama a `.ejecutar(entrada)`.
-4. El servicio invoca al proveedor con política de reintentos, persiste los resultados en `productos_candidatos` vía la sesión de SQLAlchemy, y arma la salida.
-5. FastAPI serializa la salida contra `InvestigacionOutput` y la devuelve.
+**Request:**
 
-Ninguna capa "salta" a otra: `api/` nunca toca SQLAlchemy directamente, `services/` nunca importa nada de `fastapi`.
+```json
+{
+  "categoria": "audífonos bluetooth",
+  "mercado_objetivo": "MX",
+  "presupuesto_max_producto": 50,
+  "excluir_marcas": ["MarcaX"],
+  "cantidad_resultados": 5
+}
+```
+
+Solo `categoria` y `mercado_objetivo` son obligatorios. Ver `007-Agentes/03-...`, sección 2, para las reglas de validación completas (código ISO del mercado, categorías prohibidas, truncado de `cantidad_resultados` a 50).
+
+**Respuesta 200:**
+
+```json
+{
+  "productos": [
+    {
+      "nombre_producto": "...",
+      "categoria": "audífonos bluetooth",
+      "precio_estimado_proveedor": 12.5,
+      "precio_sugerido_venta": 29.99,
+      "nivel_demanda_estimado": "alto",
+      "nivel_competencia_estimado": "medio",
+      "fuentes_evidencia": ["https://..."],
+      "riesgos_identificados": []
+    }
+  ],
+  "metadata": {
+    "categoria_consultada": "audífonos bluetooth",
+    "mercado_objetivo": "MX",
+    "fecha_investigacion": "2026-08-04T12:00:00+00:00",
+    "total_productos_evaluados": 5,
+    "total_productos_devueltos": 5,
+    "confianza": "normal",
+    "investigacion_id": "uuid-generado"
+  }
+}
+```
+
+**Respuesta 422:** la entrada no pasó las validaciones del contrato (ej. categoría prohibida, código de mercado inválido). El cuerpo del error sigue el formato estándar de validación de FastAPI/Pydantic.
+
+**Efecto secundario:** si hay productos en la respuesta, quedan persistidos en `productos_candidatos` con `estado = 'candidato'` (`006-BaseDatos/02-Esquema-Fase1.md`). Ningún producto pasa a `en_catalogo` desde este endpoint — eso requiere una acción humana separada, todavía no implementada como endpoint.
+
+**Proveedor usado:** automático — `ProveedorInvestigacionGemini` si `GEMINI_API_KEY` está configurada, si no `ProveedorInvestigacionSimulado` (`004-Backend/03-...`, o directamente `app/api/agentes.py`, función `_obtener_proveedor`).
+
+**Requiere:** que la migración de `productos_candidatos` ya esté aplicada (`docker compose exec backend alembic upgrade head`) — de lo contrario, la persistencia falla con un error de base de datos.
 
 ---
 
-# 4. Inyección de Dependencias
+# 4. Endpoints Pendientes (no implementados)
 
-El proyecto usa el sistema de `Depends` de FastAPI para todo lo que necesita compartirse entre endpoints o mockearse en tests: sesión de base de datos, cliente de Redis. Esto es lo que permite que `backend/app/tests/test_agentes_api.py` y `test_readiness.py` reemplacen esas dependencias por mocks sin tocar el código de producción — ver `app.dependency_overrides` en esos archivos.
+Estos endpoints son necesarios para el flujo completo del negocio, pero todavía no existen:
 
----
-
-# 5. Estado de lo Documentado vs. lo Implementado
-
-Hoy solo existe un dominio de negocio implementado: la investigación de producto. La estructura de carpetas (`api/`, `services/proveedores/`, etc.) ya está pensada para que un segundo agente no necesite reorganizar nada — solo agregar archivos nuevos siguiendo el mismo patrón (ver `03-Patron-para-Agregar-un-Agente-Nuevo.md`).
+* **Cambiar `estado` de un producto candidato** (de `candidato` a `en_catalogo` o `descartado`) — requiere autenticación/autorización humana, que todavía no está diseñada (`013-Seguridad` sigue vacío).
+* **Listar/consultar productos candidatos** ya persistidos — hoy solo se pueden ver insertando directamente en la base o vía `POST /agentes/investigador-producto` (que siempre crea nuevos, nunca lista existentes).
 
 ---
 
 # Resumen Ejecutivo para IA
 
-El backend sigue una arquitectura en capas: `api/` (HTTP) → `services/` (lógica de negocio y proveedores de IA) → `models/`+`core/` (persistencia e infraestructura), con `schemas/` como contratos de entrada/salida de la API, deliberadamente separados de `models/`. Toda dependencia compartida (sesión de BD, cliente Redis, proveedor de IA) se resuelve vía `Depends` de FastAPI, lo que permite mockearla en tests sin infraestructura real. La estructura ya está preparada para agregar un segundo agente sin reorganizar nada.
+El backend expone hoy 3 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness, verifica PostgreSQL y Redis, siempre 200 con campo `status`), y `POST /agentes/investigador-producto` (ejecuta el agente, persiste resultados como `candidato`, nunca los aprueba automáticamente). No existe todavía ningún endpoint para listar productos candidatos o cambiar su estado — son los próximos candidatos naturales a implementar.

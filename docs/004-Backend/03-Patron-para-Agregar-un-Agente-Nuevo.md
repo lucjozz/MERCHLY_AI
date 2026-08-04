@@ -1,9 +1,9 @@
-# 02-Referencia-de-Endpoints.md
+# 03-Patron-para-Agregar-un-Agente-Nuevo.md
 
 ---
 
-title: Referencia de Endpoints
-document: 004-02
+title: Patrón para Agregar un Agente Nuevo
+document: 004-03
 version: 1.0.0
 status: Aprobado
 owner: CTO
@@ -12,133 +12,93 @@ next_review: 2027-02-04
 related:
 
 * 01-Arquitectura-del-Backend.md
-* ../007-Agentes/03-Agente-Investigador-de-Producto.md
+* ../007-Agentes/01-Contrato-Tecnico-Estandar.md
+* ../006-BaseDatos/01-Convenciones-de-Base-de-Datos.md
+* ../010-Prompts/01-Convenciones-de-Prompts.md
 
 ---
 
-# Referencia de Endpoints
+# Patrón para Agregar un Agente Nuevo
 
 ## Propósito
 
-Catálogo real de los endpoints HTTP que expone el backend hoy. Se actualiza en el mismo cambio que agrega o modifica un endpoint — no es una API pública versionada todavía (eso corresponde a una decisión futura, cuando exista Fase 7 o consumidores externos reales).
+Extraer, del proceso real que llevó al Agente Investigador de Producto de contrato aprobado a endpoint funcionando, una guía paso a paso reutilizable — para que el segundo agente (y los siguientes) se construyan más rápido, siguiendo exactamente el mismo patrón, sin tener que releer todo el código del primero para inferirlo.
 
 ---
 
-# 1. `GET /health`
+# Los 6 Pasos
 
-**Propósito:** liveness — confirma que el proceso está corriendo, sin depender de nada externo.
+## Paso 1 — Contrato técnico (`007-Agentes`)
 
-**Respuesta 200:**
+Antes de cualquier código: escribir el contrato técnico completo del agente, siguiendo `007-Agentes/01-Contrato-Tecnico-Estandar.md` (las 10 secciones obligatorias). Registrar el agente en `007-Agentes/04-Registro-de-Agentes.md` con etapa "Contrato Aprobado".
 
-```json
-{
-  "status": "ok",
-  "service": "MERCHLY AI Backend",
-  "version": "0.1.0",
-  "environment": "local",
-  "timestamp": "2026-08-04T12:00:00+00:00"
-}
-```
+**No avanzar al paso 2 sin esto.** Es la disciplina central del proyecto.
 
-No requiere autenticación. No consulta PostgreSQL ni Redis — para eso existe `/health/ready`.
+## Paso 2 — Esquema de datos, si hace falta (`006-BaseDatos`)
 
----
+Si el agente necesita persistir algo nuevo (no siempre es el caso — un agente de análisis podría no persistir nada propio):
 
-# 2. `GET /health/ready`
+1. Documentar la tabla nueva en `006-BaseDatos/02-Esquema-Fase1.md` (o el documento de esquema vigente), siguiendo `01-Convenciones-de-Base-de-Datos.md`.
+2. Crear el modelo SQLAlchemy en `backend/app/models/`, heredando de `ConMarcaDeTiempo` y `Base` (`app/models/base.py`) para las convenciones de UUID/timestamps/borrado lógico.
+3. Generar la migración de Alembic (`alembic revision --autogenerate -m "..."`) y revisarla a mano.
 
-**Propósito:** readiness — confirma que las dependencias reales (PostgreSQL, Redis) están alcanzables.
+## Paso 3 — Schemas Pydantic (`backend/app/schemas/`)
 
-**Respuesta 200 (todo bien):**
+Crear un archivo nuevo en `app/schemas/` que replique exactamente las secciones 2 ("Entradas") y 3 ("Salidas") del contrato técnico. Usar `field_validator` de Pydantic para las reglas de validación del contrato (no dejarlas para el código del endpoint o del servicio) — ver `app/schemas/investigador_producto.py` como referencia: validación de formato, rechazo de valores prohibidos, truncado de límites.
 
-```json
-{
-  "status": "ok",
-  "database": "ok",
-  "redis": "ok",
-  "timestamp": "2026-08-04T12:00:00+00:00"
-}
-```
+## Paso 4 — Proveedor (`backend/app/services/proveedores/`)
 
-**Respuesta 200 (alguna dependencia falla — no es un 5xx):**
+Si el agente usa un modelo de IA:
 
-```json
-{
-  "status": "degraded",
-  "database": "error",
-  "redis": "ok",
-  "timestamp": "2026-08-04T12:00:00+00:00"
-}
-```
+1. Verificar si `ProveedorInvestigacion` (o una interfaz nueva, si el contrato de entrada/salida es distinto) ya sirve como base, o definir una interfaz abstracta nueva en `app/services/proveedores/base.py` (o un archivo equivalente).
+2. Escribir primero una implementación simulada (`*_simulado.py`) que devuelva resultados sintéticos claramente marcados como tales — permite construir y testear el resto del sistema sin depender de una API externa ni de credenciales.
+3. Documentar el prompt real en `010-Prompts` (`01-Convenciones-de-Prompts.md` + un documento nuevo para este agente), **antes** de escribir el proveedor real.
+4. Escribir la implementación real (`*_gemini.py` u otra), usando salida estructurada nativa cuando el proveedor lo soporte — ver `app/services/proveedores/gemini.py` como referencia de cómo convertir errores de red/API en `ProveedorInvestigacionError` (o la excepción de dominio equivalente).
 
-Este endpoint siempre responde `200`, incluso si `status` es `"degraded"` — el código HTTP indica que el propio endpoint funcionó; el campo `status` indica el resultado del chequeo. Un orquestador (Kubernetes, Docker healthcheck) debe mirar el campo `status`, no solo el código HTTP.
+## Paso 5 — Servicio de orquestación (`backend/app/services/`)
 
----
+Un archivo nuevo en `app/services/` con una clase que:
 
-# 3. `POST /agentes/investigador-producto`
+* Reciba el proveedor y la sesión de base de datos por constructor (inyección explícita, no crear sus propias dependencias adentro).
+* Implemente la política de reintentos de la sección 8 del contrato del agente.
+* Persista resultados si corresponde, agrupándolos bajo un identificador compartido si el contrato lo requiere (ver `investigacion_id` en el agente investigador como ejemplo del patrón).
+* Nunca ejecute acciones que el contrato reserve a un humano (ver sección 7 del contrato, "Límites Explícitos") — esto se verifica con un test explícito, no se asume.
 
-**Propósito:** ejecuta una investigación de producto con el Agente Investigador de Producto (`007-Agentes/03-...`).
+## Paso 6 — Endpoint (`backend/app/api/`)
 
-**Request:**
+Un router nuevo (o una ruta nueva en un router existente si el dominio es afín) que:
 
-```json
-{
-  "categoria": "audífonos bluetooth",
-  "mercado_objetivo": "MX",
-  "presupuesto_max_producto": 50,
-  "excluir_marcas": ["MarcaX"],
-  "cantidad_resultados": 5
-}
-```
-
-Solo `categoria` y `mercado_objetivo` son obligatorios. Ver `007-Agentes/03-...`, sección 2, para las reglas de validación completas (código ISO del mercado, categorías prohibidas, truncado de `cantidad_resultados` a 50).
-
-**Respuesta 200:**
-
-```json
-{
-  "productos": [
-    {
-      "nombre_producto": "...",
-      "categoria": "audífonos bluetooth",
-      "precio_estimado_proveedor": 12.5,
-      "precio_sugerido_venta": 29.99,
-      "nivel_demanda_estimado": "alto",
-      "nivel_competencia_estimado": "medio",
-      "fuentes_evidencia": ["https://..."],
-      "riesgos_identificados": []
-    }
-  ],
-  "metadata": {
-    "categoria_consultada": "audífonos bluetooth",
-    "mercado_objetivo": "MX",
-    "fecha_investigacion": "2026-08-04T12:00:00+00:00",
-    "total_productos_evaluados": 5,
-    "total_productos_devueltos": 5,
-    "confianza": "normal",
-    "investigacion_id": "uuid-generado"
-  }
-}
-```
-
-**Respuesta 422:** la entrada no pasó las validaciones del contrato (ej. categoría prohibida, código de mercado inválido). El cuerpo del error sigue el formato estándar de validación de FastAPI/Pydantic.
-
-**Efecto secundario:** si hay productos en la respuesta, quedan persistidos en `productos_candidatos` con `estado = 'candidato'` (`006-BaseDatos/02-Esquema-Fase1.md`). Ningún producto pasa a `en_catalogo` desde este endpoint — eso requiere una acción humana separada, todavía no implementada como endpoint.
-
-**Proveedor usado:** automático — `ProveedorInvestigacionGemini` si `GEMINI_API_KEY` está configurada, si no `ProveedorInvestigacionSimulado` (`004-Backend/03-...`, o directamente `app/api/agentes.py`, función `_obtener_proveedor`).
-
-**Requiere:** que la migración de `productos_candidatos` ya esté aplicada (`docker compose exec backend alembic upgrade head`) — de lo contrario, la persistencia falla con un error de base de datos.
+* Reciba el schema de entrada como parámetro del cuerpo (FastAPI valida automáticamente).
+* Resuelva sus dependencias vía `Depends` (sesión de BD, selección de proveedor).
+* Instancie el servicio del paso 5 y devuelva su resultado.
+* Se registre en `app/main.py` con `app.include_router(...)`.
 
 ---
 
-# 4. Endpoints Pendientes (no implementados)
+# Checklist de Tests (aplica a todos los pasos anteriores)
 
-Estos endpoints son necesarios para el flujo completo del negocio, pero todavía no existen:
+Siguiendo el patrón de `backend/app/tests/`:
 
-* **Cambiar `estado` de un producto candidato** (de `candidato` a `en_catalogo` o `descartado`) — requiere autenticación/autorización humana, que todavía no está diseñada (`013-Seguridad` sigue vacío).
-* **Listar/consultar productos candidatos** ya persistidos — hoy solo se pueden ver insertando directamente en la base o vía `POST /agentes/investigador-producto` (que siempre crea nuevos, nunca lista existentes).
+* [ ] Tests del schema: entrada válida, cada regla de validación rechazada individualmente.
+* [ ] Tests del proveedor simulado: cantidad de resultados, respeto de exclusiones/filtros.
+* [ ] Tests del proveedor real: con un cliente mockeado (nunca llamar a la API real desde tests automatizados) — verificar parseo de respuesta y conversión de errores.
+* [ ] Tests del servicio de orquestación: con proveedor y sesión de BD mockeados — verificar persistencia, agrupación, manejo de fallas y reintentos.
+* [ ] Tests del endpoint: con `app.dependency_overrides`, sin infraestructura real — verificar código de respuesta y estructura del cuerpo.
+
+Ningún paso se da por completo sin sus tests correspondientes en verde.
+
+---
+
+# Qué NO Repetir del Primer Agente
+
+Cosas que costó más de lo necesario en el Agente Investigador de Producto, y que el siguiente agente puede evitar:
+
+* **El proveedor real se escribió después de tener todo lo demás funcionando con el simulado.** Es el orden correcto — no escribir el proveedor real primero "porque es lo más importante"; el simulado permite avanzar en paralelo sin bloquearse por credenciales o cuota de API.
+* **El prompt se documentó en `010-Prompts` antes del código del proveedor real**, no después. Mantener ese orden evita que el prompt "viva" solo en el código.
+* **La verificación contra la API real del proveedor no se pudo hacer en el entorno de desarrollo asistido por IA** (sin acceso de red al proveedor externo) — asumir desde el principio que ese paso final lo corre una persona, en un entorno con acceso real, y dejarlo explícito como pendiente hasta confirmarse (ver `007-Agentes/04-Registro-de-Agentes.md`, sección "Pendientes Conocidos", como ejemplo de cómo se documentó ese hueco mientras existió).
 
 ---
 
 # Resumen Ejecutivo para IA
 
-El backend expone hoy 3 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness, verifica PostgreSQL y Redis, siempre 200 con campo `status`), y `POST /agentes/investigador-producto` (ejecuta el agente, persiste resultados como `candidato`, nunca los aprueba automáticamente). No existe todavía ningún endpoint para listar productos candidatos o cambiar su estado — son los próximos candidatos naturales a implementar.
+Agregar un agente nuevo sigue 6 pasos en orden: contrato técnico (007-Agentes) → esquema de datos si hace falta (006-BaseDatos + modelo SQLAlchemy + migración) → schemas Pydantic replicando el contrato → proveedor (simulado primero, documentar el prompt en 010-Prompts, después el proveedor real) → servicio de orquestación con reintentos y persistencia → endpoint que conecta todo vía FastAPI Depends. Cada paso tiene sus propios tests, con proveedores y sesiones de base de datos siempre mockeados — nunca se depende de infraestructura real ni de APIs externas en los tests automatizados.

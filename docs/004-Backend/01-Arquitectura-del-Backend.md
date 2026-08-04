@@ -1,50 +1,105 @@
-# Volumen 004 - Backend
-
-> **Versión:** 0.1 Alpha
-> **Estado:** Activo
-> **Propietario:** CTO
-> **Última actualización:** 2026-08-04
+# 01-Arquitectura-del-Backend.md
 
 ---
+
+title: Arquitectura del Backend
+document: 004-01
+version: 1.0.0
+status: Aprobado
+owner: CTO
+last_updated: 2026-08-04
+next_review: 2027-02-04
+related:
+
+* ../002-CTO/03-Stack-Tecnologico.md
+* ../002-CTO/05-Estandares-Codigo.md
+* 02-Referencia-de-Endpoints.md
+
+---
+
+# Arquitectura del Backend
 
 ## Propósito
 
-Este volumen documenta el backend **tal como existe hoy en código** (`backend/`): su estructura de módulos, el ciclo de vida de una request, el catálogo real de endpoints, y el patrón reutilizable para agregar un agente nuevo.
-
-A diferencia de `002-CTO`, que fija decisiones de stack y estándares aplicables a todo el proyecto, y de `007-Agentes`, que define contratos técnicos por agente, `004-Backend` responde una pregunta más concreta: **¿cómo está organizado el código que ya corre, y cómo se le agrega algo nuevo sin romper el patrón?**
-
-Este volumen se escribió **después** del código (a diferencia de la disciplina habitual del proyecto), porque el backend avanzó más rápido de lo previsto al construir el primer agente de punta a punta. Se documenta ahora para no acumular más deuda antes de escalar a un segundo agente — ver `memory/DECISIONS.md`, DEC-025.
+Documentar cómo está organizado el código en `backend/` hoy, y cómo fluye una request a través de sus capas.
 
 ---
 
-## Objetivos
+# 1. Estructura de Módulos
 
-- Dejar registrada la arquitectura real del backend, no la planeada.
-- Servir de referencia rápida de los endpoints que existen hoy.
-- Fijar el patrón paso a paso para agregar un agente nuevo, extraído de cómo se construyó el Agente Investigador de Producto — para que el segundo agente sea más rápido de construir que el primero.
-- Documentar las convenciones de manejo de errores y configuración ya en uso, para que el código nuevo las siga sin tener que releer el código viejo para inferirlas.
+```text
+backend/
+├── alembic/              # Migraciones de base de datos (docs/006-BaseDatos)
+│   ├── env.py
+│   └── versions/
+├── app/
+│   ├── main.py            # Punto de entrada: crea la app FastAPI, registra routers
+│   ├── api/                # Endpoints HTTP (routers de FastAPI)
+│   │   ├── health.py       # /health, /health/ready
+│   │   └── agentes.py      # /agentes/investigador-producto
+│   ├── core/                # Infraestructura transversal
+│   │   ├── config.py        # Settings (variables de entorno)
+│   │   ├── database.py      # Motor SQLAlchemy async + sesión por request
+│   │   └── redis.py         # Cliente Redis async
+│   ├── models/               # Modelos SQLAlchemy (esquema real de la BD)
+│   │   ├── base.py           # Base declarativa + mixin de timestamps/UUID
+│   │   └── producto_candidato.py
+│   ├── schemas/               # Modelos Pydantic (contratos de entrada/salida de la API)
+│   │   └── investigador_producto.py
+│   ├── services/                # Lógica de negocio, independiente de HTTP
+│   │   ├── agente_investigador_producto.py   # Orquestación del agente
+│   │   └── proveedores/                       # Proveedores de IA intercambiables
+│   │       ├── base.py         # Interfaz abstracta (ProveedorInvestigacion)
+│   │       ├── simulado.py     # Implementación de prueba, sin IA real
+│   │       └── gemini.py       # Implementación real, vía Gemini
+│   └── tests/                  # Tests automatizados (pytest)
+├── requirements.txt
+├── pyproject.toml               # Config de black/isort/ruff/mypy/pytest
+├── alembic.ini
+├── Dockerfile
+└── .env.example
+```
+
+Esta estructura sigue al pie de la letra la definida en `002-CTO/05-Estandares-Codigo.md`.
 
 ---
 
-## Estructura
+# 2. Responsabilidad de Cada Capa
 
-| Archivo | Descripción |
-|---|---|
-| 01-Arquitectura-del-Backend.md | Estructura de módulos (`api`, `core`, `models`, `schemas`, `services`), y el recorrido completo de una request. |
-| 02-Referencia-de-Endpoints.md | Catálogo real de endpoints HTTP: método, ruta, entrada, salida. |
-| 03-Patron-para-Agregar-un-Agente-Nuevo.md | Los 6 pasos concretos, con archivos y nombres reales, para llevar un agente desde su contrato técnico hasta un endpoint funcionando. |
-| 04-Manejo-de-Errores-y-Configuracion.md | Cómo se manejan errores hoy, y cómo se gestiona configuración/secretos vía `Settings`. |
+* **`api/`** — traduce HTTP a llamadas de dominio y de vuelta. No contiene lógica de negocio; valida vía Pydantic (`schemas/`) y delega a `services/`.
+* **`core/`** — infraestructura que no pertenece a ningún dominio en particular: configuración, conexión a base de datos, conexión a Redis. Cualquier módulo puede importar de acá; `core/` no importa de `services/` ni de `api/`.
+* **`models/`** — la verdad del esquema de base de datos, en código. Corresponde exactamente a `006-BaseDatos/02-Esquema-Fase1.md`.
+* **`schemas/`** — contratos de entrada/salida de la API, en Pydantic. Corresponden exactamente a las secciones 2 y 3 del contrato técnico del agente en `007-Agentes`. **No se reutilizan como modelos de base de datos** — `schemas/` y `models/` son deliberadamente dos cosas distintas, aunque hoy tengan campos parecidos, porque lo que la API expone y lo que se persiste no siempre deben evolucionar juntos.
+* **`services/`** — la lógica real: validación de negocio más allá de lo que Pydantic puede expresar, orquestación (reintentos, persistencia), y los proveedores de IA. Es la capa que se testea más exhaustivamente, porque no depende de HTTP ni de infraestructura para poder testearse (ver `04-Manejo-de-Errores-y-Configuracion.md`, sección sobre tests).
 
 ---
 
-## Relación con otros volúmenes
+# 3. Ciclo de Vida de una Request
 
-- `002-CTO/03-Stack-Tecnologico.md`: fija qué tecnologías se usan (FastAPI, SQLAlchemy, Alembic, etc.); este volumen no repite esa lista, la da por sentada y documenta cómo se usan en la práctica.
-- `002-CTO/05-Estandares-Codigo.md`: fija la estructura de carpetas (`api/`, `core/`, `models/`, `services/`, `tests/`) como estándar; este volumen confirma que el código real la sigue y explica qué va en cada una.
-- `006-BaseDatos`: el esquema de datos que los modelos en `backend/app/models/` implementan.
-- `007-Agentes`: el contrato técnico que cada agente implementa; `03-Patron-para-Agregar-un-Agente-Nuevo.md` de este volumen es la guía operativa para pasar de un contrato aprobado a código funcionando.
-- `010-Prompts`: los prompts que los proveedores de IA reales (ej. `ProveedorInvestigacionGemini`) usan.
+Usando `POST /agentes/investigador-producto` como ejemplo concreto:
 
-## Principio Rector
+1. FastAPI recibe el request y valida el cuerpo contra `InvestigacionInput` (`app/schemas/investigador_producto.py`). Si falla, devuelve `422` automáticamente, sin que el código del endpoint se ejecute.
+2. El endpoint (`app/api/agentes.py`) resuelve sus dependencias vía `Depends`: una sesión de base de datos (`get_db_session`, `app/core/database.py`) y elige el proveedor de IA (`_obtener_proveedor`, según haya o no `GEMINI_API_KEY`).
+3. Se instancia `AgenteInvestigadorProducto` (`app/services/agente_investigador_producto.py`) con esa sesión y ese proveedor, y se llama a `.ejecutar(entrada)`.
+4. El servicio invoca al proveedor con política de reintentos, persiste los resultados en `productos_candidatos` vía la sesión de SQLAlchemy, y arma la salida.
+5. FastAPI serializa la salida contra `InvestigacionOutput` y la devuelve.
 
-> **Este documento describe el código, no al revés.** Si el código cambia de forma incompatible con lo escrito acá, se actualiza este volumen en el mismo cambio — no se deja para "después".
+Ninguna capa "salta" a otra: `api/` nunca toca SQLAlchemy directamente, `services/` nunca importa nada de `fastapi`.
+
+---
+
+# 4. Inyección de Dependencias
+
+El proyecto usa el sistema de `Depends` de FastAPI para todo lo que necesita compartirse entre endpoints o mockearse en tests: sesión de base de datos, cliente de Redis. Esto es lo que permite que `backend/app/tests/test_agentes_api.py` y `test_readiness.py` reemplacen esas dependencias por mocks sin tocar el código de producción — ver `app.dependency_overrides` en esos archivos.
+
+---
+
+# 5. Estado de lo Documentado vs. lo Implementado
+
+Hoy solo existe un dominio de negocio implementado: la investigación de producto. La estructura de carpetas (`api/`, `services/proveedores/`, etc.) ya está pensada para que un segundo agente no necesite reorganizar nada — solo agregar archivos nuevos siguiendo el mismo patrón (ver `03-Patron-para-Agregar-un-Agente-Nuevo.md`).
+
+---
+
+# Resumen Ejecutivo para IA
+
+El backend sigue una arquitectura en capas: `api/` (HTTP) → `services/` (lógica de negocio y proveedores de IA) → `models/`+`core/` (persistencia e infraestructura), con `schemas/` como contratos de entrada/salida de la API, deliberadamente separados de `models/`. Toda dependencia compartida (sesión de BD, cliente Redis, proveedor de IA) se resuelve vía `Depends` de FastAPI, lo que permite mockearla en tests sin infraestructura real. La estructura ya está preparada para agregar un segundo agente sin reorganizar nada.

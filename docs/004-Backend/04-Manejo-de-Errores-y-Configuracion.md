@@ -1,9 +1,9 @@
-# 03-Patron-para-Agregar-un-Agente-Nuevo.md
+# 04-Manejo-de-Errores-y-Configuracion.md
 
 ---
 
-title: Patrón para Agregar un Agente Nuevo
-document: 004-03
+title: Manejo de Errores y Configuración
+document: 004-04
 version: 1.0.0
 status: Aprobado
 owner: CTO
@@ -12,93 +12,72 @@ next_review: 2027-02-04
 related:
 
 * 01-Arquitectura-del-Backend.md
-* ../007-Agentes/01-Contrato-Tecnico-Estandar.md
-* ../006-BaseDatos/01-Convenciones-de-Base-de-Datos.md
-* ../010-Prompts/01-Convenciones-de-Prompts.md
+* ../000-Constitucion/11-Seguridad.md
 
 ---
 
-# Patrón para Agregar un Agente Nuevo
+# Manejo de Errores y Configuración
 
 ## Propósito
 
-Extraer, del proceso real que llevó al Agente Investigador de Producto de contrato aprobado a endpoint funcionando, una guía paso a paso reutilizable — para que el segundo agente (y los siguientes) se construyan más rápido, siguiendo exactamente el mismo patrón, sin tener que releer todo el código del primero para inferirlo.
+Documentar las convenciones ya en uso para manejo de errores y configuración, para que el código nuevo las siga sin tener que inferirlas leyendo el código existente.
 
 ---
 
-# Los 6 Pasos
+# 1. Configuración (`app/core/config.py`)
 
-## Paso 1 — Contrato técnico (`007-Agentes`)
+Toda configuración pasa por una única clase `Settings` (Pydantic `BaseSettings`), con:
 
-Antes de cualquier código: escribir el contrato técnico completo del agente, siguiendo `007-Agentes/01-Contrato-Tecnico-Estandar.md` (las 10 secciones obligatorias). Registrar el agente en `007-Agentes/04-Registro-de-Agentes.md` con etapa "Contrato Aprobado".
+* Valores por defecto sensatos para desarrollo local (ej. `database_url` ya apunta al contenedor `db` de `docker-compose.yml`).
+* Campos opcionales (`| None = None`) para configuración sensible que no debe tener un default real (ej. `gemini_api_key`).
+* Una función `get_settings()` cacheada con `@lru_cache`, para no releer variables de entorno en cada request.
 
-**No avanzar al paso 2 sin esto.** Es la disciplina central del proyecto.
+**Regla:** ningún módulo lee `os.environ` directamente. Toda configuración nueva se agrega como campo de `Settings`, con su valor real viviendo en `backend/.env` (nunca en `.env.example`, que solo tiene placeholders o valores de desarrollo sin riesgo).
 
-## Paso 2 — Esquema de datos, si hace falta (`006-BaseDatos`)
-
-Si el agente necesita persistir algo nuevo (no siempre es el caso — un agente de análisis podría no persistir nada propio):
-
-1. Documentar la tabla nueva en `006-BaseDatos/02-Esquema-Fase1.md` (o el documento de esquema vigente), siguiendo `01-Convenciones-de-Base-de-Datos.md`.
-2. Crear el modelo SQLAlchemy en `backend/app/models/`, heredando de `ConMarcaDeTiempo` y `Base` (`app/models/base.py`) para las convenciones de UUID/timestamps/borrado lógico.
-3. Generar la migración de Alembic (`alembic revision --autogenerate -m "..."`) y revisarla a mano.
-
-## Paso 3 — Schemas Pydantic (`backend/app/schemas/`)
-
-Crear un archivo nuevo en `app/schemas/` que replique exactamente las secciones 2 ("Entradas") y 3 ("Salidas") del contrato técnico. Usar `field_validator` de Pydantic para las reglas de validación del contrato (no dejarlas para el código del endpoint o del servicio) — ver `app/schemas/investigador_producto.py` como referencia: validación de formato, rechazo de valores prohibidos, truncado de límites.
-
-## Paso 4 — Proveedor (`backend/app/services/proveedores/`)
-
-Si el agente usa un modelo de IA:
-
-1. Verificar si `ProveedorInvestigacion` (o una interfaz nueva, si el contrato de entrada/salida es distinto) ya sirve como base, o definir una interfaz abstracta nueva en `app/services/proveedores/base.py` (o un archivo equivalente).
-2. Escribir primero una implementación simulada (`*_simulado.py`) que devuelva resultados sintéticos claramente marcados como tales — permite construir y testear el resto del sistema sin depender de una API externa ni de credenciales.
-3. Documentar el prompt real en `010-Prompts` (`01-Convenciones-de-Prompts.md` + un documento nuevo para este agente), **antes** de escribir el proveedor real.
-4. Escribir la implementación real (`*_gemini.py` u otra), usando salida estructurada nativa cuando el proveedor lo soporte — ver `app/services/proveedores/gemini.py` como referencia de cómo convertir errores de red/API en `ProveedorInvestigacionError` (o la excepción de dominio equivalente).
-
-## Paso 5 — Servicio de orquestación (`backend/app/services/`)
-
-Un archivo nuevo en `app/services/` con una clase que:
-
-* Reciba el proveedor y la sesión de base de datos por constructor (inyección explícita, no crear sus propias dependencias adentro).
-* Implemente la política de reintentos de la sección 8 del contrato del agente.
-* Persista resultados si corresponde, agrupándolos bajo un identificador compartido si el contrato lo requiere (ver `investigacion_id` en el agente investigador como ejemplo del patrón).
-* Nunca ejecute acciones que el contrato reserve a un humano (ver sección 7 del contrato, "Límites Explícitos") — esto se verifica con un test explícito, no se asume.
-
-## Paso 6 — Endpoint (`backend/app/api/`)
-
-Un router nuevo (o una ruta nueva en un router existente si el dominio es afín) que:
-
-* Reciba el schema de entrada como parámetro del cuerpo (FastAPI valida automáticamente).
-* Resuelva sus dependencias vía `Depends` (sesión de BD, selección de proveedor).
-* Instancie el servicio del paso 5 y devuelva su resultado.
-* Se registre en `app/main.py` con `app.include_router(...)`.
+En tests, cuando hace falta forzar un valor de configuración distinto, se usa `monkeypatch.setenv(...)` seguido de `get_settings.cache_clear()` — ver `backend/app/tests/test_proveedor_gemini.py` como referencia.
 
 ---
 
-# Checklist de Tests (aplica a todos los pasos anteriores)
+# 2. Excepciones de Dominio
 
-Siguiendo el patrón de `backend/app/tests/`:
+Cada capa de proveedor/servicio define su propia excepción de dominio (ej. `ProveedorInvestigacionError` en `app/services/proveedores/base.py`), en vez de dejar propagar excepciones de librerías externas (`google.genai`, `sqlalchemy`, etc.) hacia capas superiores.
 
-* [ ] Tests del schema: entrada válida, cada regla de validación rechazada individualmente.
-* [ ] Tests del proveedor simulado: cantidad de resultados, respeto de exclusiones/filtros.
-* [ ] Tests del proveedor real: con un cliente mockeado (nunca llamar a la API real desde tests automatizados) — verificar parseo de respuesta y conversión de errores.
-* [ ] Tests del servicio de orquestación: con proveedor y sesión de BD mockeados — verificar persistencia, agrupación, manejo de fallas y reintentos.
-* [ ] Tests del endpoint: con `app.dependency_overrides`, sin infraestructura real — verificar código de respuesta y estructura del cuerpo.
-
-Ningún paso se da por completo sin sus tests correspondientes en verde.
+**Regla:** un proveedor nunca deja escapar una excepción de su SDK subyacente sin envolverla. Ver `app/services/proveedores/gemini.py`: cualquier excepción de `google.genai` se captura y se relanza como `ProveedorInvestigacionError`, para que el código que orquesta reintentos (`AgenteInvestigadorProducto`) no necesite conocer las excepciones específicas de cada proveedor.
 
 ---
 
-# Qué NO Repetir del Primer Agente
+# 3. Reintentos
 
-Cosas que costó más de lo necesario en el Agente Investigador de Producto, y que el siguiente agente puede evitar:
+La política de reintentos vive en el servicio de orquestación (`app/services/agente_investigador_producto.py`), no en el proveedor. El proveedor solo debe fallar de forma clara (levantando su excepción de dominio); cuántas veces reintentar y con qué espera es una decisión de negocio que corresponde al contrato técnico del agente (`007-Agentes`, sección 8 de cada contrato), no una decisión técnica del proveedor.
 
-* **El proveedor real se escribió después de tener todo lo demás funcionando con el simulado.** Es el orden correcto — no escribir el proveedor real primero "porque es lo más importante"; el simulado permite avanzar en paralelo sin bloquearse por credenciales o cuota de API.
-* **El prompt se documentó en `010-Prompts` antes del código del proveedor real**, no después. Mantener ese orden evita que el prompt "viva" solo en el código.
-* **La verificación contra la API real del proveedor no se pudo hacer en el entorno de desarrollo asistido por IA** (sin acceso de red al proveedor externo) — asumir desde el principio que ese paso final lo corre una persona, en un entorno con acceso real, y dejarlo explícito como pendiente hasta confirmarse (ver `007-Agentes/04-Registro-de-Agentes.md`, sección "Pendientes Conocidos", como ejemplo de cómo se documentó ese hueco mientras existió).
+---
+
+# 4. Errores HTTP
+
+* **422:** siempre generado automáticamente por FastAPI/Pydantic a partir de los validadores de los schemas (`app/schemas/`). El código de los endpoints no lanza `HTTPException(422, ...)` a mano para validaciones que Pydantic ya puede expresar.
+* **500:** se deja que ocurra de forma natural ante errores no manejados (ej. base de datos inalcanzable) — no se capturan genéricamente para devolver un mensaje "amigable" que oculte el problema real durante desarrollo. Antes de producción real (Fase 2+), esto debe revisarse para no filtrar detalles internos en la respuesta.
+* **Nunca 200 con un error disfrazado en el cuerpo**, excepto en el caso deliberado de `/health/ready`, donde `"status": "degraded"` es información operativa esperada, no un error del endpoint en sí (ver `002-Referencia-de-Endpoints.md`, sección 2).
+
+---
+
+# 5. Logging
+
+Se usa el módulo estándar `logging` de Python (`logger = logging.getLogger(__name__)` por archivo), no `print()`. Los reintentos fallidos y los errores de proveedor se loguean con `logger.warning`/`logger.error` antes de decidir cómo responder — ver `app/services/agente_investigador_producto.py` como referencia. Todavía no hay configuración centralizada de logging (formato, destino, niveles por entorno) — es un pendiente para cuando exista un entorno de staging/producción real.
+
+---
+
+# 6. Tests: Nunca Contra Infraestructura Real
+
+Ningún test automatizado en `backend/app/tests/` requiere PostgreSQL, Redis, o la API de Gemini corriendo. Se logra con:
+
+* `app.dependency_overrides` de FastAPI, para reemplazar `get_db_session`/`get_redis_client` por mocks en tests de endpoints.
+* `unittest.mock.AsyncMock`/`MagicMock` inyectados directamente en los servicios/proveedores, cuando se testea la lógica sin pasar por HTTP.
+* Para el proveedor Gemini específicamente: se inyecta un cliente `genai.Client` falso por constructor (`ProveedorInvestigacionGemini(cliente=..., modelo=...)`), en vez de mockear el módulo `google.genai` globalmente.
+
+**Regla:** si un test nuevo necesitara una base de datos o API real para pasar, es una señal de que la lógica bajo prueba no está suficientemente separada de la infraestructura — hay que revisar el diseño antes de agregar el test, no agregar un test lento o frágil.
 
 ---
 
 # Resumen Ejecutivo para IA
 
-Agregar un agente nuevo sigue 6 pasos en orden: contrato técnico (007-Agentes) → esquema de datos si hace falta (006-BaseDatos + modelo SQLAlchemy + migración) → schemas Pydantic replicando el contrato → proveedor (simulado primero, documentar el prompt en 010-Prompts, después el proveedor real) → servicio de orquestación con reintentos y persistencia → endpoint que conecta todo vía FastAPI Depends. Cada paso tiene sus propios tests, con proveedores y sesiones de base de datos siempre mockeados — nunca se depende de infraestructura real ni de APIs externas en los tests automatizados.
+Configuración: toda vía la clase `Settings` cacheada, ningún acceso directo a `os.environ`, secretos reales solo en `backend/.env`. Errores: cada proveedor envuelve las excepciones de su SDK en una excepción de dominio propia; los reintentos son responsabilidad del servicio de orquestación, no del proveedor; los 422 los genera Pydantic automáticamente. Logging: módulo estándar, nunca `print()`. Tests: nunca requieren infraestructura real — dependencias mockeadas vía `Depends`/`dependency_overrides` o inyección directa por constructor.
