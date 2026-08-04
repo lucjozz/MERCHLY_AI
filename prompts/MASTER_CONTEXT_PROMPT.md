@@ -411,7 +411,7 @@ MERCHLY AI
 
 Versión:
 
-0.9 Alpha
+1.0 Alpha
 
 
 Fase:
@@ -421,12 +421,12 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 Estado:
 
-Fundación e Infraestructura cerradas: Constitución, Arquitectura, Organización, CTO, CEO, BaseDatos, Agentes y Prompts documentados; backend conectado realmente a PostgreSQL/pgvector y Redis; Agente Investigador de Producto implementado con proveedor real (Gemini, verificado contra la API real) y fallback simulado.
+Fundación e Infraestructura cerradas: Constitución, Arquitectura, Organización, CTO, CEO, BaseDatos, Agentes, Prompts y Backend documentados; backend conectado realmente a PostgreSQL/pgvector y Redis; Agente Investigador de Producto implementado con proveedor real (Gemini, verificado contra la API real) y fallback simulado.
 
 
 Siguiente fase:
 
-Especificar el siguiente agente (SEO, contenido, atención al cliente, analítica o marketing) o documentar docs/004-Backend con lo ya construido. Sin pendientes bloqueantes conocidos (ver DEC-023).
+Especificar el siguiente agente (SEO, contenido, atención al cliente, analítica o marketing), siguiendo el patrón de 6 pasos documentado en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md. Sin pendientes bloqueantes conocidos (ver DEC-025).
 
 
 Nota para cualquier IA que use este prompt:
