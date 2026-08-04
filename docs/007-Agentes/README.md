@@ -3,7 +3,7 @@
 > **Versión:** 0.1 Alpha
 > **Estado:** Activo
 > **Propietario:** CTO
-> **Última actualización:** 2026-07-26
+> **Última actualización:** 2026-08-04
 
 ---
 
@@ -37,6 +37,7 @@ Ya existen dos documentos relacionados que **no** duplica:
 | 02-Ciclo-de-Vida-de-Agentes.md | Cómo nace, se prueba, se despliega y se retira un agente. |
 | 03-Agente-Investigador-de-Producto.md | Primer agente especificado íntegramente bajo el contrato estándar (satisface el criterio técnico de Fase 0). |
 | 04-Registro-de-Agentes.md | Catálogo vivo de agentes con contrato completo y su estado. |
+| 05-Agente-Analitica-Basica.md | Segundo agente especificado bajo el contrato estándar; solo lectura sobre `productos_candidatos` (etapa "Contrato en Diseño", pendiente de aprobación del CTO). |
 
 ---
 
@@ -45,7 +46,7 @@ Ya existen dos documentos relacionados que **no** duplica:
 - `001-Arquitectura/03-Arquitectura-de-Agentes.md`: diseño conceptual que este volumen aterriza en un contrato implementable.
 - `100-Organizacion/06-Agentes-IA.md`: catálogo de roles y proveedores; este volumen no reemplaza esa tabla, la referencia.
 - `002-CTO/02-Metodologia-Desarrollo.md`: ciclo de trabajo técnico que aplica a la construcción de cada agente.
-- `004-Backend`: implementación real de los agentes especificados aquí (aún no iniciado).
+- `004-Backend`: implementación real de los agentes especificados aquí. El Investigador de Producto ya está implementado; Analítica Básica queda pendiente de aprobación de contrato antes de iniciar su implementación.
 - `010-Prompts`: prompts concretos que usará cada agente (aún no iniciado); este volumen define el contrato, no el prompt en sí.
 
 ## Principio Rector
