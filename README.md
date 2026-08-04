@@ -329,7 +329,7 @@ Instrucciones más detalladas del entorno de desarrollo: `docs/002-CTO/06-Entorn
 ## Fase actual
 
 ```
-Infraestructura (Fase 1, en curso)
+Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde Fase 2-3
 ```
 
 ## Estado de desarrollo
