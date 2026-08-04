@@ -3,7 +3,7 @@
 
 ## Prioridad actual
 
-Elegir el siguiente foco de trabajo: especificar un nuevo agente, o documentar docs/004-Backend con lo ya construido. Ver "Objetivo siguiente etapa" abajo.
+Especificar el siguiente agente (SEO, contenido, atención al cliente, analítica básica o marketing), siguiendo el patrón de 6 pasos ya documentado en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
 
 
 ---
@@ -13,23 +13,33 @@ Elegir el siguiente foco de trabajo: especificar un nuevo agente, o documentar d
 
 ## 1
 
-Especificar el siguiente agente:
+Elegir y especificar el siguiente agente:
 
 - Candidatos, según docs/007-Agentes/04-Registro-de-Agentes.md: SEO, contenido, atención al cliente (primer nivel), analítica básica, marketing.
-- Seguir el mismo proceso ya validado: contrato técnico (007-Agentes) → esquema de datos si hace falta (006-BaseDatos) → prompt (010-Prompts) → implementación en código.
+- Seguir los 6 pasos documentados en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md: contrato técnico (007-Agentes) → esquema si hace falta (006-BaseDatos) → schemas Pydantic → proveedor (simulado primero, prompt en 010-Prompts, proveedor real después) → servicio de orquestación → endpoint.
 
 
 ---
 
 ## 2
 
-Evaluar próximo volumen de documentación:
+Evaluar docs/005-Frontend:
 
-- docs/004-Backend y docs/005-Frontend siguen vacíos (placeholders). El código de backend ya avanzó bastante sin que exista su volumen de documentación formal — conviene documentar lo ya construido antes de seguir agregando funcionalidad, para no acumular deuda de documentación.
+- A diferencia de 004-Backend (documentado después del código, por necesidad), conviene decidir si documentar el frontend antes de escribir su primera línea de código, volviendo a la disciplina "documentación antes que código" ahora que la brecha de 004-Backend ya se cerró.
+
+
+---
+
+## 3
+
+Endpoints pendientes identificados en docs/004-Backend/02-Referencia-de-Endpoints.md:
+
+- Cambiar estado de un producto candidato (candidato → en_catalogo / descartado) — requiere autenticación/autorización humana, todavía no diseñada (013-Seguridad sigue vacío).
+- Listar/consultar productos candidatos ya persistidos.
 
 
 ---
 
 # Objetivo siguiente etapa
 
-Con el primer agente operando de punta a punta (validación → investigación → persistencia → API), su integración real a Gemini implementada y verificada contra la API real (ver DEC-023), y el entorno local (Docker Compose + Alembic) documentado con los comandos reales, el proyecto tiene ya un patrón repetible para agregar agentes nuevos, sin pendientes bloqueantes conocidos. El siguiente foco es decidir si conviene reforzar ese patrón (documentar 004-Backend con lo ya construido) antes de escalarlo a más agentes.
+Con el patrón de construcción de agentes ya documentado (docs/004-Backend) y probado de punta a punta con el primer agente, el proyecto está listo para escalar horizontalmente: cada agente nuevo debería tomar menos esfuerzo que el anterior. El criterio de éxito del próximo agente es justamente ese — medir si efectivamente toma menos pasos que el primero.

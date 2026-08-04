@@ -14,7 +14,7 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 Versión:
 
-0.9 Alpha
+1.0 Alpha
 
 
 ---
@@ -88,6 +88,15 @@ COMPLETADO
 Contrato técnico estándar (10 secciones), ciclo de vida de agentes (8 etapas), y el Agente Investigador de Producto — implementado en código, con proveedor real (Gemini, verificado contra la API real) y fallback simulado. Ver DEC-017 a DEC-021 y DEC-023.
 
 
+## 004-Backend
+
+Estado:
+
+COMPLETADO
+
+Arquitectura del backend (estructura de módulos, ciclo de vida de una request), referencia de los 3 endpoints reales, patrón de 6 pasos para agregar un agente nuevo (extraído del proceso real con el Investigador de Producto), y convenciones de manejo de errores y configuración. Documentado en retrospectiva sobre código ya existente. Ver DEC-025.
+
+
 ## 010-Prompts
 
 Estado:
@@ -133,21 +142,21 @@ Ninguno. Todos los criterios documentales y técnicos de cierre de Fase 0 y Fase
 
 # Próxima fase
 
-Elegir el siguiente foco de trabajo (ver memory/NEXT_STEPS.md): especificar el siguiente agente (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), o documentar docs/004-Backend y docs/005-Frontend con lo ya construido antes de seguir agregando funcionalidad.
+Especificar el siguiente agente (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo el patrón de 6 pasos ya documentado en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
 
 
 ---
 
 # Última acción realizada
 
-Se verificó ProveedorInvestigacionGemini contra la API real de Gemini (confirmado: responde con datos reales, respeta el prompt, no inventa evidencia). Se corrigió docker-compose.yml (env_file apuntaba a .env.example en vez de .env, dejando GEMINI_API_KEY sin efecto en el contenedor sin ningún error visible) y se sincronizaron docs/007-Agentes/04-Registro-de-Agentes.md, docs/010-Prompts/03-Registro-de-Prompts.md, docs/002-CTO/06-Entorno-Desarrollo.md y README.md. Ver DEC-023. Se corrigieron además contradicciones internas que había quedado en este mismo archivo (fase marcada "en curso" en vez de "cerrada", sección 003-CEO con el modelo de negocio desactualizado, y la sección del agente todavía marcada con proveedor "provisional" pese a estar ya verificado) y se sincronizó la fecha de memory/CONTEXT.md.
+Se completó docs/004-Backend: arquitectura del backend, referencia de endpoints, patrón de 6 pasos para agregar un agente nuevo, y convenciones de manejo de errores/configuración. Documentado en retrospectiva sobre código ya existente y verificado. Ver DEC-025.
 
 
 ---
 
 # Próxima acción
 
-Elegir entre: (a) especificar el siguiente agente (SEO, contenido, atención al cliente, analítica básica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), o (b) documentar docs/004-Backend y docs/005-Frontend con lo ya construido antes de seguir agregando funcionalidad. Ver memory/NEXT_STEPS.md.
+Especificar el siguiente agente, siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md: elegir entre SEO, contenido, atención al cliente, analítica básica o marketing (ver docs/007-Agentes/04-Registro-de-Agentes.md).
 
 
 ---

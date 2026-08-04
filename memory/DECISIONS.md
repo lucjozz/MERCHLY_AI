@@ -531,3 +531,23 @@ Una revisión del usuario detectó las contradicciones. El patrón de fondo: cua
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-025
+
+Fecha:
+
+2026-08-04
+
+Decisión:
+
+Se completa el volumen docs/004-Backend, documentando el backend tal como existe hoy en código (a diferencia de la disciplina habitual de documentar antes de programar, aplicada aquí en retrospectiva porque el código avanzó más rápido de lo previsto): arquitectura de módulos y ciclo de vida de una request (01), catálogo real de los 3 endpoints existentes (02), el patrón de 6 pasos para agregar un agente nuevo extraído del proceso real seguido con el Agente Investigador de Producto, incluyendo una sección explícita de "qué no repetir" (03), y las convenciones de manejo de errores y configuración ya en uso (04).
+
+Motivo:
+
+Con un segundo agente probablemente en camino (ver memory/NEXT_STEPS.md), documentar el patrón ya usado evita que cada agente nuevo reinvente su propia estructura, y cierra la brecha de tener código real sin su volumen de documentación correspondiente.
+
+Estado:
+
+Aprobada.

@@ -34,6 +34,8 @@ docs/007-Agentes
 
 docs/010-Prompts
 
+docs/004-Backend
+
 
 ---
 
@@ -41,12 +43,12 @@ docs/010-Prompts
 
 Versión:
 
-0.9 Alpha
+1.0 Alpha
 
 
 Estado:
 
-Fundación e Infraestructura cerradas; primer agente implementado con integración real a Gemini, verificada contra la API real (DEC-023)
+Fundación e Infraestructura cerradas; primer agente implementado con integración real a Gemini, verificada contra la API real (DEC-023); backend documentado en retrospectiva (docs/004-Backend, DEC-025)
 
 
 Fase:
@@ -120,6 +122,15 @@ Completado
 Convenciones de prompts, el prompt real del Agente Investigador de Producto, y su registro.
 
 
+## 004-Backend
+
+Estado:
+
+Completado
+
+Arquitectura del backend, referencia de endpoints, patrón de 6 pasos para agregar un agente nuevo, y convenciones de manejo de errores/configuración. Documentado en retrospectiva sobre código ya existente.
+
+
 ---
 
 # Entorno técnico
@@ -143,7 +154,7 @@ Contenido:
 
 # Trabajo actual
 
-Sin pendientes bloqueantes conocidos. Se corrigió docker-compose.yml (env_file apuntaba a backend/.env.example en vez de backend/.env) y se verificó ProveedorInvestigacionGemini contra la API real de Gemini (ver DEC-023).
+Sin pendientes bloqueantes conocidos. docs/004-Backend completado, documentando el backend existente y el patrón para agregar el próximo agente (ver DEC-025).
 
 
 ---
@@ -152,12 +163,12 @@ Sin pendientes bloqueantes conocidos. Se corrigió docker-compose.yml (env_file 
 
 1.
 
-Definir el siguiente agente a especificar (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md, "Próximos Agentes a Especificar").
+Definir el siguiente agente a especificar (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo el patrón de 6 pasos en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
 
 
 2.
 
-Evaluar si conviene avanzar con docs/004-Backend y docs/005-Frontend (Fase 2 formal) o seguir profundizando agentes sobre la base ya construida.
+Evaluar si conviene documentar también docs/005-Frontend antes de que exista código de frontend, o esperar a que el frontend empiece a construirse (a diferencia de 004-Backend, que se documentó después del código por necesidad, no por elección).
 
 
 ---
@@ -173,4 +184,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-08-03
+2026-08-04
