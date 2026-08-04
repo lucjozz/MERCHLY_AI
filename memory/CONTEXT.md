@@ -173,4 +173,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-07-30
+2026-08-03
