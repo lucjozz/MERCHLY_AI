@@ -511,3 +511,23 @@ La separación entre backend/.env (secretos reales, en .gitignore) y backend/.en
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-024
+
+Fecha:
+
+2026-08-04
+
+Decisión:
+
+Se corrigen contradicciones internas detectadas en memory/CURRENT_STATE.md, introducidas al integrar DEC-023 sobre una versión desactualizada del archivo: el campo "Fase" decía "en curso" cuando ROADMAP.md ya marca Fase 1 como "Cerrada"; la sección 003-CEO todavía listaba el modelo de negocio como "propuesta A/B/C, pendiente de elección" pese a que DEC-014 lo resolvió hace semanas; la sección del Agente Investigador de Producto seguía marcada "con proveedor provisional simulado, pendiente reemplazar por Gemini" pese a que la propia DEC-023 (en el mismo archivo) confirma la verificación contra la API real; y la sección de conexión a PostgreSQL/Redis conservaba la frase "todavía no hay esquema de negocio", contradicha por la sección de 006-BaseDatos inmediatamente debajo. Se corrige además el mismo error de "Fase 1 en curso" en README.md, y se sincroniza la fecha de "Última actualización" en memory/CONTEXT.md (seguía en 2026-07-30).
+
+Motivo:
+
+Una revisión del usuario detectó las contradicciones. El patrón de fondo: cuando una actualización de memoria se hace insertando una decisión nueva sobre una copia del archivo que no es la más reciente, el resultado mezcla estados de distintos momentos del proyecto dentro del mismo documento. La corrección no solo arregla el contenido; deja registrado el patrón para evitar repetirlo.
+
+Estado:
+
+Aprobada.
