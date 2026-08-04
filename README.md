@@ -323,7 +323,7 @@ Instrucciones más detalladas del entorno de desarrollo: `docs/002-CTO/06-Entorn
 ## Versión
 
 ```
-0.9 Alpha
+1.0 Alpha
 ```
 
 ## Fase actual
@@ -335,9 +335,10 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 ## Estado de desarrollo
 
 ```
-Backend inicial funcionando: FastAPI + PostgreSQL/pgvector + Redis vía
-Docker Compose, primer agente (Investigador de Producto) implementado
-con proveedor simulado y proveedor real (Gemini).
+Backend funcionando: FastAPI + PostgreSQL/pgvector + Redis vía Docker
+Compose, primer agente (Investigador de Producto) implementado y
+verificado con proveedor real (Gemini). Backend documentado en
+docs/004-Backend, incluyendo el patrón para agregar el próximo agente.
 ```
 
 Ver `memory/CURRENT_STATE.md` para el detalle completo por área.

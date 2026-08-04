@@ -4,6 +4,23 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 
 ---
 
+## [1.0.0-alpha] - 2026-08-04
+
+### docs
+- Se completa `docs/004-Backend`: arquitectura del backend (estructura de módulos, ciclo de vida de una request), referencia real de los 3 endpoints existentes, patrón de 6 pasos para agregar un agente nuevo (extraído del proceso real seguido con el Agente Investigador de Producto), y convenciones de manejo de errores y configuración. Documentado en retrospectiva sobre código ya existente (ver DEC-025).
+
+## [0.9.1-alpha] - 2026-08-03
+
+### fix
+- Se corrige `docker-compose.yml`: el servicio `backend` cargaba `env_file: ./backend/.env.example` en vez de `./backend/.env`, por lo que cualquier valor puesto en `backend/.env` (incluida `GEMINI_API_KEY`) nunca llegaba al contenedor — el backend arrancaba siempre con `ProveedorInvestigacionSimulado` sin ningún error visible (ver DEC-023).
+- Se corrigen contradicciones internas en `memory/CURRENT_STATE.md` y el mismo error de fase desactualizada en `README.md`, introducidas al integrar la verificación de Gemini sobre una copia desactualizada de esos archivos (ver DEC-024).
+
+### verified
+- Se verifica `ProveedorInvestigacionGemini` contra la API real de Gemini: responde con datos reales (no el proveedor simulado) y respeta el prompt documentado (evidencia real, sin inventar productos). Cierra el pendiente de DEC-021.
+
+### docs
+- Se actualizan `docs/007-Agentes/04-Registro-de-Agentes.md` y `docs/010-Prompts/03-Registro-de-Prompts.md` quitando la nota de "pendiente verificación final". Se actualiza `docs/002-CTO/06-Entorno-Desarrollo.md` con los comandos reales de levantamiento local (incluyendo `alembic upgrade head` manual) y `README.md` con una nueva sección "Cómo Empezar".
+
 ## [0.9.0-alpha] - 2026-07-30
 
 ### docs
