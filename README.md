@@ -339,6 +339,9 @@ Backend funcionando: FastAPI + PostgreSQL/pgvector + Redis vía Docker
 Compose, primer agente (Investigador de Producto) implementado y
 verificado con proveedor real (Gemini). Backend documentado en
 docs/004-Backend, incluyendo el patrón para agregar el próximo agente.
+Segundo agente (Analítica Básica) con contrato técnico completo
+(docs/007-Agentes/05-Agente-Analitica-Basica.md), en etapa "Contrato
+en Diseño" — pendiente de aprobación del CTO antes de pasar a código.
 ```
 
 Ver `memory/CURRENT_STATE.md` para el detalle completo por área.
