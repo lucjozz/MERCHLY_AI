@@ -2,7 +2,7 @@
 
 Fecha:
 
-2026-08-03
+2026-08-04
 
 
 # Estado del Proyecto
@@ -128,7 +128,13 @@ Schemas Pydantic, proveedor abstracto con dos implementaciones (ProveedorInvesti
 
 # En progreso
 
-Ninguno.
+## Agente de Analítica Básica (contrato)
+
+Estado:
+
+CONTRATO EN DISEÑO — pendiente de aprobación del CTO
+
+Paso 1 (contrato técnico) del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md completado: docs/007-Agentes/05-Agente-Analitica-Basica.md, con las 10 secciones. Registrado en docs/007-Agentes/04-Registro-de-Agentes.md. Alcance acotado a la tabla productos_candidatos y a la actividad del Investigador de Producto (sin analítica de ventas/tráfico, porque no hay tienda operando todavía). Nivel de permiso 0 (solo lectura). Ver DEC-026. Pasos 2-6 (esquema si hace falta, schemas Pydantic, proveedor, servicio de orquestación, endpoint) no iniciados — quedan bloqueados hasta que el CTO apruebe el contrato.
 
 
 ---
@@ -142,21 +148,21 @@ Ninguno. Todos los criterios documentales y técnicos de cierre de Fase 0 y Fase
 
 # Próxima fase
 
-Especificar el siguiente agente (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo el patrón de 6 pasos ya documentado en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+Obtener aprobación humana (CTO) del contrato del Agente de Analítica Básica y, una vez aprobado, avanzar los pasos 2-6 del patrón (docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md) para llevarlo a código.
 
 
 ---
 
 # Última acción realizada
 
-Se completó docs/004-Backend: arquitectura del backend, referencia de endpoints, patrón de 6 pasos para agregar un agente nuevo, y convenciones de manejo de errores/configuración. Documentado en retrospectiva sobre código ya existente y verificado. Ver DEC-025.
+Se eligió Analítica Básica como segundo agente (DEC-026) y se redactó su contrato técnico completo (docs/007-Agentes/05-Agente-Analitica-Basica.md), siguiendo el paso 1 del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md. Registrado en docs/007-Agentes/04-Registro-de-Agentes.md en etapa "Contrato en Diseño".
 
 
 ---
 
 # Próxima acción
 
-Especificar el siguiente agente, siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md: elegir entre SEO, contenido, atención al cliente, analítica básica o marketing (ver docs/007-Agentes/04-Registro-de-Agentes.md).
+Revisar y aprobar (o pedir ajustes a) el contrato en docs/007-Agentes/05-Agente-Analitica-Basica.md. Una vez aprobado ("Contrato Aprobado" en docs/007-Agentes/02-Ciclo-de-Vida-de-Agentes.md), continuar con el paso 2 del patrón: no requiere tabla nueva (el contrato es de solo lectura sobre productos_candidatos), así que se puede saltar directo al paso 3 (schemas Pydantic en backend/app/schemas/).
 
 
 ---

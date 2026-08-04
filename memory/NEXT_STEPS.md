@@ -3,7 +3,7 @@
 
 ## Prioridad actual
 
-Especificar el siguiente agente (SEO, contenido, atención al cliente, analítica básica o marketing), siguiendo el patrón de 6 pasos ya documentado en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+Obtener aprobación del CTO para docs/007-Agentes/05-Agente-Analitica-Basica.md (Agente de Analítica Básica, DEC-026) y, una vez aprobado, avanzar los pasos 2-6 del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
 
 
 ---
@@ -13,10 +13,14 @@ Especificar el siguiente agente (SEO, contenido, atención al cliente, analític
 
 ## 1
 
-Elegir y especificar el siguiente agente:
+Llevar el Agente de Analítica Básica a código, una vez aprobado el contrato:
 
-- Candidatos, según docs/007-Agentes/04-Registro-de-Agentes.md: SEO, contenido, atención al cliente (primer nivel), analítica básica, marketing.
-- Seguir los 6 pasos documentados en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md: contrato técnico (007-Agentes) → esquema si hace falta (006-BaseDatos) → schemas Pydantic → proveedor (simulado primero, prompt en 010-Prompts, proveedor real después) → servicio de orquestación → endpoint.
+- Paso 1 (contrato técnico) completado: docs/007-Agentes/05-Agente-Analitica-Basica.md.
+- Paso 2 (esquema): no aplica — el agente es de solo lectura sobre productos_candidatos, no persiste nada nuevo.
+- Paso 3: schemas Pydantic en backend/app/schemas/ que repliquen las secciones 2 y 3 del contrato.
+- Paso 4: proveedor — evaluar si hace falta un LLM (para redactar el resumen) o si es agregación SQL pura; si usa LLM, simulado primero, prompt documentado en 010-Prompts antes del proveedor real.
+- Paso 5: servicio de orquestación (backend/app/services/) — solo lectura, sin reintentos con backoff (ver sección 8 del contrato).
+- Paso 6: endpoint nuevo (ej. GET /agentes/analitica-basica) en backend/app/api/agentes.py o un router nuevo.
 
 
 ---

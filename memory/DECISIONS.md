@@ -551,3 +551,25 @@ Con un segundo agente probablemente en camino (ver memory/NEXT_STEPS.md), docume
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-026
+
+Fecha:
+
+2026-08-04
+
+Decisión:
+
+Se elige Analítica Básica, entre los candidatos de docs/007-Agentes/04-Registro-de-Agentes.md (SEO, Contenido, Atención al cliente, Analítica básica, Marketing), como el segundo agente de Merchly AI en recibir contrato técnico, siguiendo el paso 1 del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md. Se redacta docs/007-Agentes/05-Agente-Analitica-Basica.md con las 10 secciones del contrato estándar, y se registra en docs/007-Agentes/04-Registro-de-Agentes.md en etapa "Contrato en Diseño" (docs/007-Agentes/02-Ciclo-de-Vida-de-Agentes.md, sección 1.2) — pendiente de que el CTO lo revise y lo pase a "Contrato Aprobado" antes de iniciar implementación en 004-Backend.
+
+El contrato acota deliberadamente el alcance del agente a la única fuente de datos real que existe hoy (la tabla productos_candidatos, poblada por el Agente Investigador de Producto) más la actividad de ese mismo agente, en vez de especificar analítica de ventas o tráfico de tienda — esos datos no existen todavía porque Fase 2 (Frontend/tienda) no ha comenzado. El agente queda especificado en Nivel de permiso 0 (solo lectura), el más bajo de la escala de 001-Arquitectura/03-Arquitectura-de-Agentes.md, sin memoria operativa ni histórica propia.
+
+Motivo:
+
+Mantener la disciplina de no documentar (ni implementar) sobre datos hipotéticos, coherente con cómo se especificó el Investigador de Producto y con el criterio de completitud de 007-Agentes/01-Contrato-Tecnico-Estandar.md, sección 3. La ampliación a métricas de negocio queda anotada explícitamente en la sección 9 del contrato como revisión futura (versión minor), condicionada al cierre de Fase 2, no como pendiente abierto de esta versión.
+
+Estado:
+
+Aprobada (la decisión de qué agente especificar; el contrato del agente en sí queda "Contrato en Diseño", pendiente de aprobación técnica separada por el CTO).
