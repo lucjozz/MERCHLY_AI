@@ -32,6 +32,7 @@ Este registro es el punto de entrada rápido; el detalle completo de cada agente
 | Agente | Rol organizacional (100-06) | Documento de contrato | Versión | Etapa actual |
 |---|---|---|---|---|
 | Agente Investigador de Producto | Investigador IA | `03-Agente-Investigador-de-Producto.md` | 1.0.0 | Implementado (proveedor real Gemini + fallback simulado) |
+| Agente de Analítica Básica | Analista IA | `05-Agente-Analitica-Basica.md` | 1.0.0 | Contrato en Diseño — pendiente de aprobación del CTO |
 
 ---
 
@@ -60,8 +61,9 @@ Conforme a `ROADMAP.md`, Fase 3 (Agentes IA), las siguientes áreas todavía no 
 * SEO.
 * Contenido.
 * Atención al cliente (primer nivel).
-* Analítica básica.
 * Marketing y publicidad.
+
+(Analítica básica ya cuenta con contrato en diseño — ver tabla de registro arriba.)
 
 Ninguno de estos agentes se implementa en `004-Backend` sin pasar primero por este mismo proceso de contrato.
 
@@ -69,4 +71,4 @@ Ninguno de estos agentes se implementa en `004-Backend` sin pasar primero por es
 
 # Resumen Ejecutivo para IA
 
-Este documento es el índice de agentes con contrato técnico completo. Actualmente hay un agente registrado: el Agente Investigador de Producto, en etapa "Implementado" (proveedor real Gemini verificado + fallback simulado). Todo nuevo agente debe agregarse aquí al momento de aprobar su contrato, y su etapa debe mantenerse sincronizada con el ciclo de vida definido en `02-Ciclo-de-Vida-de-Agentes.md`.
+Este documento es el índice de agentes con contrato técnico. Hay dos agentes registrados: el Agente Investigador de Producto, en etapa "Implementado" (proveedor real Gemini verificado + fallback simulado), y el Agente de Analítica Básica, en etapa "Contrato en Diseño" (contrato con las 10 secciones completas, pendiente de aprobación humana del CTO antes de pasar a "Contrato Aprobado" e iniciar implementación). Todo nuevo agente debe agregarse aquí al momento de redactar su contrato, y su etapa debe mantenerse sincronizada con el ciclo de vida definido en `02-Ciclo-de-Vida-de-Agentes.md`.
