@@ -32,7 +32,7 @@ Este registro es el punto de entrada rápido; el detalle completo de cada agente
 | Agente | Rol organizacional (100-06) | Documento de contrato | Versión | Etapa actual |
 |---|---|---|---|---|
 | Agente Investigador de Producto | Investigador IA | `03-Agente-Investigador-de-Producto.md` | 1.0.0 | Implementado (proveedor real Gemini + fallback simulado) |
-| Agente de Analítica Básica | Analista IA | `05-Agente-Analitica-Basica.md` | 1.0.0 | Contrato en Diseño — pendiente de aprobación del CTO |
+| Agente de Analítica Básica | Analista IA | `05-Agente-Analitica-Basica.md` | 1.0.0 | Implementado (sin proveedor de IA — agregación pura sobre `productos_candidatos`) |
 
 ---
 
@@ -71,4 +71,4 @@ Ninguno de estos agentes se implementa en `004-Backend` sin pasar primero por es
 
 # Resumen Ejecutivo para IA
 
-Este documento es el índice de agentes con contrato técnico. Hay dos agentes registrados: el Agente Investigador de Producto, en etapa "Implementado" (proveedor real Gemini verificado + fallback simulado), y el Agente de Analítica Básica, en etapa "Contrato en Diseño" (contrato con las 10 secciones completas, pendiente de aprobación humana del CTO antes de pasar a "Contrato Aprobado" e iniciar implementación). Todo nuevo agente debe agregarse aquí al momento de redactar su contrato, y su etapa debe mantenerse sincronizada con el ciclo de vida definido en `02-Ciclo-de-Vida-de-Agentes.md`.
+Este documento es el índice de agentes con contrato técnico. Hay dos agentes registrados: el Agente Investigador de Producto, en etapa "Implementado" (proveedor real Gemini verificado + fallback simulado), y el Agente de Analítica Básica, en etapa "Implementado" (agregación pura en Python sobre `productos_candidatos`, sin proveedor de IA — es un agente de solo lectura, Nivel de permiso 0). Todo nuevo agente debe agregarse aquí al momento de redactar su contrato, y su etapa debe mantenerse sincronizada con el ciclo de vida definido en `02-Ciclo-de-Vida-de-Agentes.md`.
