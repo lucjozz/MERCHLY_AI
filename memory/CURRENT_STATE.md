@@ -14,7 +14,7 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 Versión:
 
-1.0 Alpha
+1.1 Alpha
 
 
 ---
@@ -128,13 +128,20 @@ Schemas Pydantic, proveedor abstracto con dos implementaciones (ProveedorInvesti
 
 # En progreso
 
-## Agente de Analítica Básica (contrato)
+Ninguno.
+
+
+---
+
+# Completado (adenda)
+
+## Agente de Analítica Básica
 
 Estado:
 
-CONTRATO EN DISEÑO — pendiente de aprobación del CTO
+COMPLETADO Y VERIFICADO
 
-Paso 1 (contrato técnico) del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md completado: docs/007-Agentes/05-Agente-Analitica-Basica.md, con las 10 secciones. Registrado en docs/007-Agentes/04-Registro-de-Agentes.md. Alcance acotado a la tabla productos_candidatos y a la actividad del Investigador de Producto (sin analítica de ventas/tráfico, porque no hay tienda operando todavía). Nivel de permiso 0 (solo lectura). Ver DEC-026. Pasos 2-6 (esquema si hace falta, schemas Pydantic, proveedor, servicio de orquestación, endpoint) no iniciados — quedan bloqueados hasta que el CTO apruebe el contrato.
+Segundo agente del proyecto, implementado de punta a punta: contrato técnico aprobado por el CTO (docs/007-Agentes/05-Agente-Analitica-Basica.md, rol "Analista IA"), schemas Pydantic, servicio de orquestación (agregación en Python sobre productos_candidatos, sin proveedor de IA — Nivel de permiso 0, solo lectura), y endpoint POST /agentes/analitica-basica. 15 tests nuevos (38 en total en el proyecto), todos en verde. Verificado con el servidor real: 422 en validaciones correctas, 500 esperado solo por falta de PostgreSQL real en este entorno (no un bug de código). Ver DEC-026 y DEC-027.
 
 
 ---
@@ -148,21 +155,21 @@ Ninguno. Todos los criterios documentales y técnicos de cierre de Fase 0 y Fase
 
 # Próxima fase
 
-Obtener aprobación humana (CTO) del contrato del Agente de Analítica Básica y, una vez aprobado, avanzar los pasos 2-6 del patrón (docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md) para llevarlo a código.
+Elegir el tercer agente a especificar (SEO, atención al cliente, marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo el patrón de 6 pasos en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md. El Agente de Contenido especificado en una sesión anterior (ver historial de DEC-026 original, sustituida) quedó descartado a favor de Analítica Básica; retomarlo requeriría una nueva decisión explícita.
 
 
 ---
 
 # Última acción realizada
 
-Se eligió Analítica Básica como segundo agente (DEC-026) y se redactó su contrato técnico completo (docs/007-Agentes/05-Agente-Analitica-Basica.md), siguiendo el paso 1 del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md. Registrado en docs/007-Agentes/04-Registro-de-Agentes.md en etapa "Contrato en Diseño".
+Se aprobó (CTO) y se implementó de punta a punta el Agente de Analítica Básica: schemas, servicio de orquestación, endpoint POST /agentes/analitica-basica, 15 tests nuevos (38 en total), verificado contra el servidor real. Ver DEC-027.
 
 
 ---
 
 # Próxima acción
 
-Revisar y aprobar (o pedir ajustes a) el contrato en docs/007-Agentes/05-Agente-Analitica-Basica.md. Una vez aprobado ("Contrato Aprobado" en docs/007-Agentes/02-Ciclo-de-Vida-de-Agentes.md), continuar con el paso 2 del patrón: no requiere tabla nueva (el contrato es de solo lectura sobre productos_candidatos), así que se puede saltar directo al paso 3 (schemas Pydantic en backend/app/schemas/).
+Elegir el tercer agente a especificar (SEO, atención al cliente o marketing), siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
 
 
 ---

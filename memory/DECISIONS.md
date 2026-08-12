@@ -573,3 +573,23 @@ Mantener la disciplina de no documentar (ni implementar) sobre datos hipotético
 Estado:
 
 Aprobada (la decisión de qué agente especificar; el contrato del agente en sí queda "Contrato en Diseño", pendiente de aprobación técnica separada por el CTO).
+
+---
+
+## DEC-027
+
+Fecha:
+
+2026-08-05
+
+Decisión:
+
+El CTO aprueba el contrato técnico del Agente de Analítica Básica (docs/007-Agentes/05-Agente-Analitica-Basica.md), pasándolo de "Contrato en Diseño" a "Contrato Aprobado". Se implementan los pasos 3 a 6 del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md (el paso 2 no aplica: el contrato es de solo lectura, no requiere tabla nueva): se reutilizan los schemas Pydantic ya existentes (backend/app/schemas/analitica_basica.py, escritos en una sesión previa junto con el contrato), se agrega el servicio de orquestación (AgenteAnaliticaBasica), que agrega en Python — no en SQL — las filas de productos_candidatos filtradas por fecha/categoría/mercado, y el endpoint POST /agentes/analitica-basica. A diferencia del Investigador de Producto, este agente no usa ningún proveedor de IA: es agregación determinística sobre datos ya persistidos (Nivel de permiso 0, solo lectura). Se agregan 15 tests nuevos (38 en total en el proyecto), todos en verde, y se verificó el servidor real end-to-end (422 en validaciones, 500 esperado sin PostgreSQL real disponible en este entorno).
+
+Motivo:
+
+Resolver el conflicto identificado entre dos líneas de trabajo paralelas (esta sesión había avanzado con un Agente de Contenido, contrato con su propio DEC-026; otra sesión avanzó con Analítica Básica, sobrescribiendo esa decisión). El usuario eligió explícitamente continuar con Analítica Básica.
+
+Estado:
+
+Aprobada.

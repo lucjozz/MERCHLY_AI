@@ -3,7 +3,7 @@
 
 ## Prioridad actual
 
-Obtener aprobación del CTO para docs/007-Agentes/05-Agente-Analitica-Basica.md (Agente de Analítica Básica, DEC-026) y, una vez aprobado, avanzar los pasos 2-6 del patrón de docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+Elegir y especificar el tercer agente (SEO, atención al cliente, o marketing), siguiendo el patrón de 6 pasos en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md. Alternativamente, evaluar si retomar el Agente de Contenido (contrato descartado en favor de Analítica Básica) sigue siendo prioritario.
 
 
 ---
@@ -13,37 +13,44 @@ Obtener aprobación del CTO para docs/007-Agentes/05-Agente-Analitica-Basica.md 
 
 ## 1
 
-Llevar el Agente de Analítica Básica a código, una vez aprobado el contrato:
+Elegir y especificar el tercer agente:
 
-- Paso 1 (contrato técnico) completado: docs/007-Agentes/05-Agente-Analitica-Basica.md.
-- Paso 2 (esquema): no aplica — el agente es de solo lectura sobre productos_candidatos, no persiste nada nuevo.
-- Paso 3: schemas Pydantic en backend/app/schemas/ que repliquen las secciones 2 y 3 del contrato.
-- Paso 4: proveedor — evaluar si hace falta un LLM (para redactar el resumen) o si es agregación SQL pura; si usa LLM, simulado primero, prompt documentado en 010-Prompts antes del proveedor real.
-- Paso 5: servicio de orquestación (backend/app/services/) — solo lectura, sin reintentos con backoff (ver sección 8 del contrato).
-- Paso 6: endpoint nuevo (ej. GET /agentes/analitica-basica) en backend/app/api/agentes.py o un router nuevo.
+- Candidatos, según docs/007-Agentes/04-Registro-de-Agentes.md: SEO, atención al cliente (primer nivel), marketing.
+- Seguir los 6 pasos documentados en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+- Si el agente necesita un proveedor de IA, documentar primero el prompt en docs/010-Prompts antes del código del proveedor real (orden ya validado con el Investigador de Producto).
 
 
 ---
 
 ## 2
 
-Evaluar docs/005-Frontend:
+Evaluar si retomar el Agente de Contenido:
 
-- A diferencia de 004-Backend (documentado después del código, por necesidad), conviene decidir si documentar el frontend antes de escribir su primera línea de código, volviendo a la disciplina "documentación antes que código" ahora que la brecha de 004-Backend ya se cerró.
+- Su contrato técnico se redactó pero fue descartado cuando el proyecto avanzó con Analítica Básica en su lugar (dos sesiones en paralelo, ver DEC-026/DEC-027).
+- Si sigue siendo prioritario para el negocio, requiere una nueva decisión explícita y volver a redactar su contrato (el original ya no está en el repo).
 
 
 ---
 
 ## 3
 
+Evaluar docs/005-Frontend:
+
+- A diferencia de 004-Backend (documentado después del código, por necesidad), conviene decidir si documentar el frontend antes de escribir su primera línea de código.
+
+
+---
+
+## 4
+
 Endpoints pendientes identificados en docs/004-Backend/02-Referencia-de-Endpoints.md:
 
 - Cambiar estado de un producto candidato (candidato → en_catalogo / descartado) — requiere autenticación/autorización humana, todavía no diseñada (013-Seguridad sigue vacío).
-- Listar/consultar productos candidatos ya persistidos.
+- Listar/consultar productos candidatos individuales.
 
 
 ---
 
 # Objetivo siguiente etapa
 
-Con el patrón de construcción de agentes ya documentado (docs/004-Backend) y probado de punta a punta con el primer agente, el proyecto está listo para escalar horizontalmente: cada agente nuevo debería tomar menos esfuerzo que el anterior. El criterio de éxito del próximo agente es justamente ese — medir si efectivamente toma menos pasos que el primero.
+Con dos agentes funcionando de punta a punta (uno con IA real, uno sin IA — agregación pura), el patrón de 6 pasos quedó validado en dos escenarios distintos. El tercer agente es una buena oportunidad para medir si el patrón sigue acelerando el desarrollo, o si necesita ajustes.
