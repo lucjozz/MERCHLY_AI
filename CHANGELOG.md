@@ -4,6 +4,22 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 
 ---
 
+## [1.1.0-alpha] - 2026-08-05
+
+### feat
+- Se implementa el Agente de Analítica Básica (`backend/app/services/agente_analitica_basica.py`): segundo agente del proyecto, de solo lectura (Nivel de permiso 0), sin proveedor de IA — agrega en Python los datos ya existentes en `productos_candidatos` (resumen por categoría/estado/nivel, tasa de conversión, actividad del Investigador de Producto).
+- Se agrega el endpoint `POST /agentes/analitica-basica`.
+
+### docs
+- Se aprueba (CTO) el contrato técnico del Agente de Analítica Básica (`docs/007-Agentes/05-Agente-Analitica-Basica.md`), pasando de "Contrato en Diseño" a "Contrato Aprobado" e "Implementado".
+- Se actualiza `docs/004-Backend/02-Referencia-de-Endpoints.md` con el endpoint nuevo.
+
+### test
+- Se agregan 15 tests nuevos (38 en total): validación de schema, orquestación (agrupación, tasa de conversión, actividad del investigador, no-escritura, reintentos) y el endpoint HTTP.
+
+### nota
+- Un contrato previo para un "Agente de Contenido", redactado en una sesión distinta, quedó descartado cuando otra sesión avanzó en paralelo con Analítica Básica. El usuario confirmó continuar con Analítica Básica. Ver DEC-026 y DEC-027.
+
 ## [1.0.0-alpha] - 2026-08-04
 
 ### docs
