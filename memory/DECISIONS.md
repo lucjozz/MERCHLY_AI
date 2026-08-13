@@ -593,3 +593,43 @@ Resolver el conflicto identificado entre dos líneas de trabajo paralelas (esta 
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-028
+
+Fecha:
+
+2026-08-11
+
+Decisión:
+
+Se aprueba el contrato técnico del Agente de Marketing (docs/007-Agentes/06-Agente-de-Marketing.md), tercer agente de Merchly AI: recibe entre 1 y 10 productos ya aprobados en catálogo (estado = 'en_catalogo') y canales objetivo, y genera ángulos de campaña, copy por canal, público objetivo sugerido y una distribución de presupuesto orientativa, sin ejecutar publicación ni gasto real. Corresponde al rol "Marketing IA" ya existente en docs/100-Organizacion/06-Agentes-IA.md (proveedor asignado: ChatGPT). No persiste resultados en esta versión (a diferencia del Investigador de Producto), por no existir todavía una necesidad real de historial de campañas. Se actualiza docs/007-Agentes/04-Registro-de-Agentes.md.
+
+Motivo:
+
+Tercer paso del patrón de 6 pasos (docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md): paso 1 (contrato técnico), siguiendo la disciplina "documentación antes que código". El usuario eligió explícitamente Marketing como tercer agente entre las opciones disponibles (SEO, atención al cliente, marketing, retomar Contenido, o documentar 005-Frontend).
+
+Estado:
+
+Aprobada.
+
+---
+
+## DEC-029
+
+Fecha:
+
+2026-08-11
+
+Decisión:
+
+Se implementa en código el Agente de Marketing (pasos 3 a 6 del patrón, ver DEC-028 para el paso 1): schemas Pydantic (productos_candidato_ids hasta 10, canales_objetivo sin duplicados, idioma ISO 639-1, tono, presupuesto opcional), proveedor abstracto con implementación provisional simulada (ProveedorMarketingSimulado, claramente marcada como no apta para campañas reales), el servicio de orquestación (AgenteMarketing: valida que cada producto exista y esté en estado 'en_catalogo' antes de invocar al proveedor, reintentos según contrato sección 8, distribución de presupuesto uniforme determinística, nunca persiste nada) y el endpoint POST /agentes/marketing. Se agregan 19 tests nuevos (57 en total en el proyecto), todos en verde, más verificación manual del servidor real (422 en validaciones, 500 esperado sin PostgreSQL real disponible en este entorno).
+
+Motivo:
+
+Completar el patrón de 6 pasos para el tercer agente, siguiendo el mismo orden ya validado con el Investigador de Producto: proveedor simulado primero, proveedor real (ChatGPT) queda como trabajo futuro explícito.
+
+Estado:
+
+Aprobada.

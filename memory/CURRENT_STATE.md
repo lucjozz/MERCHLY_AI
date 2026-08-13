@@ -14,7 +14,7 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 Versión:
 
-1.1 Alpha
+1.2 Alpha
 
 
 ---
@@ -135,6 +135,15 @@ Ninguno.
 
 # Completado (adenda)
 
+## Agente de Marketing
+
+Estado:
+
+COMPLETADO (proveedor simulado; sin integración real con ChatGPT todavía)
+
+Tercer agente del proyecto, implementado de punta a punta: contrato técnico (docs/007-Agentes/06-Agente-de-Marketing.md, rol "Marketing IA"), schemas Pydantic, proveedor simulado, servicio de orquestación (valida producto existente + estado 'en_catalogo' antes de invocar al proveedor, reintentos, distribución de presupuesto uniforme, no persiste nada), y endpoint POST /agentes/marketing. 19 tests nuevos (57 en total en el proyecto), todos en verde. Verificado con el servidor real (422 en validaciones, 500 esperado solo por falta de PostgreSQL real en este entorno). Ver DEC-028 y DEC-029.
+
+
 ## Agente de Analítica Básica
 
 Estado:
@@ -155,21 +164,21 @@ Ninguno. Todos los criterios documentales y técnicos de cierre de Fase 0 y Fase
 
 # Próxima fase
 
-Elegir el tercer agente a especificar (SEO, atención al cliente, marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo el patrón de 6 pasos en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md. El Agente de Contenido especificado en una sesión anterior (ver historial de DEC-026 original, sustituida) quedó descartado a favor de Analítica Básica; retomarlo requeriría una nueva decisión explícita.
+Elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing (cerrando su único pendiente), o (b) especificar un cuarto agente (SEO o atención al cliente — ver docs/007-Agentes/04-Registro-de-Agentes.md).
 
 
 ---
 
 # Última acción realizada
 
-Se aprobó (CTO) y se implementó de punta a punta el Agente de Analítica Básica: schemas, servicio de orquestación, endpoint POST /agentes/analitica-basica, 15 tests nuevos (38 en total), verificado contra el servidor real. Ver DEC-027.
+Se implementó de punta a punta el Agente de Marketing (schemas, proveedor simulado, servicio de orquestación, endpoint), 19 tests nuevos (57 en total), verificado contra el servidor real. Ver DEC-029.
 
 
 ---
 
 # Próxima acción
 
-Elegir el tercer agente a especificar (SEO, atención al cliente o marketing), siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+Elegir entre integrar ChatGPT real para el Agente de Marketing, o especificar el cuarto agente (SEO o atención al cliente).
 
 
 ---

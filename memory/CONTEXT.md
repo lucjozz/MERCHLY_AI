@@ -43,12 +43,12 @@ docs/004-Backend
 
 Versión:
 
-1.1 Alpha
+1.2 Alpha
 
 
 Estado:
 
-Fundación e Infraestructura cerradas. Dos agentes implementados y verificados: Investigador de Producto (con Gemini real) y Analítica Básica (agregación pura, sin proveedor de IA). Backend documentado (docs/004-Backend).
+Fundación e Infraestructura cerradas. Tres agentes implementados: Investigador de Producto (con Gemini real), Analítica Básica (agregación pura, sin proveedor de IA) y Marketing (proveedor simulado, ChatGPT real pendiente). Backend documentado (docs/004-Backend).
 
 
 Fase:
@@ -108,13 +108,14 @@ Convenciones de base de datos, esquema real de Fase 1 (tabla productos_candidato
 
 Estado:
 
-Completado (volumen); 2 agentes con contrato, ambos implementados
+Completado (volumen); 3 agentes con contrato, los 3 implementados
 
-Contrato técnico estándar, ciclo de vida de agentes, y dos agentes:
+Contrato técnico estándar, ciclo de vida de agentes, y tres agentes:
 - Agente Investigador de Producto — implementado, con proveedor real (Gemini, verificado contra la API real) y fallback simulado.
 - Agente de Analítica Básica — implementado, agregación de solo lectura sobre productos_candidatos, sin proveedor de IA (Nivel de permiso 0).
+- Agente de Marketing — implementado, proveedor simulado (ChatGPT real pendiente), genera campañas para productos en estado 'en_catalogo', no persiste nada.
 
-Nota histórica: un tercer contrato (Agente de Contenido) se redactó en una sesión y quedó descartado cuando otra sesión, en paralelo, avanzó con Analítica Básica en su lugar; el usuario confirmó continuar con Analítica Básica (ver DEC-026, DEC-027).
+Nota histórica: un contrato descartado (Agente de Contenido) se redactó en una sesión y quedó sustituido cuando otra sesión, en paralelo, avanzó con Analítica Básica en su lugar; el usuario confirmó continuar con Analítica Básica (ver DEC-026, DEC-027).
 
 
 ## 010-Prompts
@@ -152,14 +153,15 @@ Contenido:
 - Modelo SQLAlchemy productos_candidatos + primera migración de Alembic
 - Agente Investigador de Producto: validación, proveedor Gemini real + simulado (fallback automático), reintentos, persistencia
 - Agente de Analítica Básica: validación, agregación en Python sobre datos ya persistidos, sin escritura
-- 38 tests automatizados, todos en verde
+- Agente de Marketing: validación de producto en estado 'en_catalogo', proveedor simulado, reintentos, distribución de presupuesto uniforme, sin persistencia
+- 57 tests automatizados, todos en verde
 
 
 ---
 
 # Trabajo actual
 
-Sin pendientes bloqueantes conocidos. Definir el tercer agente a especificar.
+Sin pendientes bloqueantes conocidos. Elegir entre integrar ChatGPT real para el Agente de Marketing, o especificar un cuarto agente.
 
 
 ---
@@ -168,7 +170,7 @@ Sin pendientes bloqueantes conocidos. Definir el tercer agente a especificar.
 
 1.
 
-Elegir y especificar el tercer agente (SEO, atención al cliente, o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+Integrar el proveedor real de ChatGPT para el Agente de Marketing (cerrando su único pendiente), o especificar un cuarto agente (SEO o atención al cliente — ver docs/007-Agentes/04-Registro-de-Agentes.md).
 
 
 2.
@@ -194,4 +196,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-08-05
+2026-08-11
