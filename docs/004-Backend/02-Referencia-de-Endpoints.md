@@ -181,7 +181,47 @@ Un catálogo sin resultados en el rango pedido devuelve `200` con totales en cer
 
 ---
 
-# 5. Endpoints Pendientes (no implementados)
+# 5. `POST /agentes/marketing`
+
+**Propósito:** genera una propuesta de campaña publicitaria para productos ya aprobados en catálogo (`007-Agentes/06-Agente-de-Marketing.md`).
+
+**Request:**
+
+```json
+{
+  "productos_candidato_ids": ["uuid"],
+  "canales_objetivo": ["email", "redes_sociales"],
+  "idioma_destino": "es",
+  "tono": "entusiasta",
+  "presupuesto_mensual_referencia": 500
+}
+```
+
+Solo `productos_candidato_ids`, `canales_objetivo` e `idioma_destino` son obligatorios. Cada producto debe existir y estar en `estado = 'en_catalogo'` — de lo contrario, `422`.
+
+**Respuesta 200:**
+
+```json
+{
+  "productos_candidato_ids": ["uuid"],
+  "angulos_de_campana": ["..."],
+  "copy_por_canal": {"email": [{"titulo": "...", "cuerpo": "..."}]},
+  "publico_objetivo_sugerido": "...",
+  "distribucion_presupuesto_sugerida": {"email": 0.5, "redes_sociales": 0.5},
+  "advertencias": [],
+  "metadata": {"idioma_destino": "es", "tono": "entusiasta", "fecha_generacion": "...", "campana_id": "uuid"}
+}
+```
+
+**Respuesta 422:** algún producto no existe, no está en `estado = 'en_catalogo'`, o la entrada no cumple las validaciones del contrato (canales vacíos/duplicados, idioma inválido, más de 10 productos).
+
+**Efecto secundario:** ninguno — no persiste nada (contrato, sección 3). Nunca publica anuncios ni ejecuta gasto real; `distribucion_presupuesto_sugerida` es siempre orientativa.
+
+**Proveedor usado:** hoy siempre `ProveedorMarketingSimulado` — la integración real con ChatGPT todavía no existe (ver `007-Agentes/04-Registro-de-Agentes.md`, "Pendientes Conocidos").
+
+---
+
+# 6. Endpoints Pendientes (no implementados)
 
 Estos endpoints son necesarios para el flujo completo del negocio, pero todavía no existen:
 
@@ -192,4 +232,4 @@ Estos endpoints son necesarios para el flujo completo del negocio, pero todavía
 
 # Resumen Ejecutivo para IA
 
-El backend expone hoy 4 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness, verifica PostgreSQL y Redis, siempre 200 con campo `status`), `POST /agentes/investigador-producto` (ejecuta el agente, persiste resultados como `candidato`) y `POST /agentes/analitica-basica` (reporte de solo lectura sobre `productos_candidatos`, nunca escribe nada). No existe todavía ningún endpoint para listar productos candidatos individualmente o cambiar su estado — son los próximos candidatos naturales a implementar.
+El backend expone hoy 5 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness), `POST /agentes/investigador-producto` (proveedor real Gemini + fallback simulado, persiste resultados), `POST /agentes/analitica-basica` (solo lectura, sin proveedor de IA) y `POST /agentes/marketing` (proveedor simulado, no persiste nada). No existe todavía ningún endpoint para listar productos candidatos individualmente o cambiar su estado — son los próximos candidatos naturales a implementar.
