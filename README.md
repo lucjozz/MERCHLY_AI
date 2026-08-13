@@ -323,7 +323,7 @@ Instrucciones más detalladas del entorno de desarrollo: `docs/002-CTO/06-Entorn
 ## Versión
 
 ```
-1.1 Alpha
+1.2 Alpha
 ```
 
 ## Fase actual
@@ -336,11 +336,11 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 ```
 Backend funcionando: FastAPI + PostgreSQL/pgvector + Redis vía Docker
-Compose. Dos agentes implementados y verificados de punta a punta:
-Investigador de Producto (con proveedor real Gemini) y Analítica
-Básica (agregación de solo lectura, sin proveedor de IA). Backend
-documentado en docs/004-Backend, incluyendo el patrón de 6 pasos
-para agregar el próximo agente.
+Compose. Tres agentes implementados: Investigador de Producto (con
+proveedor real Gemini), Analítica Básica (agregación de solo lectura,
+sin IA) y Marketing (proveedor simulado, ChatGPT real pendiente).
+Backend documentado en docs/004-Backend, incluyendo el patrón de 6
+pasos para agregar el próximo agente.
 ```
 
 Ver `memory/CURRENT_STATE.md` para el detalle completo por área.

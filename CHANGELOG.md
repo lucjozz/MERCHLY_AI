@@ -4,6 +4,20 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 
 ---
 
+## [1.2.0-alpha] - 2026-08-11
+
+### feat
+- Se implementa el Agente de Marketing (`backend/app/services/agente_marketing.py`): tercer agente del proyecto, recibe hasta 10 productos ya aprobados en catálogo (`estado = 'en_catalogo'`) y genera ángulos de campaña, copy por canal, público objetivo sugerido y una distribución de presupuesto orientativa (reparto uniforme, determinístico). No persiste nada ni ejecuta gasto real.
+- Se agrega `ProveedorMarketingSimulado`, siguiendo el mismo patrón ya validado con el Investigador de Producto (simulado primero, proveedor real ChatGPT queda pendiente).
+- Se agrega el endpoint `POST /agentes/marketing`.
+
+### docs
+- Se aprueba el contrato técnico del Agente de Marketing (`docs/007-Agentes/06-Agente-de-Marketing.md`), rol "Marketing IA" ya existente en el catálogo organizacional.
+- Se actualiza `docs/004-Backend/02-Referencia-de-Endpoints.md` con el endpoint nuevo.
+
+### test
+- Se agregan 19 tests nuevos (57 en total): validación de schema, proveedor simulado, orquestación (validación de estado del producto, distribución de presupuesto, manejo de fallas del proveedor, no-persistencia) y el endpoint HTTP.
+
 ## [1.1.0-alpha] - 2026-08-05
 
 ### feat
