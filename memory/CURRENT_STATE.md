@@ -2,7 +2,7 @@
 
 Fecha:
 
-2026-08-04
+2026-08-11
 
 
 # Estado del Proyecto
@@ -94,7 +94,7 @@ Estado:
 
 COMPLETADO
 
-Arquitectura del backend (estructura de módulos, ciclo de vida de una request), referencia de los 3 endpoints reales, patrón de 6 pasos para agregar un agente nuevo (extraído del proceso real con el Investigador de Producto), y convenciones de manejo de errores y configuración. Documentado en retrospectiva sobre código ya existente. Ver DEC-025.
+Arquitectura del backend (estructura de módulos, ciclo de vida de una request), referencia de los 4 endpoints reales, patrón de 6 pasos para agregar un agente nuevo (extraído del proceso real con el Investigador de Producto), y convenciones de manejo de errores y configuración. Documentado en retrospectiva sobre código ya existente. Ver DEC-025.
 
 
 ## 010-Prompts
