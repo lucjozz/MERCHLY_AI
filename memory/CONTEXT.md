@@ -43,17 +43,17 @@ docs/004-Backend
 
 Versión:
 
-1.0 Alpha
+1.1 Alpha
 
 
 Estado:
 
-Fundación e Infraestructura cerradas; primer agente implementado con integración real a Gemini, verificada contra la API real (DEC-023); backend documentado en retrospectiva (docs/004-Backend, DEC-025)
+Fundación e Infraestructura cerradas. Dos agentes implementados y verificados: Investigador de Producto (con Gemini real) y Analítica Básica (agregación pura, sin proveedor de IA). Backend documentado (docs/004-Backend).
 
 
 Fase:
 
-FASE 1 - Infraestructura (cerrada); trabajo actual corresponde a funcionalidad adelantada de Fase 2-3
+FASE 1 - Infraestructura (cerrada); funcionalidad de agentes ya adelantada desde Fase 2-3
 
 
 ---
@@ -101,16 +101,20 @@ Estado:
 
 Completado
 
-Convenciones de base de datos, esquema real de Fase 1 (tabla productos_candidatos), estrategia de migraciones (Alembic) y política de backups/retención. Implementado en código: modelo SQLAlchemy y primera migración.
+Convenciones de base de datos, esquema real de Fase 1 (tabla productos_candidatos), estrategia de migraciones (Alembic) y política de backups/retención.
 
 
 ## 007-Agentes
 
 Estado:
 
-Completado
+Completado (volumen); 2 agentes con contrato, ambos implementados
 
-Contrato técnico estándar (10 secciones), ciclo de vida de agentes (8 etapas), y el Agente Investigador de Producto — implementado en código, con proveedor real (Gemini) y fallback simulado.
+Contrato técnico estándar, ciclo de vida de agentes, y dos agentes:
+- Agente Investigador de Producto — implementado, con proveedor real (Gemini, verificado contra la API real) y fallback simulado.
+- Agente de Analítica Básica — implementado, agregación de solo lectura sobre productos_candidatos, sin proveedor de IA (Nivel de permiso 0).
+
+Nota histórica: un tercer contrato (Agente de Contenido) se redactó en una sesión y quedó descartado cuando otra sesión, en paralelo, avanzó con Analítica Básica en su lugar; el usuario confirmó continuar con Analítica Básica (ver DEC-026, DEC-027).
 
 
 ## 010-Prompts
@@ -119,7 +123,7 @@ Estado:
 
 Completado
 
-Convenciones de prompts, el prompt real del Agente Investigador de Producto, y su registro.
+Convenciones de prompts, el prompt real del Agente Investigador de Producto (único agente que usa un proveedor de IA hasta ahora), y su registro.
 
 
 ## 004-Backend
@@ -128,7 +132,7 @@ Estado:
 
 Completado
 
-Arquitectura del backend, referencia de endpoints, patrón de 6 pasos para agregar un agente nuevo, y convenciones de manejo de errores/configuración. Documentado en retrospectiva sobre código ya existente.
+Arquitectura del backend, referencia de los 4 endpoints reales, patrón de 6 pasos para agregar un agente nuevo, y convenciones de manejo de errores/configuración.
 
 
 ---
@@ -142,19 +146,20 @@ Completado (Fase 0 y Fase 1)
 
 Contenido:
 
-- Backend FastAPI con /health (liveness) y /health/ready (readiness, verifica PostgreSQL y Redis)
+- Backend FastAPI con /health, /health/ready, /agentes/investigador-producto, /agentes/analitica-basica
 - docker-compose.yml: backend + PostgreSQL/pgvector + Redis
-- Backend conectado realmente a PostgreSQL/pgvector (SQLAlchemy async + psycopg 3) y Redis (redis.asyncio)
-- Modelo SQLAlchemy productos_candidatos + primera migración de Alembic (aplicada realmente contra el Postgres de docker-compose, no solo en modo offline)
-- Agente Investigador de Producto implementado: validación, proveedor Gemini real + proveedor simulado (fallback automático), reintentos, persistencia, endpoint POST /agentes/investigador-producto
-- 23 tests automatizados, todos en verde
+- Backend conectado realmente a PostgreSQL/pgvector y Redis
+- Modelo SQLAlchemy productos_candidatos + primera migración de Alembic
+- Agente Investigador de Producto: validación, proveedor Gemini real + simulado (fallback automático), reintentos, persistencia
+- Agente de Analítica Básica: validación, agregación en Python sobre datos ya persistidos, sin escritura
+- 38 tests automatizados, todos en verde
 
 
 ---
 
 # Trabajo actual
 
-Sin pendientes bloqueantes conocidos. docs/004-Backend completado, documentando el backend existente y el patrón para agregar el próximo agente (ver DEC-025).
+Sin pendientes bloqueantes conocidos. Definir el tercer agente a especificar.
 
 
 ---
@@ -163,12 +168,17 @@ Sin pendientes bloqueantes conocidos. docs/004-Backend completado, documentando 
 
 1.
 
-Definir el siguiente agente a especificar (SEO, contenido, atención al cliente, analítica o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo el patrón de 6 pasos en docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+Elegir y especificar el tercer agente (SEO, atención al cliente, o marketing — ver docs/007-Agentes/04-Registro-de-Agentes.md), siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
 
 
 2.
 
-Evaluar si conviene documentar también docs/005-Frontend antes de que exista código de frontend, o esperar a que el frontend empiece a construirse (a diferencia de 004-Backend, que se documentó después del código por necesidad, no por elección).
+Evaluar si conviene retomar el Agente de Contenido descartado, si sigue siendo prioritario para el negocio.
+
+
+3.
+
+Evaluar docs/005-Frontend: documentar antes de escribir la primera línea de código de frontend (a diferencia de 004-Backend, documentado después por necesidad).
 
 
 ---
@@ -184,4 +194,4 @@ memory/DECISIONS.md
 
 # Última actualización
 
-2026-08-04
+2026-08-05

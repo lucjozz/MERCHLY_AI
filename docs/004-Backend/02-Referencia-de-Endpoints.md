@@ -130,7 +130,58 @@ Solo `categoria` y `mercado_objetivo` son obligatorios. Ver `007-Agentes/03-...`
 
 ---
 
-# 4. Endpoints Pendientes (no implementados)
+# 4. `POST /agentes/analitica-basica`
+
+**Propósito:** genera un reporte agregado de solo lectura sobre `productos_candidatos` (`007-Agentes/05-Agente-Analitica-Basica.md`).
+
+**Request:**
+
+```json
+{
+  "fecha_desde": "2026-07-06",
+  "fecha_hasta": "2026-08-05",
+  "categoria": "audífonos bluetooth",
+  "mercado_objetivo": "MX",
+  "agrupar_por": "categoria"
+}
+```
+
+Todos los campos son opcionales — sin body (`{}`), usa los defaults del contrato (últimos 30 días, agrupado por categoría, sin filtros de categoría/mercado).
+
+**Respuesta 200:**
+
+```json
+{
+  "periodo": {"fecha_desde": "2026-07-06", "fecha_hasta": "2026-08-05"},
+  "resumen_catalogo": {
+    "total_productos_candidatos": 12,
+    "agrupado_por": "categoria",
+    "grupos": [{"clave": "audífonos bluetooth", "cantidad": 8, "porcentaje_del_total": 66.67}]
+  },
+  "tasa_conversion_catalogo": {
+    "candidato": 9, "en_catalogo": 2, "descartado": 1,
+    "tasa_candidato_a_en_catalogo": 0.1667
+  },
+  "actividad_agente_investigador": {
+    "total_investigaciones": 3,
+    "promedio_productos_por_investigacion": 4.0,
+    "categorias_mas_investigadas": ["audífonos bluetooth"]
+  },
+  "metadata": {"fecha_generacion_reporte": "...", "filtros_aplicados": {"...": "..."}}
+}
+```
+
+Un catálogo sin resultados en el rango pedido devuelve `200` con totales en cero — nunca es un error (contrato, sección 8).
+
+**Respuesta 422:** `fecha_desde` posterior a `fecha_hasta`, rango mayor a 365 días, `mercado_objetivo` inválido, o `agrupar_por` fuera del enum permitido.
+
+**Efecto secundario:** ninguno — es de solo lectura (Nivel de permiso 0). Nunca escribe en `productos_candidatos` ni en ninguna otra tabla.
+
+**Nota de implementación:** la agregación se hace en Python sobre las filas ya filtradas por SQL, no con `GROUP BY`. Es la opción más simple mientras el catálogo es pequeño; revisar si el volumen crece (ver `backend/app/services/agente_analitica_basica.py`).
+
+---
+
+# 5. Endpoints Pendientes (no implementados)
 
 Estos endpoints son necesarios para el flujo completo del negocio, pero todavía no existen:
 
@@ -141,4 +192,4 @@ Estos endpoints son necesarios para el flujo completo del negocio, pero todavía
 
 # Resumen Ejecutivo para IA
 
-El backend expone hoy 3 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness, verifica PostgreSQL y Redis, siempre 200 con campo `status`), y `POST /agentes/investigador-producto` (ejecuta el agente, persiste resultados como `candidato`, nunca los aprueba automáticamente). No existe todavía ningún endpoint para listar productos candidatos o cambiar su estado — son los próximos candidatos naturales a implementar.
+El backend expone hoy 4 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness, verifica PostgreSQL y Redis, siempre 200 con campo `status`), `POST /agentes/investigador-producto` (ejecuta el agente, persiste resultados como `candidato`) y `POST /agentes/analitica-basica` (reporte de solo lectura sobre `productos_candidatos`, nunca escribe nada). No existe todavía ningún endpoint para listar productos candidatos individualmente o cambiar su estado — son los próximos candidatos naturales a implementar.

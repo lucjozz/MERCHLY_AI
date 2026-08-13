@@ -5,7 +5,7 @@
 title: Contrato Técnico — Agente de Analítica Básica
 document: 007-05
 version: 1.0.0
-status: Contrato en Diseño — pendiente de aprobación del CTO
+status: Aprobado
 owner: CTO
 last_updated: 2026-08-04
 next_review: 2027-02-04
