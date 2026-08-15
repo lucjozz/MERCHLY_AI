@@ -6,7 +6,8 @@ the technical closure criteria of Fase 0 (Fundación):
 ``docs/003-CEO/03-Criterios-de-Exito-Fase0.md``.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI 
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.agentes import router as agentes_router
 from app.api.analitica import router as analitica_router
@@ -21,6 +22,13 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="AI Commerce Operating System — API principal.",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(health_router)

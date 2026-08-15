@@ -1,69 +1,140 @@
-import Image from "next/image";
+import { listarProductosCandidatos } from "@/lib/api/productos-candidatos";
+import Link from "next/link";
 
-export default function Home() {
+interface PageProps {
+  searchParams: Promise<{ categoria?: string; estado?: string }>;
+}
+
+const ESTILO_ESTADO: Record<string, string> = {
+  candidato: "bg-[#3A2E12] text-[#E8B84B] border border-[#4A3A17]",
+  en_catalogo: "bg-[#123420] text-[#4ADE80] border border-[#1B4A2C]",
+  descartado: "bg-[#1C2029] text-[#7C8699] border border-[#242938]",
+};
+
+export default async function Home({ searchParams }: PageProps) {
+  const filtros = await searchParams;
+  let datos;
+  let error: string | null = null;
+
+  try {
+    datos = await listarProductosCandidatos(
+      1,
+      20,
+      filtros.categoria,
+      filtros.estado
+    );
+  } catch {
+    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-[#0B0D12]">
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        <header className="mb-10 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[#F5F7FA] tracking-tight">
+              Panel General
+            </h1>
+            <p className="text-[#7C8699] mt-1 text-sm">
+              Productos candidatos descubiertos por el Investigador de Producto
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-[#7C8699] font-mono">
+            <span className="w-2 h-2 rounded-full bg-[#3D7DD8]" />
+            MERCHLY AI
+          </div>
+        </header>
+
+        <form className="flex flex-wrap gap-3 mb-8 bg-[#12151C] border border-[#1F2430] p-4 rounded-lg">
+          <input
+            type="text"
+            name="categoria"
+            placeholder="Filtrar por categoría"
+            defaultValue={filtros.categoria}
+            className="bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] placeholder-[#5B6272] rounded-md px-3 py-2 text-sm flex-1 min-w-[180px] outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors"
+          />
+          <select
+            name="estado"
+            defaultValue={filtros.estado ?? ""}
+            className="bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] rounded-md px-3 py-2 text-sm outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <option value="">Todos los estados</option>
+            <option value="candidato">Candidato</option>
+            <option value="en_catalogo">En catálogo</option>
+            <option value="descartado">Descartado</option>
+          </select>
+          <button
+            type="submit"
+            className="bg-[#1E3A5F] hover:bg-[#28507F] border border-[#2B4A73] text-white px-5 py-2 rounded-md text-sm font-medium transition-colors"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
+            Filtrar
+          </button>
+        </form>
+
+        {error && (
+          <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm">
+            {error}
+          </div>
+        )}
+
+        {datos && datos.productos.length === 0 && (
+          <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-12 text-center text-[#7C8699] text-sm">
+            No hay productos candidatos todavía.
+          </div>
+        )}
+
+        {datos && datos.productos.length > 0 && (
+          <div className="bg-[#12151C] border border-[#1F2430] rounded-lg overflow-hidden">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-[#0B0D12] border-b border-[#1F2430]">
+                <tr className="text-left text-[#7C8699]">
+                  <th className="p-3 font-medium">Producto</th>
+                  <th className="p-3 font-medium">Categoría</th>
+                  <th className="p-3 font-medium">Estado</th>
+                  <th className="p-3 font-medium">Demanda</th>
+                  <th className="p-3 font-medium">Competencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {datos.productos.map((producto) => (
+                  <tr
+                    key={producto.id}
+                    className="border-t border-[#1F2430] hover:bg-[#161922] transition-colors"
+                  >
+                    <td className="p-3 font-medium">
+                      <Link
+                        href={`/productos/${producto.id}`}
+                        className="text-[#F5F7FA] hover:text-[#3D7DD8] transition-colors"
+                      >
+                        {producto.nombre_producto}
+                      </Link>
+                    </td>
+                    <td className="p-3 text-[#7C8699] font-mono text-xs">
+                      {producto.categoria}
+                    </td>
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          ESTILO_ESTADO[producto.estado] ??
+                          "bg-[#1C2029] text-[#7C8699] border border-[#242938]"
+                        }`}
+                      >
+                        {producto.estado}
+                      </span>
+                    </td>
+                    <td className="p-3 text-[#7C8699]">
+                      {producto.nivel_demanda_estimado}
+                    </td>
+                    <td className="p-3 text-[#7C8699]">
+                      {producto.nivel_competencia_estimado}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
