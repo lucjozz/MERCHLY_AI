@@ -147,7 +147,7 @@ Completado (Fase 0 y Fase 1)
 
 Contenido:
 
-- Backend FastAPI con /health, /health/ready, /agentes/investigador-producto, /agentes/analitica-basica
+- Backend FastAPI con /health, /health/ready, /agentes/investigador-producto, /agentes/analitica-basica, /agentes/marketing
 - docker-compose.yml: backend + PostgreSQL/pgvector + Redis
 - Backend conectado realmente a PostgreSQL/pgvector y Redis
 - Modelo SQLAlchemy productos_candidatos + primera migración de Alembic
