@@ -14,6 +14,8 @@ class EstadoProducto(str, Enum):
 
 class ProductoCandidatoDetalle(BaseModel):
 
+    model_config = {"from_attributes": True}
+
     id: uuid.UUID
     nombre_producto: str
     categoria: str
@@ -27,8 +29,6 @@ class ProductoCandidatoDetalle(BaseModel):
     estado: EstadoProducto
     investigacion_id: uuid.UUID
     creado_en: datetime
-
-model_config = {"from_attributes": True}
 
 class ProductosCandidatosListado(BaseModel):
     """Una página de resultados de productos candidatos."""
