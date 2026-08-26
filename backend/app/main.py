@@ -14,6 +14,7 @@ from app.api.analitica import router as analitica_router
 from app.api.health import router as health_router
 from app.api.marketing import router as marketing_router
 from app.api.productos_candidatos import router as productos_candidatos_router
+from app.api.decisiones import router as decisiones_router
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -36,3 +37,4 @@ app.include_router(agentes_router)
 app.include_router(analitica_router)
 app.include_router(marketing_router)
 app.include_router(productos_candidatos_router)
+app.include_router(decisiones_router)
