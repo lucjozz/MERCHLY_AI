@@ -1,16 +1,25 @@
+"""Servicio para registrar y consultar decisiones humanas."""
+
 import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.decisiones import DecisionContext, DecisionEvidence, DecisionRecord
-from app.schemas.decisiones import DecisionInput
+from app.models.producto_candidato import ProductoCandidato
+from app.schemas.decisiones import AccionDecision, DecisionInput
+
+ACCION_A_ESTADO = {
+    AccionDecision.APROBAR: "en_catalogo",
+    AccionDecision.DESCARTAR: "descartado",
+}
 
 
 async def registrar_decision(
     db_session: AsyncSession, entrada: DecisionInput
 ) -> DecisionRecord:
-    """Registra una decisión humana, con su contexto y evidencias si vienen.
+    """Registra una decisión humana y, si aplica, ejecuta el cambio de
+    estado real sobre la entidad decidida.
 
     Args:
         db_session: sesión async de SQLAlchemy.
@@ -18,7 +27,22 @@ async def registrar_decision(
 
     Returns:
         DecisionRecord: la decisión recién creada, ya persistida.
+
+    Raises:
+        ValueError: si entity_type es "product_candidate" pero no existe
+            ningún producto con ese entity_id.
     """
+    if entrada.entity_type == "product_candidate":
+        producto = await db_session.get(ProductoCandidato, entrada.entity_id)
+        if producto is None:
+            raise ValueError(
+                f"No existe un producto candidato con id {entrada.entity_id}."
+            )
+
+        nuevo_estado = ACCION_A_ESTADO.get(entrada.action)
+        if nuevo_estado is not None:
+            producto.estado = nuevo_estado
+
     decision = DecisionRecord(
         id=uuid.uuid4(),
         decision_type=entrada.decision_type,

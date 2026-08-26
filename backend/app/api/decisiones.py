@@ -28,8 +28,19 @@ async def crear_decision(
 
     Returns:
         DecisionOutput: la decisión recién creada.
+
+    Raises:
+        HTTPException: 404 si entity_type es "product_candidate" pero no
+            existe ningún producto con ese entity_id.
     """
-    decision = await registrar_decision(db_session=db_session, entrada=entrada)
+    try:
+        decision = await registrar_decision(db_session=db_session, entrada=entrada)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
+
     return decision
 
 
