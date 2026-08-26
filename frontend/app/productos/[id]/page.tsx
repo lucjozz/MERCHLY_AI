@@ -1,4 +1,5 @@
 import { obtenerProductoCandidato } from "@/lib/api/productos-candidatos";
+import AccionesDecision from "@/components/AccionesDecision";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -118,6 +119,8 @@ export default async function DetalleProducto({ params }: PageProps) {
               </ul>
             </div>
           )}
+
+          <AccionesDecision productoId={producto.id} />
         </div>
       </div>
     </div>
