@@ -7,12 +7,13 @@ document: 004-02
 version: 1.0.0
 status: Aprobado
 owner: CTO
-last_updated: 2026-08-04
-next_review: 2027-02-04
+last_updated: 2026-09-02
+next_review: 2027-03-02
 related:
 
 * 01-Arquitectura-del-Backend.md
 * ../007-Agentes/03-Agente-Investigador-de-Producto.md
+* ../006-BaseDatos/02-Esquema-Fase1.md
 
 ---
 
@@ -221,15 +222,104 @@ Solo `productos_candidato_ids`, `canales_objetivo` e `idioma_destino` son obliga
 
 ---
 
-# 6. Endpoints Pendientes (no implementados)
+# 6. `POST /decisiones`
 
-Estos endpoints son necesarios para el flujo completo del negocio, pero todavía no existen:
+**Propósito:** registra una decisión humana sobre una entidad del sistema y, si aplica, ejecuta el cambio de estado real correspondiente. Es el mecanismo que resuelve el endpoint que antes figuraba como pendiente en la sección 8 ("cambiar `estado` de un producto candidato") — no como un `PATCH` directo sobre el producto, sino como un registro auditable de por qué se tomó la decisión, del que el cambio de estado es un efecto secundario. Ver DEC-030.
 
-* **Cambiar `estado` de un producto candidato** (de `candidato` a `en_catalogo` o `descartado`) — requiere autenticación/autorización humana, que todavía no está diseñada (`013-Seguridad` sigue vacío).
-* **Listar/consultar productos candidatos** ya persistidos — hoy solo se pueden ver insertando directamente en la base o vía `POST /agentes/investigador-producto` (que siempre crea nuevos, nunca lista existentes).
+**Request:**
+
+```json
+{
+  "decision_type": "product_selection",
+  "entity_type": "product_candidate",
+  "entity_id": "uuid-de-un-producto-candidato",
+  "action": "approve",
+  "user_id": "lucas",
+  "reason": "Buen margen y demanda alta en el mercado objetivo.",
+  "context_data": {"margen": 0.35, "demanda": "alta"},
+  "evidencias": [
+    {
+      "source_type": "market_research",
+      "source_url": "https://ejemplo.test/informe",
+      "source_title": "Informe de mercado",
+      "evidence": "Demanda creciente en el segmento durante Q3."
+    }
+  ]
+}
+```
+
+Obligatorios: `decision_type`, `entity_type`, `entity_id`, `action`, `user_id`, `reason`. `action` es uno de `approve` / `discard` / `request_review`. `context_data` y `evidencias` son opcionales.
+
+**Respuesta 201:**
+
+```json
+{
+  "id": "uuid-de-la-decision",
+  "decision_type": "product_selection",
+  "entity_type": "product_candidate",
+  "entity_id": "uuid-de-un-producto-candidato",
+  "action": "approve",
+  "user_id": "lucas",
+  "reason": "Buen margen y demanda alta en el mercado objetivo.",
+  "creado_en": "2026-09-02T12:00:00+00:00",
+  "context_data": {"margen": 0.35, "demanda": "alta"},
+  "evidencias": [{"id": "uuid", "source_type": "market_research", "source_url": "...", "source_title": "...", "evidence": "..."}]
+}
+```
+
+**Respuesta 404:** `entity_type = "product_candidate"` pero no existe ningún producto con ese `entity_id`.
+
+**Respuesta 422:** `action` fuera del enum permitido, `reason` vacío, u otro campo obligatorio faltante.
+
+**Efecto secundario:** si `entity_type = "product_candidate"`, el producto cambia de estado según la acción — `approve` → `en_catalogo`, `discard` → `descartado`, `request_review` → sin cambio de estado. Además se persiste el registro de la decisión (tabla `decision_records`) y, si se enviaron, su contexto (`decision_context`) y evidencias (`decision_evidence`).
+
+**Límite importante — sin autenticación real:** `user_id` es un campo de texto libre en el body, no un usuario autenticado. Cualquiera con acceso al endpoint puede declarar cualquier `user_id`. Esto es aceptable mientras el sistema lo usa una sola persona (Lucas) desde un entorno controlado, pero es un límite explícito a resolver cuando exista `013-Seguridad` (autenticación/autorización real).
+
+---
+
+# 7. `GET /decisiones/{decision_id}`
+
+**Propósito:** consulta una decisión ya registrada, con su contexto y evidencias incluidos.
+
+**Respuesta 200:** mismo formato que la respuesta 201 de `POST /decisiones`.
+
+**Respuesta 404:** no existe ninguna decisión con ese `decision_id`.
+
+---
+
+# 8. `GET /productos-candidatos`
+
+**Propósito:** lista productos candidatos ya persistidos, con filtros y paginación. Resuelve el segundo endpoint que figuraba como pendiente en la sección 8 anterior.
+
+**Query params (todos opcionales):** `pagina` (default 1), `tamano_pagina` (default 20, máx. 100), `categoria`, `estado` (`candidato` / `en_catalogo` / `descartado`), `mercado_objetivo`.
+
+**Respuesta 200:**
+
+```json
+{
+  "productos": [{"id": "uuid", "nombre_producto": "...", "categoria": "...", "estado": "candidato", "...": "..."}],
+  "total": 12,
+  "pagina": 1,
+  "tamano_pagina": 20
+}
+```
+
+**Respuesta 422:** `estado` fuera del enum permitido, o parámetros de paginación fuera de rango.
+
+**Efecto secundario:** ninguno — solo lectura.
+
+---
+
+# 9. `GET /productos-candidatos/{producto_id}`
+
+**Propósito:** busca un producto candidato específico por su ID.
+
+**Respuesta 200:** el producto, con el mismo formato de objeto que aparece en el listado de la sección 8.
+
+**Respuesta 404:** no existe ningún producto con ese ID.
 
 ---
 
 # Resumen Ejecutivo para IA
 
-El backend expone hoy 5 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness), `POST /agentes/investigador-producto` (proveedor real Gemini + fallback simulado, persiste resultados), `POST /agentes/analitica-basica` (solo lectura, sin proveedor de IA) y `POST /agentes/marketing` (proveedor simulado, no persiste nada). No existe todavía ningún endpoint para listar productos candidatos individualmente o cambiar su estado — son los próximos candidatos naturales a implementar.
+El backend expone hoy 9 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness), `POST /agentes/investigador-producto` (proveedor real Gemini + fallback simulado, persiste resultados), `POST /agentes/analitica-basica` (solo lectura, sin proveedor de IA), `POST /agentes/marketing` (proveedor simulado, no persiste nada), `POST /decisiones` y `GET /decisiones/{id}` (registro humano de decisiones; `approve`/`discard` cambian el `estado` de un producto candidato como efecto secundario — sin autenticación real todavía), y `GET /productos-candidatos` / `GET /productos-candidatos/{id}` (listado y consulta, solo lectura). Con esto, el flujo candidato → decisión humana → en_catalogo → marketing ya es end-to-end.
