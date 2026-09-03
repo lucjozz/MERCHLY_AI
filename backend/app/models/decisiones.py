@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import  DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 from app.models.base import Base, ConMarcaDeTiempo
@@ -26,6 +26,13 @@ class DecisionRecord(ConMarcaDeTiempo, Base):
         user_id: quién tomó la decisión. No es una foreign key todavía
             porque no existe tabla de usuarios (013-Seguridad pendiente).
         reason: motivo en texto libre, dado por el humano.
+        contexto: relación uno-a-uno hacia DecisionContext, si se guardó
+            contexto para esta decisión. Sin esta relación (bug corregido
+            en DEC-030), context_data siempre se serializaba como None en
+            la API aunque estuviera persistido en la base de datos.
+        evidencias: relación uno-a-muchos hacia DecisionEvidence. Mismo
+            bug: sin ella, la lista de evidencias siempre salía vacía en
+            la API aunque estuviera persistida.
     """
 
     __tablename__ = "decision_records"
@@ -36,6 +43,17 @@ class DecisionRecord(ConMarcaDeTiempo, Base):
     action: Mapped[str] = mapped_column(String(20), nullable=False)
     user_id: Mapped[str] = mapped_column(String(120), nullable=False)
     reason: Mapped[str] = mapped_column(Text, nullable=False)
+
+    contexto: Mapped["DecisionContext | None"] = relationship(
+        back_populates="decision",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    evidencias: Mapped[list["DecisionEvidence"]] = relationship(
+        back_populates="decision",
+        cascade="all, delete-orphan",
+        order_by="DecisionEvidence.creado_en",
+    )
 class DecisionContext(ConMarcaDeTiempo, Base):
     """La 'foto' de la información disponible al momento de decidir.
 
@@ -57,6 +75,8 @@ class DecisionContext(ConMarcaDeTiempo, Base):
         nullable=False,
     )
     context_data: Mapped[dict] = mapped_column(JSONB, nullable=False)
+
+    decision: Mapped["DecisionRecord"] = relationship(back_populates="contexto")
 class DecisionEvidence(ConMarcaDeTiempo, Base):
     """Una fuente de evidencia que respaldó una decisión.
 
@@ -82,7 +102,9 @@ class DecisionEvidence(ConMarcaDeTiempo, Base):
     source_type: Mapped[str] = mapped_column(String(50), nullable=False)
     source_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     source_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    evidence: Mapped[str] = mapped_column(Text, nullable=False) 
+    evidence: Mapped[str] = mapped_column(Text, nullable=False)
+
+    decision: Mapped["DecisionRecord"] = relationship(back_populates="evidencias")
 class DecisionOutcome(ConMarcaDeTiempo, Base):
     """El resultado real, medido después de ejecutar una decisión.
 
