@@ -4,10 +4,11 @@ import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.decisiones import DecisionContext, DecisionEvidence, DecisionRecord
 from app.models.producto_candidato import ProductoCandidato
-from app.schemas.decisiones import AccionDecision, DecisionInput
+from app.schemas.decisiones import AccionDecision, DecisionInput, DecisionOutput, EvidenciaDetalle
 
 ACCION_A_ESTADO = {
     AccionDecision.APROBAR: "en_catalogo",
@@ -15,9 +16,49 @@ ACCION_A_ESTADO = {
 }
 
 
+def _opciones_carga_completa():
+    """Opciones de carga ansiosa (eager load) para contexto y evidencias.
+
+    Necesario porque la sesión es async: acceder a una relación no
+    cargada fuera de un `await` explícito revienta con
+    `MissingGreenlet`. Sin esto (bug corregido en DEC-030), además,
+    `DecisionRecord.contexto` y `DecisionRecord.evidencias` no existían
+    como atributos y la API siempre devolvía context_data=None y
+    evidencias=[] aunque estuvieran persistidos.
+    """
+    return (selectinload(DecisionRecord.contexto), selectinload(DecisionRecord.evidencias))
+
+
+def _a_decision_output(decision: DecisionRecord) -> DecisionOutput:
+    """Convierte un DecisionRecord ya cargado (con contexto y evidencias)
+    en su DecisionOutput.
+
+    Se hace a mano, en vez de dejar que Pydantic use `from_attributes`
+    directamente sobre el ORM, porque `context_data` vive en la relación
+    `contexto` (un DecisionContext), no como atributo plano de
+    DecisionRecord — usar `from_attributes` directo es exactamente lo
+    que producía el bug de DEC-030 (siempre None / [] en la respuesta).
+    """
+    return DecisionOutput(
+        id=decision.id,
+        decision_type=decision.decision_type,
+        entity_type=decision.entity_type,
+        entity_id=decision.entity_id,
+        action=decision.action,
+        user_id=decision.user_id,
+        reason=decision.reason,
+        creado_en=decision.creado_en,
+        context_data=decision.contexto.context_data if decision.contexto else None,
+        evidencias=[
+            EvidenciaDetalle.model_validate(evidencia, from_attributes=True)
+            for evidencia in decision.evidencias
+        ],
+    )
+
+
 async def registrar_decision(
     db_session: AsyncSession, entrada: DecisionInput
-) -> DecisionRecord:
+) -> DecisionOutput:
     """Registra una decisión humana y, si aplica, ejecuta el cambio de
     estado real sobre la entidad decidida.
 
@@ -26,7 +67,8 @@ async def registrar_decision(
         entrada: la decisión ya validada por DecisionInput.
 
     Returns:
-        DecisionRecord: la decisión recién creada, ya persistida.
+        DecisionOutput: la decisión recién creada, ya persistida, con su
+        contexto y evidencias (si se enviaron) incluidos en la respuesta.
 
     Raises:
         ValueError: si entity_type es "product_candidate" pero no existe
@@ -75,14 +117,34 @@ async def registrar_decision(
         db_session.add(evidencia)
 
     await db_session.commit()
-    await db_session.refresh(decision)
-    return decision
+
+    decision_completa = await _obtener_decision_orm_por_id(
+        db_session=db_session, decision_id=decision.id
+    )
+    assert decision_completa is not None  # acabamos de crearla en esta misma transacción
+    return _a_decision_output(decision_completa)
+
+
+async def _obtener_decision_orm_por_id(
+    db_session: AsyncSession, decision_id: uuid.UUID
+) -> DecisionRecord | None:
+    """Busca el DecisionRecord ORM por su ID, con contexto y evidencias
+    ya cargados (ver `_opciones_carga_completa`)."""
+    consulta = (
+        select(DecisionRecord)
+        .where(DecisionRecord.id == decision_id)
+        .options(*_opciones_carga_completa())
+    )
+    resultado = await db_session.execute(consulta)
+    return resultado.scalar_one_or_none()
 
 
 async def obtener_decision_por_id(
     db_session: AsyncSession, decision_id: uuid.UUID
-) -> DecisionRecord | None:
-    """Busca una decisión por su ID."""
-    consulta = select(DecisionRecord).where(DecisionRecord.id == decision_id)
-    resultado = await db_session.execute(consulta)
-    return resultado.scalar_one_or_none()
+) -> DecisionOutput | None:
+    """Busca una decisión por su ID, ya convertida a DecisionOutput con
+    su contexto y evidencias incluidos."""
+    decision = await _obtener_decision_orm_por_id(
+        db_session=db_session, decision_id=decision_id
+    )
+    return _a_decision_output(decision) if decision is not None else None
