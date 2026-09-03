@@ -4,6 +4,23 @@ Todas las entradas relevantes de este proyecto se documentan en este archivo, en
 
 ---
 
+## [1.3.0-alpha] - 2026-09-02
+
+### fix
+- Se corrige un bug en el modelo `DecisionRecord` (`backend/app/models/decisiones.py`): faltaban las relaciones ORM hacia `DecisionContext` y `DecisionEvidence`. Efecto: `context_data` y `evidencias` se guardaban bien en la base de datos, pero la API siempre los devolvía vacíos (`null` / `[]`), sin ningún error visible.
+
+### feat
+- Se documenta y corrige en retrospectiva el sistema de Decisiones Humanas, implementado en una sesión anterior sin contrato, sin tests y sin DEC registrado: `POST /decisiones`, `GET /decisiones/{id}`, `GET /productos-candidatos`, `GET /productos-candidatos/{id}`. `POST /decisiones` con `action=approve/discard` es el mecanismo real que mueve un producto candidato entre `candidato`, `en_catalogo` y `descartado`.
+
+### docs
+- Se actualiza `docs/004-Backend/02-Referencia-de-Endpoints.md` (secciones 6-9) y `docs/006-BaseDatos/02-Esquema-Fase1.md` (sección 4) con los 4 endpoints y las 4 tablas nuevas, incluyendo la limitación explícita de que `user_id` es texto libre sin autenticación real.
+
+### test
+- Se agregan 20 tests nuevos (77 en total): relaciones del modelo y conversión a `DecisionOutput` (incluye reproducción directa del bug corregido), orquestación de `registrar_decision` con sesión mockeada, y los 4 endpoints HTTP nuevos.
+
+### nota
+- Auditoría general del repositorio (ver DEC-030): se detectó código en producción sin seguir la disciplina "documentación antes que código" ni la práctica de testear todo código nuevo. Corregido en este mismo ciclo.
+
 ## [1.2.0-alpha] - 2026-08-11
 
 ### feat
