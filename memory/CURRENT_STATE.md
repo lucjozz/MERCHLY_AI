@@ -2,7 +2,7 @@
 
 Fecha:
 
-2026-08-11
+2026-09-02
 
 
 # Estado del Proyecto
@@ -14,7 +14,7 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 Versión:
 
-1.2 Alpha
+1.3 Alpha
 
 
 ---
@@ -144,6 +144,19 @@ COMPLETADO (proveedor simulado; sin integración real con ChatGPT todavía)
 Tercer agente del proyecto, implementado de punta a punta: contrato técnico (docs/007-Agentes/06-Agente-de-Marketing.md, rol "Marketing IA"), schemas Pydantic, proveedor simulado, servicio de orquestación (valida producto existente + estado 'en_catalogo' antes de invocar al proveedor, reintentos, distribución de presupuesto uniforme, no persiste nada), y endpoint POST /agentes/marketing. 19 tests nuevos (57 en total en el proyecto), todos en verde. Verificado con el servidor real (422 en validaciones, 500 esperado solo por falta de PostgreSQL real en este entorno). Ver DEC-028 y DEC-029.
 
 
+## Sistema de Decisiones Humanas
+
+Estado:
+
+COMPLETADO Y CORREGIDO (ver DEC-030)
+
+Se encontró en auditoría del 2026-09-02: código ya implementado en una sesión anterior (migración fechada 2026-08-26) sin contrato técnico, sin tests, y sin ningún DEC registrado — 4 tablas (decision_records, decision_context, decision_evidence, decision_outcomes) y 4 endpoints (POST /decisiones, GET /decisiones/{id}, GET /productos-candidatos, GET /productos-candidatos/{id}). Es el mecanismo real que resuelve el pendiente crítico de cambiar el estado de un producto candidato — vía POST /decisiones con action=approve/discard, no un PATCH directo.
+
+Se detectó además un bug funcional real: el modelo DecisionRecord no tenía relaciones ORM hacia DecisionContext ni DecisionEvidence, así que context_data y evidencias se guardaban bien en la base pero la API siempre los devolvía vacíos, sin ningún error visible. Corregido (relationship() + selectinload + conversión manual a DecisionOutput). Se documentó en retrospectiva (docs/004-Backend/02-Referencia-de-Endpoints.md secciones 6-9, docs/006-BaseDatos/02-Esquema-Fase1.md sección 4) y se agregaron 20 tests nuevos (77 en total en el proyecto), todos en verde, incluyendo una prueba que reproduce el bug original.
+
+Pendiente conocido: user_id es texto libre sin autenticación real (013-Seguridad sigue vacío). decision_outcomes existe como tabla pero sin endpoint que la use todavía.
+
+
 ## Agente de Analítica Básica
 
 Estado:
@@ -157,28 +170,28 @@ Segundo agente del proyecto, implementado de punta a punta: contrato técnico ap
 
 # Pendientes críticos identificados
 
-Ninguno. Todos los criterios documentales y técnicos de cierre de Fase 0 y Fase 1 están cumplidos, y la integración con Gemini está verificada contra la API real.
+Ninguno de Fase 0/1. El pendiente activo ahora es de higiene de proceso: mantener la disciplina "documentación antes que código" y "sin merge sin tests" en sesiones futuras — el sistema de Decisiones (ver DEC-030) es un ejemplo concreto de qué pasa cuando no se respeta (código en producción sin contrato, sin tests, con un bug silencioso).
 
 
 ---
 
 # Próxima fase
 
-Elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing (cerrando su único pendiente), o (b) especificar un cuarto agente (SEO o atención al cliente — ver docs/007-Agentes/04-Registro-de-Agentes.md).
+Elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing, (b) especificar un cuarto agente (SEO o atención al cliente — ver docs/007-Agentes/04-Registro-de-Agentes.md), o (c) diseñar 013-Seguridad (autenticación real), ahora más urgente porque POST /decisiones expone `user_id` como texto libre sin validar.
 
 
 ---
 
 # Última acción realizada
 
-Se implementó de punta a punta el Agente de Marketing (schemas, proveedor simulado, servicio de orquestación, endpoint), 19 tests nuevos (57 en total), verificado contra el servidor real. Ver DEC-029.
+Auditoría general del repositorio (2026-09-02): se encontró y corrigió el sistema de Decisiones Humanas, implementado en una sesión anterior sin documentación, sin tests y sin DEC registrado. Se corrigió un bug real (relaciones ORM faltantes que ocultaban context_data/evidencias en la API), se agregaron 20 tests nuevos (77 en total) y se documentó en retrospectiva. Ver DEC-030.
 
 
 ---
 
 # Próxima acción
 
-Elegir entre integrar ChatGPT real para el Agente de Marketing, o especificar el cuarto agente (SEO o atención al cliente).
+Elegir entre integrar ChatGPT real para el Agente de Marketing, especificar el cuarto agente, o diseñar 013-Seguridad.
 
 
 ---

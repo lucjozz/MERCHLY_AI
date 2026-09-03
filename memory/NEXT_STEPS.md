@@ -3,7 +3,7 @@
 
 ## Prioridad actual
 
-Elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing (cerrando su único pendiente), o (b) especificar un cuarto agente (SEO o atención al cliente), siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md.
+Elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing, (b) especificar un cuarto agente (SEO o atención al cliente), siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md, o (c) diseñar 013-Seguridad (autenticación real) — ver DEC-030, el sistema de Decisiones ya expone `POST /decisiones` con `user_id` como texto libre sin validar.
 
 
 ---
@@ -53,14 +53,25 @@ Evaluar docs/005-Frontend:
 
 ## 5
 
-Endpoints pendientes identificados en docs/004-Backend/02-Referencia-de-Endpoints.md:
+Resuelto (ver DEC-030): `POST /decisiones` ya permite cambiar el estado de un producto candidato (candidato → en_catalogo / descartado), y `GET /productos-candidatos` / `GET /productos-candidatos/{id}` ya permiten listar y consultar productos individuales. Pendiente derivado de esto: `user_id` en `POST /decisiones` sigue siendo texto libre sin autenticación real — requiere 013-Seguridad para cerrarse del todo.
 
-- Cambiar estado de un producto candidato (candidato → en_catalogo / descartado) — requiere autenticación/autorización humana, todavía no diseñada (013-Seguridad sigue vacío). Este endpoint es además un prerequisito de negocio real para el Agente de Marketing, que solo opera sobre productos en 'en_catalogo'.
-- Listar/consultar productos candidatos individuales.
+## 6
+
+Diseñar 013-Seguridad (autenticación/autorización real):
+
+- Hoy `POST /decisiones` acepta cualquier `user_id` como texto libre, sin validar quién es realmente el que decide.
+- Es un prerequisito para que el registro de decisiones (auditoría de quién aprobó/descartó qué) tenga valor real.
+
+## 7
+
+Evaluar si usar `decision_outcomes`:
+
+- La tabla existe (migración `202608260001`) pero ningún endpoint la escribe ni la lee todavía.
+- Pensada para medir después si una decisión (ej. aprobar un producto) funcionó o no — relevante recién cuando haya datos de ventas/tráfico reales.
 
 
 ---
 
 # Objetivo siguiente etapa
 
-Con tres agentes funcionando (uno con IA real, uno sin IA, uno con IA simulada), el patrón de 6 pasos está validado en varios escenarios. El cuello de botella real ahora es que no existe forma de mover un producto de 'candidato' a 'en_catalogo' — sin ese endpoint, el Agente de Marketing no tiene productos reales sobre los que operar en un flujo end-to-end genuino.
+Con tres agentes funcionando (uno con IA real, uno sin IA, uno con IA simulada) y el sistema de Decisiones ya operativo y corregido (DEC-030), el flujo candidato → decisión humana → en_catalogo → marketing es end-to-end por primera vez. El cuello de botella real ahora es la falta de autenticación real (013-Seguridad) y, en paralelo, decidir el cuarto agente o cerrar ChatGPT para Marketing.

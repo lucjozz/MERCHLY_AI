@@ -633,3 +633,27 @@ Completar el patrón de 6 pasos para el tercer agente, siguiendo el mismo orden 
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-030
+
+Fecha:
+
+2026-09-02
+
+Decisión:
+
+Se documenta en retrospectiva y se corrige el sistema de Decisiones Humanas (`decision_records`, `decision_context`, `decision_evidence`, `decision_outcomes`; endpoints `POST /decisiones`, `GET /decisiones/{id}`, `GET /productos-candidatos`, `GET /productos-candidatos/{id}`), implementado en código en una sesión anterior (migración fechada 2026-08-26) sin contrato previo, sin tests y sin registrar ningún DEC — violando la disciplina "documentación antes que código" y la práctica de testear todo código nuevo. Se detectó en una auditoría general del repositorio.
+
+Al auditar el código se encontró además un bug funcional real: el modelo SQLAlchemy `DecisionRecord` no declaraba las relaciones ORM hacia `DecisionContext` ni `DecisionEvidence`. El efecto era silencioso: `context_data` y `evidencias` sí se guardaban correctamente en sus tablas al hacer `POST /decisiones`, pero la API siempre los devolvía vacíos (`null` / `[]`) en la respuesta y en cualquier `GET /decisiones/{id}` posterior — la información quedaba persistida pero invisible, sin ningún error que lo delatara.
+
+Se corrige agregando las relaciones faltantes (`relationship()`, con `back_populates` y `cascade="all, delete-orphan"`), cargándolas explícitamente con `selectinload` (necesario en sesión async), y separando la conversión a `DecisionOutput` en una función propia (`_a_decision_output`) en vez de depender de la serialización automática de Pydantic sobre el ORM. Se agregan 20 tests nuevos (77 en total en el proyecto): 5 sobre el modelo y la conversión (incluyendo una reproducción directa del bug — revertir el fix hace fallar 2 de esos tests), 5 sobre el servicio `registrar_decision` con sesión mockeada, y 10 sobre los 4 endpoints HTTP nuevos. Se documenta el feature en `docs/004-Backend/02-Referencia-de-Endpoints.md` (secciones 6-9) y `docs/006-BaseDatos/02-Esquema-Fase1.md` (sección 4), incluyendo la limitación explícita de que `user_id` es texto libre sin autenticación real todavía (pendiente de `013-Seguridad`).
+
+Motivo:
+
+Cerrar la brecha de tener código real en producción sin contrato, sin tests y sin decisión registrada — exactamente el tipo de drift entre memoria y código que el proyecto ya identificó como riesgo recurrente de sesiones paralelas. El bug de las relaciones ORM es además un caso concreto de por qué la disciplina de testing importa: sin tests, este tipo de pérdida silenciosa de datos en la respuesta de la API puede pasar desapercibida indefinidamente.
+
+Estado:
+
+Aprobada.
