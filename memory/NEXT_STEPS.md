@@ -3,7 +3,7 @@
 
 ## Prioridad actual
 
-Elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing, (b) especificar un cuarto agente (SEO o atención al cliente), siguiendo docs/004-Backend/03-Patron-para-Agregar-un-Agente-Nuevo.md, o (c) diseñar 013-Seguridad (autenticación real) — ver DEC-030, el sistema de Decisiones ya expone `POST /decisiones` con `user_id` como texto libre sin validar.
+Aprobar el diseño de docs/013-Seguridad (DEC-031, Contrato en Diseño) e implementarlo: tabla `usuarios`, JWT, y proteger los 4 endpoints de acción (agentes + decisiones). Hasta que esto se implemente, `POST /decisiones` sigue aceptando `user_id` como texto libre sin validar. En paralelo, sigue pendiente elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing, o (b) especificar un cuarto agente (SEO o atención al cliente).
 
 
 ---
@@ -57,10 +57,10 @@ Resuelto (ver DEC-030): `POST /decisiones` ya permite cambiar el estado de un pr
 
 ## 6
 
-Diseñar 013-Seguridad (autenticación/autorización real):
+Implementar 013-Seguridad (ver DEC-031 — el diseño ya está completo, falta el código):
 
-- Hoy `POST /decisiones` acepta cualquier `user_id` como texto libre, sin validar quién es realmente el que decide.
-- Es un prerequisito para que el registro de decisiones (auditoría de quién aprobó/descartó qué) tenga valor real.
+- Orden fijo definido en docs/013-Seguridad/03-Alcance-y-Plan-de-Migracion.md sección 3.4: tabla `usuarios` + migración → seed del usuario admin_principal (Lucas) → `POST /auth/login` + `GET /auth/me` → dependencia `usuario_actual` → aplicar a los 4 endpoints de acción (quitando `user_id` del body de `POST /decisiones`) → actualizar 004-Backend/02-Referencia-de-Endpoints.md → tests.
+- Requiere aprobación final del CTO sobre los detalles técnicos del documento antes de arrancar (README.md del volumen, "Estado de Aprobación").
 
 ## 7
 

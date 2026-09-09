@@ -657,3 +657,31 @@ Cerrar la brecha de tener código real en producción sin contrato, sin tests y 
 Estado:
 
 Aprobada.
+
+---
+
+## DEC-031
+
+Fecha:
+
+2026-09-02
+
+Decisión:
+
+Se diseña el volumen `docs/013-Seguridad` (README + 3 documentos), que reemplaza el placeholder vacío que existía hasta ahora. Es un **Contrato en Diseño**: documentación completa, sin una sola línea de código implementada todavía, siguiendo la disciplina "documentación antes que código".
+
+El diseño parte de 3 decisiones explícitas del CTO:
+
+1. **Mecanismo:** JWT con login/password (no API Key simple, no OAuth externo) — usuario+contraseña reales desde el inicio, preparando el sistema para multiusuario.
+2. **Alcance:** se protegen los 4 endpoints que ejecutan una acción — los 3 de agentes (`investigador-producto`, `analitica-basica`, `marketing`) más `POST /decisiones` — no solo los que persisten datos en la base. Los endpoints de solo lectura y los health checks quedan públicos por ahora.
+3. **Roles:** se implementan los 4 roles ya definidos en `001-Arquitectura/08-Arquitectura-de-Seguridad.md` (`admin_principal`, `responsable_tecnico`, `responsable_negocio`, `usuario_operativo`) desde el día uno, aunque hoy solo exista un usuario real (Lucas, `admin_principal`).
+
+Detalles técnicos definidos en el diseño: tabla `usuarios` (email, password_hash con bcrypt costo 12, rol, activo), JWT firmado HS256 con expiración de 8 horas y sin refresh token, endpoints `POST /auth/login` y `GET /auth/me`, y una matriz inicial de permisos rol × endpoint. Se define también el plan de migración de `POST /decisiones`: `user_id` deja de ser texto libre en el body y pasa a obtenerse del JWT, **sin período de compatibilidad hacia atrás** — mantenerla reintroduciría el mismo problema que se resuelve.
+
+Motivo:
+
+`POST /decisiones` (DEC-030) ya está en producción aceptando `user_id` como texto libre, sin validar quién decide realmente — es el primer endpoint con impacto de negocio real (cambia el `estado` de un producto) que lo necesita. Diseñar el volumen completo antes de tocar código evita repetir el error que motivó DEC-030 (código sin contrato).
+
+Estado:
+
+**Diseño aprobado por el CTO en sus decisiones de alcance (mecanismo, endpoints, roles). Pendiente de aprobación final de los detalles técnicos del documento (esquema exacto, expiración, matriz de permisos) antes de iniciar la implementación en `backend/`.**

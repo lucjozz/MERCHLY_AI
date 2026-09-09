@@ -154,7 +154,18 @@ Se encontró en auditoría del 2026-09-02: código ya implementado en una sesió
 
 Se detectó además un bug funcional real: el modelo DecisionRecord no tenía relaciones ORM hacia DecisionContext ni DecisionEvidence, así que context_data y evidencias se guardaban bien en la base pero la API siempre los devolvía vacíos, sin ningún error visible. Corregido (relationship() + selectinload + conversión manual a DecisionOutput). Se documentó en retrospectiva (docs/004-Backend/02-Referencia-de-Endpoints.md secciones 6-9, docs/006-BaseDatos/02-Esquema-Fase1.md sección 4) y se agregaron 20 tests nuevos (77 en total en el proyecto), todos en verde, incluyendo una prueba que reproduce el bug original.
 
-Pendiente conocido: user_id es texto libre sin autenticación real (013-Seguridad sigue vacío). decision_outcomes existe como tabla pero sin endpoint que la use todavía.
+Pendiente conocido: user_id sigue siendo texto libre sin autenticación real — el diseño de 013-Seguridad que lo resuelve ya está aprobado (DEC-031), falta implementarlo. decision_outcomes existe como tabla pero sin endpoint que la use todavía.
+
+
+## 013-Seguridad (Contrato en Diseño)
+
+Estado:
+
+DISEÑO COMPLETO, PENDIENTE DE IMPLEMENTACIÓN (ver DEC-031)
+
+Volumen nuevo (README + 3 documentos), reemplaza el placeholder vacío que existía antes. Define: JWT con login/password (HS256, expiración 8h, sin refresh token), tabla `usuarios` (bcrypt costo 12), los 4 roles ya previstos en 001-Arquitectura (admin_principal, responsable_tecnico, responsable_negocio, usuario_operativo) implementados desde el inicio, y protección de los 4 endpoints de acción (los 3 de agentes + POST /decisiones) — los de solo lectura y health checks quedan públicos. Incluye plan de migración de POST /decisiones: user_id deja de venir en el body y pasa a tomarse del JWT, sin compatibilidad hacia atrás.
+
+Sin código todavía — es deliberado, sigue la disciplina "documentación antes que código". El orden de implementación ya está definido en docs/013-Seguridad/03-Alcance-y-Plan-de-Migracion.md sección 3.4.
 
 
 ## Agente de Analítica Básica
@@ -170,28 +181,28 @@ Segundo agente del proyecto, implementado de punta a punta: contrato técnico ap
 
 # Pendientes críticos identificados
 
-Ninguno de Fase 0/1. El pendiente activo ahora es de higiene de proceso: mantener la disciplina "documentación antes que código" y "sin merge sin tests" en sesiones futuras — el sistema de Decisiones (ver DEC-030) es un ejemplo concreto de qué pasa cuando no se respeta (código en producción sin contrato, sin tests, con un bug silencioso).
+Ninguno de Fase 0/1. Dos pendientes activos: (1) implementar 013-Seguridad, ya diseñado y pendiente de aprobación final de detalles técnicos (DEC-031); (2) higiene de proceso — mantener la disciplina "documentación antes que código" y "sin merge sin tests" en sesiones futuras, tras lo encontrado en DEC-030.
 
 
 ---
 
 # Próxima fase
 
-Elegir entre: (a) integrar el proveedor real de ChatGPT para el Agente de Marketing, (b) especificar un cuarto agente (SEO o atención al cliente — ver docs/007-Agentes/04-Registro-de-Agentes.md), o (c) diseñar 013-Seguridad (autenticación real), ahora más urgente porque POST /decisiones expone `user_id` como texto libre sin validar.
+Aprobar los detalles técnicos de docs/013-Seguridad e implementarlo (tabla usuarios, JWT, proteger los 4 endpoints de acción). En paralelo, sigue pendiente elegir entre integrar ChatGPT real para el Agente de Marketing o especificar un cuarto agente (SEO o atención al cliente — ver docs/007-Agentes/04-Registro-de-Agentes.md).
 
 
 ---
 
 # Última acción realizada
 
-Auditoría general del repositorio (2026-09-02): se encontró y corrigió el sistema de Decisiones Humanas, implementado en una sesión anterior sin documentación, sin tests y sin DEC registrado. Se corrigió un bug real (relaciones ORM faltantes que ocultaban context_data/evidencias en la API), se agregaron 20 tests nuevos (77 en total) y se documentó en retrospectiva. Ver DEC-030.
+Diseño completo del volumen docs/013-Seguridad (README + 3 documentos), a partir de 3 decisiones explícitas del CTO: JWT con login/password, proteger los 4 endpoints de acción (agentes + decisiones), y los 4 roles desde el inicio. Sin código todavía — documentación antes que código. Ver DEC-031.
 
 
 ---
 
 # Próxima acción
 
-Elegir entre integrar ChatGPT real para el Agente de Marketing, especificar el cuarto agente, o diseñar 013-Seguridad.
+Revisar y aprobar los detalles técnicos de docs/013-Seguridad; al aprobarse, implementar siguiendo el orden de docs/013-Seguridad/03-Alcance-y-Plan-de-Migracion.md sección 3.4.
 
 
 ---
