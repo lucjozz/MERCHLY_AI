@@ -65,3 +65,22 @@ async def obtener_producto_candidato_por_id(db_session: AsyncSession, producto_c
     consulta = select(ProductoCandidato).where(ProductoCandidato.id == producto_candidato_id)
     resultado = await db_session.execute(consulta)
     return resultado.scalar_one_or_none()
+async def eliminar_producto_candidato(
+    db_session: AsyncSession, producto_candidato_id: uuid.UUID
+) -> bool:
+    """Elimina un producto candidato por su ID.
+
+    Args:
+        db_session: sesión async de SQLAlchemy.
+        producto_candidato_id: el UUID del producto a eliminar.
+
+    Returns:
+        bool: True si se eliminó, False si no existía.
+    """
+    producto = await db_session.get(ProductoCandidato, producto_candidato_id)
+    if producto is None:
+        return False
+
+    await db_session.delete(producto)
+    await db_session.commit()
+    return True

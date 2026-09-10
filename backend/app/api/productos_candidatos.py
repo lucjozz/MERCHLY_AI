@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
 from app.schemas.productos_candidatos import EstadoProducto, ProductoCandidatoDetalle, ProductosCandidatosListado
 from app.services.consulta_productos_candidatos import (
+    eliminar_producto_candidato,
     listar_productos_candidatos,
     obtener_producto_candidato_por_id,
 )
@@ -84,3 +85,29 @@ async def obtener_producto(
         )
 
     return producto
+@router.delete(
+    "/{producto_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def eliminar_producto(
+    producto_id: uuid.UUID,
+    db_session: AsyncSession = Depends(get_db_session),
+) -> None:
+    """Elimina un producto candidato por su ID.
+
+    Args:
+        producto_id: el UUID del producto a eliminar.
+        db_session: sesión de base de datos inyectada.
+
+    Raises:
+        HTTPException: 404 si no existe un producto con ese ID.
+    """
+    eliminado = await eliminar_producto_candidato(
+        db_session=db_session, producto_candidato_id=producto_id
+    )
+
+    if not eliminado:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No existe un producto candidato con id {producto_id}.",
+        )

@@ -63,3 +63,12 @@ export async function obtenerProductoCandidato(
 
   return respuesta.json();
 }
+export async function eliminarProductoCandidato(id: string): Promise<void> {
+  const respuesta = await fetch(`${API_URL}/productos-candidatos/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(`Error al eliminar el producto: ${respuesta.status}`);
+  }
+}
