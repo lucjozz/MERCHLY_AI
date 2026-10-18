@@ -1,4 +1,7 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { fetchAutenticado } from "@/lib/api/cliente";
+
+export type CanalMarketing = "busqueda_paga" | "redes_sociales" | "email";
+export type TonoMarketing = "neutral" | "entusiasta" | "tecnico" | "premium";
 
 export interface CopyCanal {
   titulo: string;
@@ -13,15 +16,18 @@ export interface CampanaMarketing {
 }
 
 export async function generarCampanaMarketing(
-  productoId: string
+  productoId: string,
+  canales: CanalMarketing[] = ["email"],
+  tono: TonoMarketing = "neutral"
 ): Promise<CampanaMarketing> {
-  const respuesta = await fetch(`${API_URL}/agentes/marketing`, {
+  const respuesta = await fetchAutenticado("/agentes/marketing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       productos_candidato_ids: [productoId],
-      canales_objetivo: ["email"],
+      canales_objetivo: canales,
       idioma_destino: "es",
+      tono,
     }),
   });
 

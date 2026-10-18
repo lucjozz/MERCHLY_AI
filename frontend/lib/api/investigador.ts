@@ -1,10 +1,10 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { fetchAutenticado } from "@/lib/api/cliente";
 
 export async function investigarProductos(
   categoria: string,
   mercadoObjetivo: string
 ): Promise<void> {
-  const respuesta = await fetch(`${API_URL}/agentes/investigador-producto`, {
+  const respuesta = await fetchAutenticado("/agentes/investigador-producto", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

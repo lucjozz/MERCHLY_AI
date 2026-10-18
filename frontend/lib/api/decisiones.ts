@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { fetchAutenticado } from "@/lib/api/cliente";
 
 export type AccionDecision = "approve" | "discard";
 
@@ -7,14 +7,11 @@ export interface DecisionInput {
   entity_type: string;
   entity_id: string;
   action: AccionDecision;
-  user_id: string;
   reason: string;
 }
 
-export async function registrarDecision(
-  entrada: DecisionInput
-): Promise<void> {
-  const respuesta = await fetch(`${API_URL}/decisiones`, {
+export async function registrarDecision(entrada: DecisionInput): Promise<void> {
+  const respuesta = await fetchAutenticado("/decisiones", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(entrada),

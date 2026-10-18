@@ -35,7 +35,6 @@ export default function AccionesDecision({ productoId }: AccionesDecisionProps) 
         entity_type: "product_candidate",
         entity_id: productoId,
         action: decision === "aprobado" ? "approve" : "discard",
-        user_id: "daniel",
         reason: motivo,
       });
       setResultado(decision);
