@@ -49,7 +49,4 @@ Ya existen `000-Constitucion/11-Seguridad.md` (principios y normas generales de 
 > **Este volumen se aprueba completo antes de escribir código.** Ningún endpoint pasa a requerir autenticación, y no se crea la tabla `usuarios`, hasta que el CTO confirme el diseño de las 3 secciones.
 
 ---
-
-## Estado de Aprobación
-
-Diseñado el 2026-09-02, a partir de 3 decisiones explícitas del CTO: JWT con login/password, proteger los endpoints que escriben/ejecutan (agentes + decisiones), y los 4 roles desde el inicio. **Pendiente:** revisión y aprobación final de los detalles técnicos (esquema de la tabla, expiración del token, matriz de permisos exacta) antes de pasar a `004-Backend` e implementar.
+status: Implementado — 2026-09-28
