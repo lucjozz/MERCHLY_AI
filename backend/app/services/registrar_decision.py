@@ -57,8 +57,8 @@ def _a_decision_output(decision: DecisionRecord) -> DecisionOutput:
 
 
 async def registrar_decision(
-    db_session: AsyncSession, entrada: DecisionInput
-) -> DecisionOutput:
+    db_session: AsyncSession, entrada: DecisionInput, user_id: uuid.UUID
+) -> DecisionRecord:
     """Registra una decisión humana y, si aplica, ejecuta el cambio de
     estado real sobre la entidad decidida.
 
@@ -91,7 +91,7 @@ async def registrar_decision(
         entity_type=entrada.entity_type,
         entity_id=entrada.entity_id,
         action=entrada.action.value,
-        user_id=entrada.user_id,
+        user_id=str(user_id),
         reason=entrada.reason,
     )
     db_session.add(decision)

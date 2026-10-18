@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.dependencias import requiere_rol
+from app.models.usuario import Usuario
 
 from app.core.database import get_db_session
 from app.schemas.productos_candidatos import EstadoProducto, ProductoCandidatoDetalle, ProductosCandidatosListado
@@ -92,6 +94,9 @@ async def obtener_producto(
 async def eliminar_producto(
     producto_id: uuid.UUID,
     db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(
+        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
+    ),
 ) -> None:
     """Elimina un producto candidato por su ID.
 

@@ -23,6 +23,9 @@ class Settings(BaseSettings):
             in local/dev environments where only the simulated provider
             is used.
         gemini_model: Gemini model name used by ProveedorInvestigacionGemini.
+                jwt_secret_key: secret used to sign and verify JWT tokens (see
+            docs/013-Seguridad/01-Modelo-de-Usuarios-y-Autenticacion.md).
+            Must be overridden via .env in any real environment.
     """
 
     app_name: str = "MERCHLY AI Backend"
@@ -32,7 +35,8 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis:6379/0"
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-2.5-flash"
-
+    jwt_secret_key: str = "cambiar-en-produccion"
+    jwt_expiracion_horas: int = 8
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property

@@ -17,6 +17,8 @@ from app.services.agente_investigador_producto import AgenteInvestigadorProducto
 from app.services.proveedores.base import ProveedorInvestigacion
 from app.services.proveedores.gemini import ProveedorInvestigacionGemini
 from app.services.proveedores.simulado import ProveedorInvestigacionSimulado
+from app.core.dependencias import requiere_rol
+from app.models.usuario import Usuario
 
 router = APIRouter(prefix="/agentes", tags=["agentes"])
 
@@ -45,6 +47,9 @@ def _obtener_proveedor() -> ProveedorInvestigacion:
 async def investigar_producto(
     entrada: InvestigacionInput,
     db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(
+        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
+    ),
 ) -> InvestigacionOutput:
     """Ejecuta una investigación de producto.
 

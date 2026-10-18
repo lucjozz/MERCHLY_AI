@@ -15,6 +15,7 @@ from app.api.health import router as health_router
 from app.api.marketing import router as marketing_router
 from app.api.productos_candidatos import router as productos_candidatos_router
 from app.api.decisiones import router as decisiones_router
+from app.api.auth import router as auth_router
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -32,6 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(health_router)
 app.include_router(agentes_router)
 app.include_router(analitica_router)

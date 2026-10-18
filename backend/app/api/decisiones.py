@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.dependencias import requiere_rol
+from app.models.usuario import Usuario
 
 from app.core.database import get_db_session
 from app.schemas.decisiones import DecisionInput, DecisionOutput
@@ -18,6 +20,9 @@ router = APIRouter(prefix="/decisiones", tags=["decisiones"])
 async def crear_decision(
     entrada: DecisionInput,
     db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(
+        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
+    ),
 ) -> DecisionOutput:
     """Registra una nueva decisión humana.
 
@@ -34,7 +39,9 @@ async def crear_decision(
             existe ningún producto con ese entity_id.
     """
     try:
-        decision = await registrar_decision(db_session=db_session, entrada=entrada)
+        decision = await registrar_decision(
+            db_session=db_session, entrada=entrada, user_id=usuario.id
+        )
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -8,7 +8,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.database import get_db_session
+from app.core.dependencias import obtener_usuario_autenticado
 from app.main import app
+from app.tests.conftest import override_usuario_autenticado
 
 
 @pytest.fixture(autouse=True)
@@ -37,6 +39,7 @@ def test_marketing_devuelve_200_para_producto_en_catalogo() -> None:
         fuentes_evidencia=["https://ejemplo.test"],
     )
     app.dependency_overrides[get_db_session] = _override_db_session([producto])
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -55,6 +58,7 @@ def test_marketing_devuelve_200_para_producto_en_catalogo() -> None:
 
 def test_marketing_rechaza_producto_inexistente_con_422() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session([])
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -71,6 +75,7 @@ def test_marketing_rechaza_producto_inexistente_con_422() -> None:
 
 def test_marketing_rechaza_canales_vacios_con_422() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session([])
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -83,3 +88,38 @@ def test_marketing_rechaza_canales_vacios_con_422() -> None:
     )
 
     assert respuesta.status_code == 422
+
+
+def test_marketing_sin_token_devuelve_403() -> None:
+    app.dependency_overrides[get_db_session] = _override_db_session([])
+
+    client = TestClient(app)
+    respuesta = client.post(
+        "/agentes/marketing",
+        json={
+            "productos_candidato_ids": [str(uuid.uuid4())],
+            "canales_objetivo": ["email"],
+            "idioma_destino": "es",
+        },
+    )
+
+    assert respuesta.status_code == 403
+
+
+def test_marketing_con_rol_insuficiente_devuelve_403() -> None:
+    app.dependency_overrides[get_db_session] = _override_db_session([])
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado(
+        rol="usuario_operativo"
+    )
+
+    client = TestClient(app)
+    respuesta = client.post(
+        "/agentes/marketing",
+        json={
+            "productos_candidato_ids": [str(uuid.uuid4())],
+            "canales_objetivo": ["email"],
+            "idioma_destino": "es",
+        },
+    )
+
+    assert respuesta.status_code == 403

@@ -7,6 +7,8 @@ redis==5.2.1
 sqlalchemy[asyncio]==2.0.36
 alembic==1.14.0
 google-genai==1.2.0
+bcrypt==4.2.1
+python-jose[cryptography]==3.3.0
 
 # Dev / test dependencies
 pytest==8.3.4

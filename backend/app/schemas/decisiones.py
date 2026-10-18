@@ -29,7 +29,6 @@ class DecisionInput(BaseModel):
     entity_type: str
     entity_id: uuid.UUID
     action: AccionDecision
-    user_id: str
     reason: str = Field(min_length=1)
     context_data: dict | None = None
     evidencias: list[EvidenciaInput] = Field(default_factory=list)

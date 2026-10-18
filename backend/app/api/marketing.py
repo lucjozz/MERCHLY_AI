@@ -10,6 +10,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
+from app.core.dependencias import requiere_rol
+from app.models.usuario import Usuario
 from app.schemas.marketing import MarketingInput, MarketingOutput
 from app.services.agente_marketing import AgenteMarketing, ProductosInvalidosError
 from app.services.proveedores.marketing_simulado import ProveedorMarketingSimulado
@@ -25,6 +27,9 @@ router = APIRouter(prefix="/agentes", tags=["agentes"])
 async def generar_campana_marketing(
     entrada: MarketingInput,
     db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(
+        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
+    ),
 ) -> MarketingOutput:
     """Genera una propuesta de campaña de marketing.
 
@@ -32,6 +37,7 @@ async def generar_campana_marketing(
         entrada: solicitud validada automáticamente por FastAPI/Pydantic
             contra ``MarketingInput`` (sección 2 del contrato).
         db_session: sesión de base de datos inyectada.
+        usuario: usuario autenticado (docs/013-Seguridad/02-..., matriz).
 
     Returns:
         MarketingOutput: la propuesta de campaña (sección 3 del contrato).

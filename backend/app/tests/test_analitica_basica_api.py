@@ -6,7 +6,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.database import get_db_session
+from app.core.dependencias import obtener_usuario_autenticado
 from app.main import app
+from app.tests.conftest import override_usuario_autenticado
 
 
 @pytest.fixture(autouse=True)
@@ -29,6 +31,7 @@ def _override_db_session_vacia():
 
 def test_analitica_basica_devuelve_200_con_reporte_vacio() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session_vacia()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post("/agentes/analitica-basica", json={})
@@ -41,6 +44,7 @@ def test_analitica_basica_devuelve_200_con_reporte_vacio() -> None:
 
 def test_analitica_basica_rechaza_rango_de_fechas_invalido() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session_vacia()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -53,6 +57,7 @@ def test_analitica_basica_rechaza_rango_de_fechas_invalido() -> None:
 
 def test_analitica_basica_rechaza_mercado_objetivo_invalido() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session_vacia()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -60,3 +65,26 @@ def test_analitica_basica_rechaza_mercado_objetivo_invalido() -> None:
     )
 
     assert respuesta.status_code == 422
+
+
+def test_analitica_basica_sin_token_devuelve_403() -> None:
+    app.dependency_overrides[get_db_session] = _override_db_session_vacia()
+
+    client = TestClient(app)
+    respuesta = client.post("/agentes/analitica-basica", json={})
+
+    assert respuesta.status_code == 403
+
+
+def test_analitica_basica_permite_usuario_operativo() -> None:
+    """A diferencia de los otros 3 endpoints protegidos, analitica-basica
+    está abierto a los 4 roles (docs/013-Seguridad/02-..., matriz)."""
+    app.dependency_overrides[get_db_session] = _override_db_session_vacia()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado(
+        rol="usuario_operativo"
+    )
+
+    client = TestClient(app)
+    respuesta = client.post("/agentes/analitica-basica", json={})
+
+    assert respuesta.status_code == 200

@@ -8,7 +8,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.database import get_db_session
+from app.core.dependencias import obtener_usuario_autenticado
 from app.main import app
+from app.tests.conftest import override_usuario_autenticado
 
 
 @pytest.fixture(autouse=True)
@@ -58,6 +60,7 @@ def test_crear_decision_devuelve_201_y_estado_actualizado() -> None:
     _override_db_session_para_crear(
         producto, _decision_orm_fake(decision_id, producto_id)
     )
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -67,7 +70,6 @@ def test_crear_decision_devuelve_201_y_estado_actualizado() -> None:
             "entity_type": "product_candidate",
             "entity_id": str(producto_id),
             "action": "approve",
-            "user_id": "lucas",
             "reason": "Buen margen.",
         },
     )
@@ -102,6 +104,7 @@ def test_crear_decision_incluye_evidencias_en_la_respuesta() -> None:
         producto,
         _decision_orm_fake(decision_id, producto_id, contexto=contexto, evidencias=[evidencia]),
     )
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -111,7 +114,6 @@ def test_crear_decision_incluye_evidencias_en_la_respuesta() -> None:
             "entity_type": "product_candidate",
             "entity_id": str(producto_id),
             "action": "approve",
-            "user_id": "lucas",
             "reason": "Buen margen.",
             "context_data": {"margen": 0.4},
             "evidencias": [
@@ -134,6 +136,7 @@ def test_crear_decision_incluye_evidencias_en_la_respuesta() -> None:
 
 def test_crear_decision_producto_inexistente_devuelve_404() -> None:
     _override_db_session_para_crear(None, None)
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -143,7 +146,6 @@ def test_crear_decision_producto_inexistente_devuelve_404() -> None:
             "entity_type": "product_candidate",
             "entity_id": str(uuid.uuid4()),
             "action": "approve",
-            "user_id": "lucas",
             "reason": "N/A",
         },
     )
@@ -152,6 +154,8 @@ def test_crear_decision_producto_inexistente_devuelve_404() -> None:
 
 
 def test_crear_decision_accion_invalida_devuelve_422() -> None:
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
+
     client = TestClient(app)
     respuesta = client.post(
         "/decisiones",
@@ -160,12 +164,47 @@ def test_crear_decision_accion_invalida_devuelve_422() -> None:
             "entity_type": "product_candidate",
             "entity_id": str(uuid.uuid4()),
             "action": "no_existe",
-            "user_id": "lucas",
             "reason": "N/A",
         },
     )
 
     assert respuesta.status_code == 422
+
+
+def test_crear_decision_sin_token_devuelve_403() -> None:
+    client = TestClient(app)
+    respuesta = client.post(
+        "/decisiones",
+        json={
+            "decision_type": "product_selection",
+            "entity_type": "product_candidate",
+            "entity_id": str(uuid.uuid4()),
+            "action": "approve",
+            "reason": "N/A",
+        },
+    )
+
+    assert respuesta.status_code == 403
+
+
+def test_crear_decision_con_rol_insuficiente_devuelve_403() -> None:
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado(
+        rol="usuario_operativo"
+    )
+
+    client = TestClient(app)
+    respuesta = client.post(
+        "/decisiones",
+        json={
+            "decision_type": "product_selection",
+            "entity_type": "product_candidate",
+            "entity_id": str(uuid.uuid4()),
+            "action": "approve",
+            "reason": "N/A",
+        },
+    )
+
+    assert respuesta.status_code == 403
 
 
 def test_obtener_decision_devuelve_200_si_existe() -> None:

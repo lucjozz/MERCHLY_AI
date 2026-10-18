@@ -6,7 +6,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.database import get_db_session
+from app.core.dependencias import obtener_usuario_autenticado
 from app.main import app
+from app.tests.conftest import override_usuario_autenticado
 
 
 @pytest.fixture(autouse=True)
@@ -27,6 +29,7 @@ def _override_db_session():
 
 def test_investigar_producto_devuelve_200_con_productos() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -46,6 +49,7 @@ def test_investigar_producto_devuelve_200_con_productos() -> None:
 
 def test_investigar_producto_rechaza_categoria_prohibida() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -58,6 +62,7 @@ def test_investigar_producto_rechaza_categoria_prohibida() -> None:
 
 def test_investigar_producto_rechaza_mercado_objetivo_invalido() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
 
     client = TestClient(app)
     respuesta = client.post(
@@ -66,3 +71,30 @@ def test_investigar_producto_rechaza_mercado_objetivo_invalido() -> None:
     )
 
     assert respuesta.status_code == 422
+
+
+def test_investigar_producto_sin_token_devuelve_403() -> None:
+    app.dependency_overrides[get_db_session] = _override_db_session()
+
+    client = TestClient(app)
+    respuesta = client.post(
+        "/agentes/investigador-producto",
+        json={"categoria": "audifonos", "mercado_objetivo": "BO"},
+    )
+
+    assert respuesta.status_code == 403
+
+
+def test_investigar_producto_con_rol_insuficiente_devuelve_403() -> None:
+    app.dependency_overrides[get_db_session] = _override_db_session()
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado(
+        rol="usuario_operativo"
+    )
+
+    client = TestClient(app)
+    respuesta = client.post(
+        "/agentes/investigador-producto",
+        json={"categoria": "audifonos", "mercado_objetivo": "BO"},
+    )
+
+    assert respuesta.status_code == 403
