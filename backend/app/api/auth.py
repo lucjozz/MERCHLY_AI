@@ -152,7 +152,9 @@ async def login_google(
 
     try:
         identidad = await verificar_id_token_google(entrada.id_token, client_id)
-    except GoogleTokenInvalidoError:
+    except GoogleTokenInvalidoError as error:
+        # Solo el motivo (p. ej. "Invalid audience"), nunca el token.
+        logger.warning("Token de Google rechazado: %s", error)
         await limites.registrar_fallo("google", ip)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No se pudo validar tu cuenta de Google.")
 
