@@ -4,10 +4,10 @@
 
 title: Referencia de Endpoints
 document: 004-02
-version: 1.0.0
-status: Aprobado
+version: 1.1.0
+status: Aprobado (1.0.0) — cambios de 1.1.0 pendientes de visto bueno del CTO (DEC-032)
 owner: CTO
-last_updated: 2026-09-02
+last_updated: 2026-11-23
 next_review: 2027-03-02
 related:
 
@@ -21,7 +21,26 @@ related:
 
 ## Propósito
 
-Catálogo real de los endpoints HTTP que expone el backend hoy. Se actualiza en el mismo cambio que agrega o modifica un endpoint — no es una API pública versionada todavía (eso corresponde a una decisión futura, cuando exista Fase 7 o consumidores externos reales).
+Catálogo real de los endpoints HTTP que expone el backend hoy.
+
+> **Desde 1.1.0 (013-04 / DEC-032):** todos los endpoints exigen `Authorization: Bearer <access token>` salvo `/health`, `/health/ready`, `/auth/login`, `/auth/refresh` y `/auth/google`. Sin token → **401** (antes 403). Todo dato está limitado a la **organización** del usuario: un recurso de otra organización responde **404**. Los schemas de entrada rechazan campos extra (**422**). Los 422 no devuelven el valor enviado. Las respuestas llevan `Cache-Control: no-store` y headers de seguridad. `/docs` y `/openapi.json` solo con `EXPONER_DOCS=true`. Los agentes que cuestan dinero tienen cuota por organización (**429** con `Retry-After`).
+
+| Endpoint | Auth | Roles |
+|---|---|---|
+| `POST /auth/login` | pública | — (429 tras 5 fallos email+IP / 10 email / 20 IP en 15 min; 503 si Redis cae) |
+| `POST /auth/refresh` | pública (refresh token) | — |
+| `POST /auth/google` | pública (ID token de Google) | — (503 si no hay `GOOGLE_CLIENT_ID`) |
+| `POST /auth/logout` | Bearer | todos |
+| `POST /auth/cerrar-todas-las-sesiones` | Bearer | todos |
+| `GET /auth/me` | Bearer | todos |
+| `POST /agentes/investigador-producto` | Bearer | admin, técnico, negocio (cuota 30/h por organización) |
+| `POST /agentes/analitica-basica` | Bearer | los 4 |
+| `POST /agentes/marketing` | Bearer | admin, técnico, negocio (cuota 60/h por organización) |
+| `POST /decisiones` | Bearer | admin, técnico, negocio |
+| `GET /decisiones/{id}` | Bearer | los 4 |
+| `GET /productos-candidatos` | Bearer | los 4 |
+| `GET /productos-candidatos/{id}` | Bearer | los 4 |
+| `DELETE /productos-candidatos/{id}` | Bearer | admin, negocio (borrado lógico) | Se actualiza en el mismo cambio que agrega o modifica un endpoint — no es una API pública versionada todavía (eso corresponde a una decisión futura, cuando exista Fase 7 o consumidores externos reales).
 
 ---
 
@@ -283,7 +302,7 @@ Obligatorios: `decision_type`, `entity_type`, `entity_id`, `action`, `user_id`, 
 
 **Respuesta 200:** mismo formato que la respuesta 201 de `POST /decisiones`.
 
-**Respuesta 404:** no existe ninguna decisión con ese `decision_id`.
+**Respuesta 404:** no existe ninguna decisión con ese `decision_id` en la organización del usuario.
 
 ---
 
@@ -291,7 +310,9 @@ Obligatorios: `decision_type`, `entity_type`, `entity_id`, `action`, `user_id`, 
 
 **Propósito:** lista productos candidatos ya persistidos, con filtros y paginación. Resuelve el segundo endpoint que figuraba como pendiente en la sección 8 anterior.
 
-**Query params (todos opcionales):** `pagina` (default 1), `tamano_pagina` (default 20, máx. 100), `categoria`, `estado` (`candidato` / `en_catalogo` / `descartado`), `mercado_objetivo`.
+**Query params (todos opcionales):** `pagina` (default 1, mínimo 1), `tamano_pagina` (default 20, entre 1 y 100), `categoria` (máx. 120), `estado` (`candidato` / `en_revision` / `en_catalogo` / `descartado`), `mercado_objetivo` (2 letras).
+
+**Desde 1.1.0:** el listado usa un schema **resumido** (sin `fuentes_evidencia` ni `investigacion_id`) y excluye los productos borrados lógicamente.
 
 **Respuesta 200:**
 
@@ -316,10 +337,39 @@ Obligatorios: `decision_type`, `entity_type`, `entity_id`, `action`, `user_id`, 
 
 **Respuesta 200:** el producto, con el mismo formato de objeto que aparece en el listado de la sección 8.
 
-**Respuesta 404:** no existe ningún producto con ese ID.
+**Respuesta 404:** no existe ningún producto con ese ID (o es de otra organización, o fue borrado).
+
+---
+
+# 10. `DELETE /productos-candidatos/{producto_id}`
+
+**Propósito:** borrado **lógico** (`eliminado_en = now()`): el producto deja de aparecer en todas las consultas, pero sus decisiones históricas no quedan huérfanas.
+
+**Roles:** `admin_principal`, `responsable_negocio`.
+
+**Respuesta 204:** borrado. **404:** no existe / otra organización / ya borrado. **403:** rol sin permiso.
+
+---
+
+# 11. `POST /decisiones` — máquina de estados (1.1.0)
+
+`candidato` →(approve) `en_catalogo` · →(discard) `descartado` · →(request_review) `en_revision`; `en_revision` →(approve) `en_catalogo` · →(discard) `descartado`. Los estados `en_catalogo` y `descartado` son **finales**: cualquier otra acción responde **409 Conflict** y no se registra nada. La fila se bloquea (`SELECT ... FOR UPDATE`): dos envíos simultáneos no pueden decidir los dos. `user_id` y `organizacion_id` salen del token, nunca del body. Topes: `reason` ≤ 2000, `evidencias` ≤ 20, `context_data` ≤ 16 KB. La respuesta incluye `estado_resultante`.
+
+---
+
+# 12. `/auth/*`
+
+* `POST /auth/login` `{email, password}` → `{access_token, expira_en: 900, refresh_token, refresh_expira_en}`. Email sin distinción de mayúsculas; mismo mensaje y mismo tiempo para usuario inexistente, inactivo o contraseña incorrecta. Contraseña > 128 caracteres → 422.
+* `POST /auth/refresh` `{refresh_token}` → par nuevo (rotación). Reusar un refresh token ya rotado (fuera de una ventana de 20 s) revoca toda la familia (detección de robo) → 401.
+* `POST /auth/google` `{id_token}` → login o auto-registro (crea organización + admin).
+* `POST /auth/logout` `{refresh_token?}` → 204; el access token queda revocado (denylist por `jti`).
+* `POST /auth/cerrar-todas-las-sesiones` → 204; invalida todos los tokens del usuario (`token_version`).
+* `GET /auth/me` → `{id, email, nombre, rol, activo, organizacion_id, organizacion_nombre}` (nunca el hash).
+
+El frontend **no** llama a estos endpoints desde el navegador: pasa por el BFF de Next (`/api/auth/*`, `/api/backend/*`), que guarda los tokens en cookies HttpOnly.
 
 ---
 
 # Resumen Ejecutivo para IA
 
-El backend expone hoy 9 endpoints: `GET /health` (liveness), `GET /health/ready` (readiness), `POST /agentes/investigador-producto` (proveedor real Gemini + fallback simulado, persiste resultados), `POST /agentes/analitica-basica` (solo lectura, sin proveedor de IA), `POST /agentes/marketing` (proveedor simulado, no persiste nada), `POST /decisiones` y `GET /decisiones/{id}` (registro humano de decisiones; `approve`/`discard` cambian el `estado` de un producto candidato como efecto secundario — sin autenticación real todavía), y `GET /productos-candidatos` / `GET /productos-candidatos/{id}` (listado y consulta, solo lectura). Con esto, el flujo candidato → decisión humana → en_catalogo → marketing ya es end-to-end.
+**(1.1.0)** El backend expone hoy 15 endpoints; todos exigen autenticación salvo health, login, refresh y Google, y todo dato está aislado por organización (RLS). Antes de 1.1.0 eran 9: `GET /health` (liveness), `GET /health/ready` (readiness), `POST /agentes/investigador-producto` (proveedor real Gemini + fallback simulado, persiste resultados), `POST /agentes/analitica-basica` (solo lectura, sin proveedor de IA), `POST /agentes/marketing` (proveedor simulado, no persiste nada), `POST /decisiones` y `GET /decisiones/{id}` (registro humano de decisiones; `approve`/`discard` cambian el `estado` de un producto candidato como efecto secundario — sin autenticación real todavía), y `GET /productos-candidatos` / `GET /productos-candidatos/{id}` (listado y consulta, solo lectura). Con esto, el flujo candidato → decisión humana → en_catalogo → marketing ya es end-to-end.

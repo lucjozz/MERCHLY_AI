@@ -2,7 +2,7 @@
 
 Fecha:
 
-2026-09-02
+2026-11-23
 
 
 # Estado del Proyecto
@@ -14,7 +14,7 @@ Infraestructura (Fase 1, cerrada); funcionalidad de agentes ya adelantada desde 
 
 Versión:
 
-1.3 Alpha
+1.4 Alpha (endurecimiento de seguridad para lanzamiento)
 
 
 ---
@@ -154,18 +154,27 @@ Se encontró en auditoría del 2026-09-02: código ya implementado en una sesió
 
 Se detectó además un bug funcional real: el modelo DecisionRecord no tenía relaciones ORM hacia DecisionContext ni DecisionEvidence, así que context_data y evidencias se guardaban bien en la base pero la API siempre los devolvía vacíos, sin ningún error visible. Corregido (relationship() + selectinload + conversión manual a DecisionOutput). Se documentó en retrospectiva (docs/004-Backend/02-Referencia-de-Endpoints.md secciones 6-9, docs/006-BaseDatos/02-Esquema-Fase1.md sección 4) y se agregaron 20 tests nuevos (77 en total en el proyecto), todos en verde, incluyendo una prueba que reproduce el bug original.
 
-Pendiente conocido: user_id sigue siendo texto libre sin autenticación real — el diseño de 013-Seguridad que lo resuelve ya está aprobado (DEC-031), falta implementarlo. decision_outcomes existe como tabla pero sin endpoint que la use todavía.
+Resuelto (DEC-031/032): user_id sale del token y las decisiones siguen una máquina de estados con estados finales inmutables. decision_outcomes existe como tabla pero sin endpoint que la use todavía.
 
 
-## 013-Seguridad (Contrato en Diseño)
+## 013-Seguridad
 
 Estado:
 
-DISEÑO COMPLETO, PENDIENTE DE IMPLEMENTACIÓN (ver DEC-031)
+BASE (DEC-031) + ENDURECIMIENTO PARA LANZAMIENTO (DEC-032) IMPLEMENTADOS — pendiente visto bueno del CTO del documento 013-04
 
-Volumen nuevo (README + 3 documentos), reemplaza el placeholder vacío que existía antes. Define: JWT con login/password (HS256, expiración 8h, sin refresh token), tabla `usuarios` (bcrypt costo 12), los 4 roles ya previstos en 001-Arquitectura (admin_principal, responsable_tecnico, responsable_negocio, usuario_operativo) implementados desde el inicio, y protección de los 4 endpoints de acción (los 3 de agentes + POST /decisiones) — los de solo lectura y health checks quedan públicos. Incluye plan de migración de POST /decisiones: user_id deja de venir en el body y pasa a tomarse del JWT, sin compatibilidad hacia atrás.
+* Multi-tenancy: tabla `organizaciones`, `organizacion_id` en todo, Row-Level Security con FORCE, rol de app `merchly_app` sin privilegios de dueño, decisiones append-only.
+* Sesiones: PyJWT (access 15 min con jti/iss/aud), refresh tokens rotativos con detección de reutilización, logout con revocación, cerrar todas las sesiones, login con Google implementado de punta a punta (Client ID configurado; falta la prueba con una cuenta real).
+* Frontend: BFF de Next (cookies HttpOnly, el navegador nunca ve el token), `proxy.ts` con guard de rutas, refresh automático y CSP con nonce; 401 → login, 403 → "sin permiso".
+* Todo exige login salvo health y login. Rate limiting en Redis (login fail-closed, agentes con cuota por organización). Validación estricta (extra="forbid", topes), errores sin filtrar datos, headers de seguridad, CORS por variable.
+* Docker: puertos solo en 127.0.0.1, contraseñas fuertes, Redis con contraseña, imagen sin root y parcheada, límites de recursos.
+* Dependencias: FastAPI 0.165 / Starlette 1.10 / PyJWT; Next 16.4.6. pip-audit, npm audit y trivy en 0.
+* Tests: 216 en verde, incluidos de integración contra Postgres real (RLS, IDOR, privilegios, concurrencia, refresh). Pentest black-box: 68/69 (la única "falla" es un falso positivo del script).
+* CI (GitHub Actions), Dependabot y pre-commit con gitleaks: configurados, todavía no corrieron en GitHub.
 
-Sin código todavía — es deliberado, sigue la disciplina "documentación antes que código". El orden de implementación ya está definido en docs/013-Seguridad/03-Alcance-y-Plan-de-Migracion.md sección 3.4.
+Frontend: pantalla "Plan y pagos" (beta gratuita, cobros no activos todavía).
+
+Pendientes para lanzar: ver docs/013-Seguridad/05-Pendientes-para-Lanzar.md.
 
 
 ## Agente de Analítica Básica
@@ -181,29 +190,25 @@ Segundo agente del proyecto, implementado de punta a punta: contrato técnico ap
 
 # Pendientes críticos identificados
 
-Ninguno de Fase 0/1. Dos pendientes activos: (1) implementar 013-Seguridad, ya diseñado y pendiente de aprobación final de detalles técnicos (DEC-031); (2) higiene de proceso — mantener la disciplina "documentación antes que código" y "sin merge sin tests" en sesiones futuras, tras lo encontrado en DEC-030.
-
+Ver docs/013-Seguridad/05-Pendientes-para-Lanzar.md. Los principales: visto bueno del CTO a 013-04, rotar la contraseña del admin, elegir hosting y dominio (Fase 2: HTTPS, Cloudflare, backups, monitoreo) y crear el Client ID de Google.
 
 ---
 
 # Próxima fase
 
-Aprobar los detalles técnicos de docs/013-Seguridad e implementarlo (tabla usuarios, JWT, proteger los 4 endpoints de acción). En paralelo, sigue pendiente elegir entre integrar ChatGPT real para el Agente de Marketing o especificar un cuarto agente (SEO o atención al cliente — ver docs/007-Agentes/04-Registro-de-Agentes.md).
-
+Fase 1 de seguridad pendiente de producto: gestión de usuarios (invitar, desactivar, cambiar rol), bitácora de auditoría y botón "Continuar con Google". Después, Fase 2 (hosting).
 
 ---
 
 # Última acción realizada
 
-Diseño completo del volumen docs/013-Seguridad (README + 3 documentos), a partir de 3 decisiones explícitas del CTO: JWT con login/password, proteger los 4 endpoints de acción (agentes + decisiones), y los 4 roles desde el inicio. Sin código todavía — documentación antes que código. Ver DEC-031.
-
+2026-11-23: auditoría de seguridad (37 pruebas, 25 fallas) y endurecimiento completo para lanzamiento (DEC-032): multi-tenancy con RLS, BFF con cookies HttpOnly, refresh tokens, rate limiting, Docker endurecido, dependencias sin vulnerabilidades, CI. Rediseño visual del frontend (mismos colores, lenguaje simple). Bug corregido: la pantalla de detalle de producto había sido pisada en 15e42ad.
 
 ---
 
 # Próxima acción
 
-Revisar y aprobar los detalles técnicos de docs/013-Seguridad; al aprobarse, implementar siguiendo el orden de docs/013-Seguridad/03-Alcance-y-Plan-de-Migracion.md sección 3.4.
-
+El CTO revisa docs/013-Seguridad/04 y DEC-032. Daniel rota su contraseña con `docker compose exec backend python -m scripts.seed_admin --rotar` y sube los commits.
 
 ---
 

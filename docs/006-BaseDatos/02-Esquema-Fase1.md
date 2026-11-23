@@ -125,6 +125,59 @@ No se crean todavía, por no tener un agente o proceso concreto que las necesite
 
 ---
 
+# Anexo 2026-11-23 — Multi-tenancy, usuarios y sesiones (013-04 / DEC-032)
+
+Migraciones `202611230001_multi_tenancy_y_endurecimiento` y `202611230002_refresh_rotado_en`.
+
+## `organizaciones` (nueva)
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | UUID PK | |
+| `nombre` | VARCHAR(120) | |
+| `activo` | BOOLEAN | inactiva = sus usuarios reciben 401 |
+| `creado_en` / `actualizado_en` / `eliminado_en` | TIMESTAMPTZ | convención estándar |
+
+Los datos existentes se asignaron a la organización inicial **"MERCHLY (organización inicial)"**.
+
+## `organizacion_id` (nueva columna, UUID NOT NULL, FK, indexada)
+
+En `usuarios`, `productos_candidatos`, `decision_records`, `decision_context`, `decision_evidence` y `decision_outcomes`.
+
+## `usuarios` (documentada acá por primera vez; creada en `202609150001`)
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | UUID PK | |
+| `organizacion_id` | UUID FK | un usuario pertenece a una sola organización |
+| `email` | VARCHAR(255) UNIQUE | `CHECK (email = lower(email))` |
+| `password_hash` | VARCHAR(255) NULL | bcrypt costo 12; NULL para usuarios solo-Google |
+| `google_sub` | VARCHAR(255) UNIQUE NULL | cuenta de Google vinculada |
+| `nombre` | VARCHAR(120) | |
+| `rol` | VARCHAR(30) | `CHECK` con los 4 roles |
+| `activo` | BOOLEAN | |
+| `token_version` | INTEGER | +1 invalida todas las sesiones |
+| timestamps estándar | | |
+
+`CHECK (password_hash IS NOT NULL OR google_sub IS NOT NULL)`.
+
+## `refresh_tokens` (nueva)
+
+`id`, `usuario_id` (FK), `token_hash` (SHA-256, UNIQUE — nunca el token en claro), `familia` (UUID), `expira_en`, `rotado_en`, `revocado_en`, timestamps.
+
+## `productos_candidatos.estado`
+
+Nuevo valor `en_revision`: `CHECK (estado IN ('candidato','en_revision','en_catalogo','descartado'))`. El borrado es **lógico** (`eliminado_en`) y todas las consultas filtran `eliminado_en IS NULL`.
+
+## Seguridad a nivel de base
+
+* **Row-Level Security** con `FORCE` en `productos_candidatos` y las 4 tablas `decision_*`. Política `aislamiento_organizacion`: `organizacion_id = NULLIF(current_setting('app.organizacion_id', true), '')::uuid` (USING y WITH CHECK). La app fija la organización por transacción con `set_config(..., true)`.
+* Rol **`merchly_app`** (el que usa el backend): sin superusuario, sin `BYPASSRLS`, no es dueño de ninguna tabla. `SELECT, INSERT, UPDATE` en `productos_candidatos`, `usuarios`, `organizaciones`, `refresh_tokens`; **solo `SELECT, INSERT`** en `decision_*` (decisiones append-only); sin `DELETE` ni DDL. `statement_timeout = 15s`, `idle_in_transaction_session_timeout = 30s`.
+* Rol **`merchly`** (dueño): solo migraciones y administración.
+* **Regla para migraciones futuras:** toda tabla nueva con datos de negocio lleva `organizacion_id` + RLS con `FORCE`, y sus `GRANT` explícitos a `merchly_app`.
+
+---
+
 # Resumen Ejecutivo para IA
 
 El esquema real de la base de datos hoy tiene dos grupos de tablas: `productos_candidatos` (resultados del Agente Investigador de Producto) y el grupo de decisiones humanas (`decision_records`, `decision_context`, `decision_evidence`, `decision_outcomes` — esta última sin uso todavía), que registra por qué un humano aprobó o descartó un producto candidato y ejecuta ese cambio de `estado` como efecto secundario, vía `POST /decisiones`. Todas usan UUID como clave primaria, timestamps estándar y borrado lógico. `productos_candidatos.estado` solo puede pasar a `en_catalogo` mediante ese mecanismo de aprobación humana. No existen todavía tablas para otros agentes ni columnas de embeddings; se agregan solo cuando haya un caso de uso concreto que las necesite.
