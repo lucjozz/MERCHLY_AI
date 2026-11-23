@@ -50,12 +50,18 @@ Aplica el Principio de Mínimo Privilegio de `000-Constitucion/11-Seguridad.md`:
 | `POST /agentes/analitica-basica` | ✅ | ✅ | ✅ | ✅ |
 | `POST /agentes/marketing` | ✅ | ✅ | ✅ | ❌ |
 | `POST /decisiones` | ✅ | ✅ | ✅ | ❌ |
+| `DELETE /productos-candidatos/{id}` (borrado lógico) | ✅ | ❌ | ✅ | ❌ |
+| `GET /productos-candidatos`, `GET /productos-candidatos/{id}`, `GET /decisiones/{id}` | ✅ | ✅ | ✅ | ✅ |
 
 **Criterio aplicado:**
 
 * `investigador-producto` y `marketing` generan trabajo (y en el caso del primero, costo real de API de Gemini) y sus resultados alimentan decisiones de negocio — se restringen a roles con responsabilidad de negocio o técnica, no a `usuario_operativo`.
 * `analitica-basica` es de solo lectura y sin costo de proveedor de IA (Nivel de permiso 0, ver `001-Arquitectura/03-Arquitectura-de-Agentes.md`) — se habilita para los 4 roles, incluido `usuario_operativo`, porque no hay riesgo real en que cualquiera consulte métricas agregadas.
 * `POST /decisiones` es la acción con más impacto real (cambia el `estado` de un producto candidato) — se restringe a los 3 roles con responsabilidad de negocio o técnica. `usuario_operativo` no puede aprobar ni descartar productos.
+
+* `DELETE /productos-candidatos/{id}` (agregado en 013-04 / DEC-032): **borrado lógico** (`eliminado_en`), solo `admin_principal` y `responsable_negocio` (el dueño del negocio). `responsable_tecnico` ya no puede borrar.
+* Los `GET` exigen autenticación desde 013-04 (antes eran públicos) y están abiertos a los 4 roles.
+* **Todo permiso vale solo dentro de la organización del usuario** (multi-tenancy, 013-04 sección 2): un recurso de otra organización responde 404.
 
 **Este criterio es una propuesta inicial, no una verdad fija.** Al no haber hoy ningún titular real de `responsable_tecnico`, `responsable_negocio` ni `usuario_operativo`, esta matriz se ajusta con la primera persona real que se sume a alguno de esos roles, según lo que su trabajo concreto requiera — no antes.
 

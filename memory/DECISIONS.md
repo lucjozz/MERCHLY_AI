@@ -685,3 +685,29 @@ Motivo:
 Estado:
 
 **Diseño aprobado por el CTO en sus decisiones de alcance (mecanismo, endpoints, roles). Pendiente de aprobación final de los detalles técnicos del documento (esquema exacto, expiración, matriz de permisos) antes de iniciar la implementación en `backend/`.**
+
+## DEC-032
+
+Fecha:
+
+2026-11-23
+
+Decisión:
+
+Se diseña e inicia el **endurecimiento de seguridad para el lanzamiento** (`docs/013-Seguridad/04-Endurecimiento-para-Lanzamiento.md`). Cambia varias decisiones de DEC-031 / 013-01..03:
+
+1. **Multi-tenancy:** tabla `organizaciones`; cada usuario pertenece a una; `organizacion_id` en productos y decisiones; aislamiento por la app **y** por Row-Level Security con `FORCE`, fijando la organización por transacción (`set_config(..., true)`). La app se conecta con un rol `merchly_app` sin privilegios de dueño ni `BYPASSRLS`; las decisiones son append-only a nivel de privilegios.
+2. **Sesiones:** PyJWT reemplaza a python-jose; access token de 15 min con `jti/iss/aud`; refresh token rotativo con detección de reutilización; logout con denylist en Redis; tokens en cookies HttpOnly vía BFF de Next.
+3. **Auto-registro con Google** (crea organización + admin).
+4. **Todo exige autenticación** salvo health y login.
+5. **Borrado lógico**; borran `admin_principal` y `responsable_negocio` de la organización.
+6. **Máquina de estados** de productos con estados finales inmutables (409) y bloqueo de fila.
+7. Rate limiting en Redis (login fail-closed, agentes fail-open), validación estricta (`extra="forbid"`, topes), errores sin filtrar datos, headers de seguridad, CORS por variable, Docker endurecido.
+
+Motivo:
+
+Auditoría del 2026-11-22: 25 de 37 pruebas de seguridad fallaron (datos legibles sin login, Postgres accesible desde el wifi como superusuario con `merchly/merchly`, Redis sin contraseña, sin límite de intentos, 500 por inputs, 422 que devuelve la contraseña, enumeración de emails por tiempo, CVEs en python-jose/Starlette/Next). Para vender el producto a varios negocios hace falta aislamiento entre clientes.
+
+Estado:
+
+**Aprobado por Daniel (admin_principal) el 2026-11-22 en sus decisiones de alcance (refresh tokens, transiciones, borrado lógico, quién borra, fail-closed en login, login con Google). Pendiente del visto bueno del CTO. Implementación en curso.**

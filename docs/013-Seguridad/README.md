@@ -50,3 +50,10 @@ Ya existen `000-Constitucion/11-Seguridad.md` (principios y normas generales de 
 
 ---
 status: Implementado — 2026-09-28
+
+---
+
+## Actualización 2026-11-23
+
+* `04-Endurecimiento-para-Lanzamiento.md` (DEC-032): multi-tenancy con RLS, refresh tokens, login con Google, BFF con cookies HttpOnly, rate limiting, validación estricta, headers, Docker endurecido. **Implementado** (pendiente visto bueno del CTO).
+* `05-Pendientes-para-Lanzar.md`: lo que falta para lanzar y quién lo hace.
