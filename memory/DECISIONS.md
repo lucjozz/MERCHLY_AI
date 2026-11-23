@@ -766,3 +766,21 @@ Decisión:
 Estado:
 
 **Pedido por Daniel el 2026-11-24. Pendiente visto bueno del CTO.**
+
+## DEC-036
+
+Fecha:
+
+2026-11-24
+
+Decisión:
+
+1. **Backups cifrados** (`ops/backups/backup.py`): pg_dump cifrado con AES-256-GCM (clave solo en el `.env` de la raíz y en un gestor de contraseñas), guardado fuera del repo con la retención de 006-04 (30 días, 12 semanas, 12 meses). **Simulacro de restauración** (`ops/backups/probar_restauracion.py`) en un Postgres limpio y temporal, comparando filas por tabla y verificando RLS. Primer simulacro: 11 tablas idénticas, RTO 41 s.
+2. **Recuperación de contraseña por email:** token de 256 bits de un solo uso, vence en 1 hora, guardado como SHA-256, respuesta idéntica exista o no el email, límite de intentos, y al restablecer se cierran todas las sesiones. Proveedor de email: Resend (sin clave: simulado en el log solo en local).
+3. **Despliegue:** blueprint `render.yaml` con el backend como **servicio privado** (sin URL pública, solo lo alcanza el BFF), Postgres y Key Value sin acceso desde internet, Cloudflare adelante; guía en `docs/002-CTO/07-Despliegue-en-Render.md`. Dockerfile del frontend para otros proveedores.
+4. **Dependabot:** React agrupado; sin propuestas automáticas de Python mayor/menor ni ESLint mayor.
+
+Estado:
+
+**Pedido por Daniel el 2026-11-24. Pendiente visto bueno del CTO.**
+

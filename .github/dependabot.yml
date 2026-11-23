@@ -12,10 +12,22 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      # react y react-dom tienen que subir JUNTOS (versiones distintas rompen la app).
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+    ignore:
+      # ESLint mayor: esperar a que eslint-config-next lo soporte.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: docker
     directory: /backend
     schedule:
       interval: monthly
+    ignore:
+      # La versión de Python se cambia a propósito y con pruebas, no por un PR automático.
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

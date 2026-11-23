@@ -1,0 +1,82 @@
+# Blueprint de Render para MERCHLY AI (docs/002-CTO/07-Despliegue-en-Render.md, DEC-036).
+#
+# Arquitectura:
+#   Internet -> Cloudflare -> merchly-web (Next.js, BFF, público)
+#                               -> merchly-backend (FastAPI, PRIVADO: sin URL pública)
+#                                    -> merchly-db (Postgres administrado, con backups)
+#                                    -> merchly-redis (Key Value, solo red interna)
+#
+# Los valores con `sync: false` los cargás a mano en el panel de Render
+# (nunca en este archivo ni en git). Elegí los planes en el panel.
+
+databases:
+  - name: merchly-db
+    databaseName: merchly
+    user: merchly
+    postgresMajorVersion: "16"
+    ipAllowList: []  # sin acceso desde internet: solo los servicios de Render
+
+services:
+  - type: keyvalue
+    name: merchly-redis
+    ipAllowList: []  # solo red interna
+    maxmemoryPolicy: noeviction
+
+  - type: pserv  # servicio PRIVADO: solo lo alcanza el frontend por la red interna
+    name: merchly-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    # Migraciones antes de cada despliegue (rol dueño). Crean/actualizan el rol merchly_app.
+    preDeployCommand: alembic upgrade head
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL_MIGRACIONES
+        fromDatabase:
+          name: merchly-db
+          property: connectionString
+      - key: DATABASE_URL  # rol merchly_app (sin privilegios, sujeto a RLS): armar a mano tras el primer deploy
+        sync: false
+      - key: DB_APP_PASSWORD
+        generateValue: true
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: merchly-redis
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CONFIAR_PROXY  # solo lo alcanza el BFF, que le pasa la IP real del cliente
+        value: "true"
+      - key: CORS_ORIGENES
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_REMITENTE
+        sync: false
+
+  - type: web
+    name: merchly-web
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: BACKEND_URL  # red privada de Render: nombre del servicio + puerto
+        value: http://merchly-backend:8000
+      - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+        sync: false
+      - key: NEXT_PUBLIC_SOPORTE_WHATSAPP
+        sync: false
