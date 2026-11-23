@@ -11,12 +11,26 @@ import { BACKEND_URL, COOKIE_ACCESS, mismoOrigen } from "@/lib/sesion/config";
 
 const UUID = "[0-9a-fA-F-]{36}";
 const PERMITIDAS: Record<string, RegExp[]> = {
-  GET: [new RegExp(`^productos-candidatos(/${UUID})?$`), new RegExp(`^decisiones/${UUID}$`), /^auth\/me$/],
+  GET: [
+    new RegExp(`^productos-candidatos(/${UUID})?$`),
+    new RegExp(`^decisiones/${UUID}$`),
+    new RegExp(`^campanas(/${UUID})?$`),
+    /^auth\/me$/,
+    /^organizacion(\/uso)?$/,
+    /^usuarios(\/invitaciones)?$/,
+  ],
   POST: [
     /^agentes\/(investigador-producto|marketing|analitica-basica)$/,
     /^decisiones$/,
+    /^usuarios\/invitaciones$/,
   ],
-  DELETE: [new RegExp(`^productos-candidatos/${UUID}$`)],
+  PUT: [/^organizacion\/perfil$/],
+  PATCH: [new RegExp(`^campanas/${UUID}$`), new RegExp(`^usuarios/${UUID}$`)],
+  DELETE: [
+    new RegExp(`^productos-candidatos/${UUID}$`),
+    new RegExp(`^campanas/${UUID}$`),
+    new RegExp(`^usuarios/invitaciones/${UUID}$`),
+  ],
 };
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -37,7 +51,7 @@ async function reenviar(request: NextRequest, segmentos: string[]) {
   }
 
   let cuerpo: string | undefined;
-  if (metodo === "POST") {
+  if (metodo === "POST" || metodo === "PUT" || metodo === "PATCH") {
     cuerpo = await request.text();
     if (new TextEncoder().encode(cuerpo).length > MAX_BODY_BYTES) {
       return NextResponse.json({ detail: "La solicitud es demasiado grande." }, { status: 413 });
@@ -79,6 +93,12 @@ export async function GET(request: NextRequest, { params }: Contexto) {
   return reenviar(request, (await params).ruta);
 }
 export async function POST(request: NextRequest, { params }: Contexto) {
+  return reenviar(request, (await params).ruta);
+}
+export async function PUT(request: NextRequest, { params }: Contexto) {
+  return reenviar(request, (await params).ruta);
+}
+export async function PATCH(request: NextRequest, { params }: Contexto) {
   return reenviar(request, (await params).ruta);
 }
 export async function DELETE(request: NextRequest, { params }: Contexto) {

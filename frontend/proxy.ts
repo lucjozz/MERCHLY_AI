@@ -23,7 +23,7 @@ import {
 
 // Rutas que se usan SIN sesión (para iniciarla). Toda ruta nueva de login
 // tiene que estar acá o el proxy la frena con 401.
-const RUTAS_PUBLICAS = ["/login", "/api/auth/login", "/api/auth/google"];
+const RUTAS_PUBLICAS = ["/login", "/invitacion", "/api/auth/login", "/api/auth/google", "/api/auth/aceptar-invitacion"];
 
 function esPublica(ruta: string): boolean {
   return RUTAS_PUBLICAS.some((p) => ruta === p || ruta.startsWith(`${p}/`));

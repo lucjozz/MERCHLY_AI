@@ -5,6 +5,8 @@ import Badge from "@/components/ui/Badge";
 import Alerta from "@/components/ui/Alerta";
 import { obtenerUsuarioActual, type UsuarioActual } from "@/lib/api/usuario";
 import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
+import UsoDelPlan from "@/components/UsoDelPlan";
+import { obtenerUsoPlan, type UsoPlan } from "@/lib/api/organizacion";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,8 @@ interface Plan {
   destacado?: boolean;
   incluye: string[];
 }
+
+const NOMBRE_PLAN: Record<string, string> = { beta: "Beta gratuita", emprendedor: "Emprendedor", negocio: "Negocio" };
 
 const PLANES: Plan[] = [
   {
@@ -60,9 +64,10 @@ const PLANES: Plan[] = [
 
 export default async function Planes() {
   let usuario: UsuarioActual | undefined;
+  let uso: UsoPlan | null = null;
   let error: string | null = null;
   try {
-    usuario = await obtenerUsuarioActual();
+    [usuario, uso] = await Promise.all([obtenerUsuarioActual(), obtenerUsoPlan().catch(() => null)]);
   } catch (e) {
     error = mensajeDeErrorDePagina(e);
   }
@@ -85,12 +90,18 @@ export default async function Planes() {
             <p className="text-sm text-texto-2">Plan actual de {usuario?.organizacion_nombre ?? "tu negocio"}</p>
             <p className="mt-1 flex items-center gap-2 text-xl font-bold text-texto">
               <Sparkles className="h-5 w-5 text-acento-claro" aria-hidden="true" />
-              Beta gratuita
+              {NOMBRE_PLAN[uso?.plan ?? "beta"] ?? "Beta gratuita"}
             </p>
           </div>
           <Badge tono="verde">Activo</Badge>
         </div>
       </Card>
+
+      {uso && (
+        <div className="mb-6">
+          <UsoDelPlan uso={uso} />
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         {PLANES.map((plan) => (
@@ -102,8 +113,8 @@ export default async function Planes() {
           >
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-lg font-semibold text-texto">{plan.nombre}</h2>
-              {plan.actual && <Badge tono="verde">Tu plan</Badge>}
-              {plan.destacado && !plan.actual && <Badge tono="azul">Recomendado</Badge>}
+              {plan.id === (uso?.plan ?? "beta") && <Badge tono="verde">Tu plan</Badge>}
+              {plan.destacado && plan.id !== (uso?.plan ?? "beta") && <Badge tono="azul">Recomendado</Badge>}
             </div>
             <p className="mt-1 text-sm text-texto-2">{plan.para}</p>
             <p className="mt-4 text-2xl font-bold text-texto">{plan.precio}</p>
@@ -120,7 +131,7 @@ export default async function Planes() {
               disabled
               className="mt-6 w-full cursor-not-allowed rounded-lg border border-borde px-4 py-2.5 text-sm font-semibold text-texto-3"
             >
-              {plan.actual ? "Plan actual" : "Próximamente"}
+              {plan.id === (uso?.plan ?? "beta") ? "Plan actual" : "Próximamente"}
             </button>
           </Card>
         ))}

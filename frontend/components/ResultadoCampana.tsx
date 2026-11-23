@@ -1,4 +1,7 @@
-import { Lightbulb, Users, AlertTriangle, Mail, Share2, Search } from "lucide-react";
+import Link from "next/link";
+import { Lightbulb, Users, AlertTriangle, Mail, Share2, Search, History } from "lucide-react";
+import AccionesCanal from "@/components/AccionesCanal";
+import DescargarCampana from "@/components/DescargarCampana";
 import type { CampanaMarketing } from "@/lib/api/marketing";
 import TextoAnimado from "@/components/TextoAnimado";
 import { BadgeSimulado } from "@/components/ui/Badge";
@@ -16,6 +19,25 @@ export default function ResultadoCampana({ campana }: { campana: CampanaMarketin
 
   return (
     <div className="space-y-6 animate-aparecer">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {campana.metadata?.campana_id ? (
+          <Link
+            href={`/campanas/${campana.metadata.campana_id}`}
+            className="inline-flex items-center gap-2 text-sm text-acento-claro hover:underline"
+          >
+            <History className="h-4 w-4" aria-hidden="true" />
+            Guardada en tu historial · editar
+          </Link>
+        ) : (
+          <span />
+        )}
+        <DescargarCampana
+          titulo="Campaña de MERCHLY"
+          angulos={campana.angulos_de_campana}
+          publico={campana.publico_objetivo_sugerido}
+          copyPorCanal={campana.copy_por_canal}
+        />
+      </div>
       {simulada && (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-acento-borde bg-acento-hondo/20 px-4 py-3 text-sm text-texto-2">
           <BadgeSimulado />
@@ -67,6 +89,7 @@ export default function ResultadoCampana({ campana }: { campana: CampanaMarketin
                   <p className="mt-1 break-words text-sm leading-relaxed text-texto-2">
                     <TextoAnimado texto={copy.cuerpo} velocidad={8} />
                   </p>
+                  <AccionesCanal titulo={copy.titulo} cuerpo={copy.cuerpo} />
                 </div>
               ))}
             </div>

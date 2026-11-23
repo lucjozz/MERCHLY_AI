@@ -14,6 +14,9 @@ import {
   Clock,
   Settings,
   CreditCard,
+  History,
+  Users,
+  LifeBuoy,
   Sparkles,
   Menu,
   X,
@@ -34,6 +37,7 @@ const FLUJO: ItemNav[] = [
   { href: "/productos", label: "Productos", icono: Package },
   { href: "/decisiones", label: "Decisiones", icono: Scale },
   { href: "/marketing", label: "Marketing", icono: Megaphone },
+  { href: "/campanas", label: "Mis campañas", icono: History },
 ];
 
 const INTELIGENCIA: ItemNav[] = [
@@ -44,8 +48,10 @@ const INTELIGENCIA: ItemNav[] = [
 ];
 
 const CUENTA: ItemNav[] = [
+  { href: "/equipo", label: "Equipo", icono: Users },
   { href: "/planes", label: "Plan y pagos", icono: CreditCard },
   { href: "/configuracion", label: "Configuración", icono: Settings },
+  { href: "/ayuda", label: "Ayuda", icono: LifeBuoy },
 ];
 
 function estaActivo(pathname: string, href: string): boolean {
@@ -142,7 +148,7 @@ export default function Sidebar() {
   }, [menuAbierto]);
 
   // La pantalla de login ocupa toda la vista: sin navegación.
-  if (pathname.startsWith("/login")) return null;
+  if (pathname.startsWith("/login") || pathname.startsWith("/invitacion")) return null;
 
   const enMenuMas = [...INTELIGENCIA, ...CUENTA].some((i) =>
     estaActivo(pathname, i.href)

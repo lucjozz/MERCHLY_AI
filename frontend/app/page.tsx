@@ -23,22 +23,35 @@ import RecorridoGuiado from "@/components/RecorridoGuiado";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import { plural } from "@/lib/etiquetas";
 import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
+import { redirect } from "next/navigation";
+import UsoDelPlan from "@/components/UsoDelPlan";
+import { obtenerOrganizacion, obtenerUsoPlan, type UsoPlan } from "@/lib/api/organizacion";
+import { obtenerUsuarioActual } from "@/lib/api/usuario";
 
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   let reporte;
   let recientes;
+  let uso: UsoPlan | null = null;
+  let irAOnboarding = false;
   let error: string | null = null;
 
   try {
-    [reporte, recientes] = await Promise.all([
-      obtenerReporteAnalitica(),
-      listarProductosCandidatos(1, 5, undefined, "candidato"),
-    ]);
+    const [usuario, organizacion] = await Promise.all([obtenerUsuarioActual(), obtenerOrganizacion()]);
+    // Primer ingreso del admin: completar el perfil del negocio.
+    irAOnboarding = usuario.rol === "admin_principal" && !organizacion.onboarding_completo;
+    if (!irAOnboarding) {
+      [reporte, recientes, uso] = await Promise.all([
+        obtenerReporteAnalitica(),
+        listarProductosCandidatos(1, 5, undefined, "candidato"),
+        obtenerUsoPlan().catch(() => null),
+      ]);
+    }
   } catch (e) {
     error = mensajeDeErrorDePagina(e);
   }
+  if (irAOnboarding) redirect("/bienvenida");
 
   const conversion = reporte?.tasa_conversion_catalogo;
   const actividad = reporte?.actividad_agente_investigador;
@@ -58,6 +71,12 @@ export default async function Dashboard() {
       />
 
       {error && <Alerta>{error}</Alerta>}
+
+      {uso && (
+        <div className="mb-8">
+          <UsoDelPlan uso={uso} />
+        </div>
+      )}
 
       {reporte && conversion && actividad && (
         <div className="space-y-8">

@@ -13,6 +13,7 @@ export interface CampanaMarketing {
   copy_por_canal: Record<string, CopyCanal[]>;
   publico_objetivo_sugerido: string;
   advertencias: string[];
+  metadata?: { campana_id?: string; modelo?: string | null };
 }
 
 export async function generarCampanaMarketing(

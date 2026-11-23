@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
+import BotonSoporte from "@/components/BotonSoporte";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Saltar al contenido
         </a>
         <Sidebar />
+        <BotonSoporte />
         <main
           id="contenido"
           className="min-w-0 flex-1 pb-24 md:ml-16 md:pb-0"

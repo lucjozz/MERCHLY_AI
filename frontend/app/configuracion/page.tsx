@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
-import { Check, Link2, Lock, Settings, Mail, Share2, Search } from "lucide-react";
+import Link from "next/link";
+import { Check, Lock, Settings, Mail, Share2, Search, MessageCircle, ArrowRight, Users } from "lucide-react";
+import FormularioPerfil from "@/components/FormularioPerfil";
+import { obtenerOrganizacion, type Organizacion } from "@/lib/api/organizacion";
 import BotonCerrarSesion from "@/components/BotonCerrarSesion";
 import SesionInfo from "@/components/SesionInfo";
 import { SesionInvalidaError } from "@/lib/api/errores";
@@ -29,19 +32,21 @@ const ACCIONES = [
   { nombre: "Borrar productos", roles: ["admin_principal", "responsable_negocio"] },
 ];
 
+/** Canales de venta: estado REAL de cada uno (docs/004-Backend/03, sección 2). */
 const CANALES = [
-  { nombre: "Instagram", detalle: "Publicar campañas de redes sociales", icono: Share2 },
-  { nombre: "Facebook", detalle: "Publicar campañas de redes sociales", icono: Share2 },
-  { nombre: "Email", detalle: "Enviar campañas por correo", icono: Mail },
-  { nombre: "Búsqueda paga", detalle: "Anuncios en buscadores", icono: Search },
+  { nombre: "WhatsApp", detalle: "Compartí cada texto con un toque desde tus campañas.", icono: MessageCircle, activo: true },
+  { nombre: "Email", detalle: "Abre tu correo con el texto listo para enviar.", icono: Mail, activo: true },
+  { nombre: "Instagram y Facebook", detalle: "Copiá el texto y pegalo en tu publicación. La conexión directa requiere aprobación de Meta.", icono: Share2, activo: true },
+  { nombre: "Búsqueda paga", detalle: "Copiá los textos para tus anuncios. La conexión con Google Ads llega más adelante.", icono: Search, activo: true },
 ];
 
 export default async function Configuracion() {
   let usuario;
   let error: string | null = null;
 
+  let organizacion: Organizacion | null = null;
   try {
-    usuario = await obtenerUsuarioActual();
+    [usuario, organizacion] = await Promise.all([obtenerUsuarioActual(), obtenerOrganizacion()]);
   } catch (e) {
     if (e instanceof SesionInvalidaError) redirect("/login");
     error = MENSAJE_SIN_BACKEND;
@@ -125,7 +130,14 @@ export default async function Configuracion() {
           </Card>
 
           <Card className="lg:col-span-2">
-            <TituloCard descripcion="Hoy el agente de Marketing solo propone contenido: no publica ni gasta. Conectar cuentas va a requerir la aprobación de una persona.">
+            <TituloCard
+              descripcion="MERCHLY nunca publica por vos: desde cada campaña copiás o compartís el texto y decidís dónde y cuándo."
+              accion={
+                <Link href="/campanas" className="inline-flex items-center gap-1 text-sm text-acento-claro hover:underline">
+                  Mis campañas <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              }
+            >
               Canales de venta
             </TituloCard>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -145,18 +157,43 @@ export default async function Configuracion() {
                         <p className="text-xs text-texto-2">{canal.detalle}</p>
                       </div>
                     </div>
-                    <button
-                      disabled
-                      className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-lg border border-borde-fuerte px-3 py-1.5 text-xs text-texto-2"
-                    >
-                      <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      Próximamente
-                    </button>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-verde-borde bg-verde-fondo px-2.5 py-1 text-xs text-verde">
+                      <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                      Listo
+                    </span>
                   </div>
                 );
               })}
             </div>
           </Card>
+
+          {organizacion && (
+            <Card className="lg:col-span-2">
+              <TituloCard
+                descripcion="La IA usa estos datos para buscar productos pensando en tu negocio, y los precios se muestran en tu moneda."
+                accion={
+                  rolActual === "admin_principal" ? (
+                    <Link href="/equipo" className="inline-flex items-center gap-1 text-sm text-acento-claro hover:underline">
+                      <Users className="h-4 w-4" aria-hidden="true" /> Equipo
+                    </Link>
+                  ) : undefined
+                }
+              >
+                Tu negocio
+              </TituloCard>
+              {rolActual === "admin_principal" ? (
+                <FormularioPerfil organizacion={organizacion} />
+              ) : (
+                <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                  <div><dt className="text-texto-2">Negocio</dt><dd className="text-texto">{organizacion.nombre}</dd></div>
+                  <div><dt className="text-texto-2">Rubro</dt><dd className="text-texto">{organizacion.rubro ?? "—"}</dd></div>
+                  <div><dt className="text-texto-2">Moneda</dt><dd className="text-texto">{organizacion.moneda === "BOB" ? "Bolivianos" : "Dólares"}</dd></div>
+                  <div><dt className="text-texto-2">Tipo de cambio</dt><dd className="text-texto">{organizacion.tipo_cambio ?? "—"}</dd></div>
+                  <p className="text-xs text-texto-3 sm:col-span-2">Solo el administrador del negocio puede cambiar estos datos.</p>
+                </dl>
+              )}
+            </Card>
+          )}
         </div>
       )}
     </>
