@@ -9,7 +9,7 @@ keys and the standard timestamp columns (``creado_en``, ``actualizado_en``,
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, func
+from sqlalchemy import DateTime, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -45,4 +45,17 @@ class ConMarcaDeTiempo:
     )
     eliminado_en: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, default=None
+    )
+
+
+class DeOrganizacion:
+    """Mixin para tablas con datos de negocio de una organización.
+
+    La columna está protegida por Row-Level Security en la base
+    (docs/013-Seguridad/04, sección 2.2): la app nunca la recibe del
+    cliente, la toma del usuario autenticado.
+    """
+
+    organizacion_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizaciones.id"), nullable=False, index=True
     )

@@ -10,9 +10,11 @@ import re
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, field_validator
+
+from app.schemas.base import EntradaEstricta
 
 _ISO_3166_1_ALPHA_2 = re.compile(r"^[A-Z]{2}$")
 
@@ -43,7 +45,7 @@ class NivelEstimado(str, Enum):
     BAJO = "bajo"
 
 
-class InvestigacionInput(BaseModel):
+class InvestigacionInput(EntradaEstricta):
     """Entrada de una investigación (contrato, sección 2).
 
     Attributes:
@@ -54,10 +56,12 @@ class InvestigacionInput(BaseModel):
         cantidad_resultados: cantidad de productos a devolver (máx. 50).
     """
 
-    categoria: str = Field(min_length=1)
+    categoria: str = Field(min_length=1, max_length=120)
     mercado_objetivo: str
-    presupuesto_max_producto: float | None = Field(default=None, gt=0)
-    excluir_marcas: list[str] = Field(default_factory=list)
+    presupuesto_max_producto: float | None = Field(default=None, gt=0, le=1_000_000)
+    excluir_marcas: list[Annotated[str, Field(min_length=1, max_length=100)]] = Field(
+        default_factory=list, max_length=20
+    )
     cantidad_resultados: int = Field(default=10, gt=0)
 
     @field_validator("mercado_objetivo")

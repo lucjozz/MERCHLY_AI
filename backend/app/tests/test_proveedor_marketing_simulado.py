@@ -2,7 +2,6 @@
 
 import uuid
 
-import pytest
 
 from app.schemas.marketing import CanalMarketing, MarketingInput
 from app.services.proveedores.marketing_simulado import ProveedorMarketingSimulado

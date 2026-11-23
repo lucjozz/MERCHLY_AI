@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.tests.conftest import ORG_TEST
 from app.schemas.analitica_basica import AgruparPor, AnaliticaInput
 from app.services.agente_analitica_basica import AgenteAnaliticaBasica, AnaliticaBasicaError
 
@@ -35,7 +36,7 @@ def _db_session_con_filas(filas: list) -> AsyncMock:
 
 async def test_reporte_vacio_no_es_un_error() -> None:
     session = _db_session_con_filas([])
-    agente = AgenteAnaliticaBasica(db_session=session)
+    agente = AgenteAnaliticaBasica(db_session=session, organizacion_id=ORG_TEST)
 
     reporte = await agente.ejecutar(AnaliticaInput())
 
@@ -52,7 +53,7 @@ async def test_agrupa_correctamente_por_categoria() -> None:
         _fila("mochilas", "en_catalogo", inv2),
     ]
     session = _db_session_con_filas(filas)
-    agente = AgenteAnaliticaBasica(db_session=session)
+    agente = AgenteAnaliticaBasica(db_session=session, organizacion_id=ORG_TEST)
 
     reporte = await agente.ejecutar(AnaliticaInput(agrupar_por=AgruparPor.CATEGORIA))
 
@@ -70,7 +71,7 @@ async def test_calcula_tasa_de_conversion() -> None:
         _fila("audifonos", "descartado", inv),
     ]
     session = _db_session_con_filas(filas)
-    agente = AgenteAnaliticaBasica(db_session=session)
+    agente = AgenteAnaliticaBasica(db_session=session, organizacion_id=ORG_TEST)
 
     reporte = await agente.ejecutar(AnaliticaInput())
 
@@ -89,7 +90,7 @@ async def test_resume_actividad_del_investigador() -> None:
         _fila("mochilas", "candidato", inv2),
     ]
     session = _db_session_con_filas(filas)
-    agente = AgenteAnaliticaBasica(db_session=session)
+    agente = AgenteAnaliticaBasica(db_session=session, organizacion_id=ORG_TEST)
 
     reporte = await agente.ejecutar(AnaliticaInput())
 
@@ -103,7 +104,7 @@ async def test_no_escribe_nada_en_la_sesion() -> None:
     """El agente es de solo lectura (contrato, sección 4): nunca debe
     llamarse add/commit/delete sobre la sesión."""
     session = _db_session_con_filas([])
-    agente = AgenteAnaliticaBasica(db_session=session)
+    agente = AgenteAnaliticaBasica(db_session=session, organizacion_id=ORG_TEST)
 
     await agente.ejecutar(AnaliticaInput())
 
@@ -115,7 +116,7 @@ async def test_no_escribe_nada_en_la_sesion() -> None:
 async def test_falla_tras_agotar_el_reintento(monkeypatch: pytest.MonkeyPatch) -> None:
     session = AsyncMock()
     session.execute.side_effect = RuntimeError("timeout de conexión")
-    agente = AgenteAnaliticaBasica(db_session=session)
+    agente = AgenteAnaliticaBasica(db_session=session, organizacion_id=ORG_TEST)
 
     with pytest.raises(AnaliticaBasicaError):
         await agente.ejecutar(AnaliticaInput())

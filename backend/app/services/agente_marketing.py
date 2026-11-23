@@ -10,6 +10,7 @@ la salida. No persiste nada (contrato, sección 3).
 
 import asyncio
 import logging
+import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,7 +44,10 @@ class AgenteMarketing:
             este agente (no persiste nada, contrato sección 3).
     """
 
-    def __init__(self, proveedor: ProveedorMarketing, db_session: AsyncSession) -> None:
+    def __init__(
+        self, proveedor: ProveedorMarketing, db_session: AsyncSession, organizacion_id: uuid.UUID
+    ) -> None:
+        self.organizacion_id = organizacion_id
         self.proveedor = proveedor
         self.db_session = db_session
 
@@ -97,6 +101,7 @@ class AgenteMarketing:
         """Busca los productos y valida existencia + estado (contrato, sección 2)."""
         consulta = select(ProductoCandidato).where(
             ProductoCandidato.id.in_(entrada.productos_candidato_ids),
+            ProductoCandidato.organizacion_id == self.organizacion_id,
             ProductoCandidato.eliminado_en.is_(None),
         )
         resultado = await self.db_session.execute(consulta)

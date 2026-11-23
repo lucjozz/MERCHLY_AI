@@ -1,20 +1,14 @@
-fastapi==0.115.6
+# Dependencias de PRODUCCIÓN (las que van en la imagen Docker).
+# Las de desarrollo/test están en requirements-dev.txt.
+fastapi==0.165.0
+starlette==1.10.0
 uvicorn[standard]==0.34.0
-pydantic==2.10.4
+pydantic==2.14.4
 pydantic-settings==2.7.1
 psycopg[binary]==3.2.3
 redis==5.2.1
 sqlalchemy[asyncio]==2.0.36
 alembic==1.14.0
 google-genai==1.2.0
-bcrypt==4.2.1
-python-jose[cryptography]==3.3.0
-
-# Dev / test dependencies
-pytest==8.3.4
-pytest-asyncio==0.25.0
-httpx==0.28.1
-black==24.10.0
-isort==5.13.2
-ruff==0.8.4
-mypy==1.13.0
+bcrypt==5.0.0
+pyjwt[crypto]==2.15.1

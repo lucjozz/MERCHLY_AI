@@ -8,6 +8,7 @@ solo persiste candidatos en estado ``'candidato'``.
 """
 
 from fastapi import APIRouter, Depends, status
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -17,7 +18,9 @@ from app.services.agente_investigador_producto import AgenteInvestigadorProducto
 from app.services.proveedores.base import ProveedorInvestigacion
 from app.services.proveedores.gemini import ProveedorInvestigacionGemini
 from app.services.proveedores.simulado import ProveedorInvestigacionSimulado
-from app.core.dependencias import requiere_rol
+from app.api.cuotas import aplicar_cuota
+from app.core.dependencias import ROLES_DECISION, requiere_rol
+from app.core.redis import get_redis_client
 from app.models.usuario import Usuario
 
 router = APIRouter(prefix="/agentes", tags=["agentes"])
@@ -47,9 +50,8 @@ def _obtener_proveedor() -> ProveedorInvestigacion:
 async def investigar_producto(
     entrada: InvestigacionInput,
     db_session: AsyncSession = Depends(get_db_session),
-    usuario: Usuario = Depends(
-        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
-    ),
+    usuario: Usuario = Depends(requiere_rol(*ROLES_DECISION)),
+    redis: Redis = Depends(get_redis_client),
 ) -> InvestigacionOutput:
     """Ejecuta una investigación de producto.
 
@@ -63,7 +65,13 @@ async def investigar_producto(
         InvestigacionOutput: productos candidatos encontrados y su
         metadata (sección 3 del contrato).
     """
+    await aplicar_cuota(
+        redis, "investigador", usuario.organizacion_id,
+        get_settings().cuota_investigador_por_hora,
+    )
     proveedor = _obtener_proveedor()
-    agente = AgenteInvestigadorProducto(proveedor=proveedor, db_session=db_session)
+    agente = AgenteInvestigadorProducto(
+        proveedor=proveedor, db_session=db_session, organizacion_id=usuario.organizacion_id
+    )
 
     return await agente.ejecutar(entrada)

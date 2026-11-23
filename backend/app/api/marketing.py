@@ -7,10 +7,14 @@ publica anuncios ni ejecuta gasto real.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.dependencias import requiere_rol
+from app.api.cuotas import aplicar_cuota
+from app.core.config import get_settings
+from app.core.dependencias import ROLES_DECISION, requiere_rol
+from app.core.redis import get_redis_client
 from app.models.usuario import Usuario
 from app.schemas.marketing import MarketingInput, MarketingOutput
 from app.services.agente_marketing import AgenteMarketing, ProductosInvalidosError
@@ -27,9 +31,8 @@ router = APIRouter(prefix="/agentes", tags=["agentes"])
 async def generar_campana_marketing(
     entrada: MarketingInput,
     db_session: AsyncSession = Depends(get_db_session),
-    usuario: Usuario = Depends(
-        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
-    ),
+    usuario: Usuario = Depends(requiere_rol(*ROLES_DECISION)),
+    redis: Redis = Depends(get_redis_client),
 ) -> MarketingOutput:
     """Genera una propuesta de campaña de marketing.
 
@@ -49,8 +52,13 @@ async def generar_campana_marketing(
     # Proveedor provisional (ver
     # app/services/proveedores/marketing_simulado.py): todavía no hay
     # integración real con ChatGPT (rol "Marketing IA").
+    await aplicar_cuota(
+        redis, "marketing", usuario.organizacion_id, get_settings().cuota_marketing_por_hora
+    )
     proveedor = ProveedorMarketingSimulado()
-    agente = AgenteMarketing(proveedor=proveedor, db_session=db_session)
+    agente = AgenteMarketing(
+        proveedor=proveedor, db_session=db_session, organizacion_id=usuario.organizacion_id
+    )
 
     try:
         return await agente.ejecutar(entrada)

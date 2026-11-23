@@ -12,13 +12,14 @@ from sqlalchemy import CheckConstraint, Index, Numeric, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, ConMarcaDeTiempo
+from app.models.base import Base, ConMarcaDeTiempo, DeOrganizacion
 
 NIVELES_VALIDOS = ("alto", "medio", "bajo")
-ESTADOS_VALIDOS = ("candidato", "en_catalogo", "descartado")
+ESTADOS_VALIDOS = ("candidato", "en_revision", "en_catalogo", "descartado")
+ESTADOS_FINALES = ("en_catalogo", "descartado")
 
 
-class ProductoCandidato(ConMarcaDeTiempo, Base):
+class ProductoCandidato(DeOrganizacion, ConMarcaDeTiempo, Base):
     """A product recommended by the Agente Investigador de Producto.
 
     See ``docs/006-BaseDatos/02-Esquema-Fase1.md`` for the full column
@@ -34,7 +35,8 @@ class ProductoCandidato(ConMarcaDeTiempo, Base):
         nivel_competencia_estimado: one of "alto", "medio", "bajo".
         fuentes_evidencia: list of URLs/references backing the recommendation.
         riesgos_identificados: list of risks identified by the agent.
-        estado: one of "candidato", "en_catalogo", "descartado". Only a
+        estado: one of "candidato", "en_revision", "en_catalogo",
+            "descartado" (máquina de estados en 013-04, sección 6.1). Only a
             human can move a row to "en_catalogo" (contrato del agente,
             sección 7 — Límites Explícitos).
         investigacion_id: groups every product returned by a single agent
@@ -52,7 +54,7 @@ class ProductoCandidato(ConMarcaDeTiempo, Base):
             name="ck_productos_candidatos_nivel_competencia",
         ),
         CheckConstraint(
-            "estado IN ('candidato', 'en_catalogo', 'descartado')",
+            "estado IN ('candidato', 'en_revision', 'en_catalogo', 'descartado')",
             name="ck_productos_candidatos_estado",
         ),
         Index("ix_productos_candidatos_categoria", "categoria"),

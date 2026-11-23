@@ -11,7 +11,14 @@ line-length = 88
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
+select = ["E", "F", "I", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests: asserts y contraseñas de prueba son esperables.
+"app/tests/**" = ["S101", "S105", "S106", "S608"]
+# Migraciones: DDL armado con nombres de tabla CONSTANTES del propio archivo
+# (DDL no acepta parámetros); nunca con datos de usuario.
+"alembic/versions/**" = ["S608"]
 
 [tool.mypy]
 python_version = "3.12"

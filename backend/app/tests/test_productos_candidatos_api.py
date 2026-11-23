@@ -8,11 +8,17 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.database import get_db_session
+from app.core.dependencias import obtener_usuario_autenticado
 from app.main import app
+from app.tests.conftest import override_usuario_autenticado
 
 
 @pytest.fixture(autouse=True)
 def _reset_overrides():
+    # Todos los GET exigen sesión desde 013-04: estos tests autentican.
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado(
+        "usuario_operativo"
+    )
     yield
     app.dependency_overrides.clear()
 
@@ -43,8 +49,6 @@ def _override_listado(productos: list, total: int):
     def _get():
         session = AsyncMock()
 
-        resultado_count = MagicMock()
-        resultado_total = AsyncMock(return_value=total)
         resultado_pagina = MagicMock()
         resultado_pagina.scalars.return_value.all.return_value = productos
 

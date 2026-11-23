@@ -41,9 +41,17 @@ class AgenteInvestigadorProducto:
         db_session: sesión async de SQLAlchemy para persistir resultados.
     """
 
-    def __init__(self, proveedor: ProveedorInvestigacion, db_session: AsyncSession) -> None:
+    def __init__(
+        self,
+        proveedor: ProveedorInvestigacion,
+        db_session: AsyncSession,
+        organizacion_id: UUID,
+    ) -> None:
         self.proveedor = proveedor
         self.db_session = db_session
+        # Los productos persistidos pertenecen a la organización del
+        # usuario que lanzó la investigación (013-04, sección 2).
+        self.organizacion_id = organizacion_id
 
     async def ejecutar(self, entrada: InvestigacionInput) -> InvestigacionOutput:
         """Ejecuta una investigación completa.
@@ -126,6 +134,7 @@ class AgenteInvestigadorProducto:
         """
         for producto in productos:
             fila = ProductoCandidato(
+                organizacion_id=self.organizacion_id,
                 investigacion_id=investigacion_id,
                 nombre_producto=producto.nombre_producto,
                 categoria=producto.categoria,

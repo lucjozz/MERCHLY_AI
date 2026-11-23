@@ -1,12 +1,19 @@
+"""Endpoints de productos candidatos (todos exigen autenticación, 013-04)."""
+
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.dependencias import requiere_rol
-from app.models.usuario import Usuario
 
 from app.core.database import get_db_session
-from app.schemas.productos_candidatos import EstadoProducto, ProductoCandidatoDetalle, ProductosCandidatosListado
+from app.core.dependencias import ROLES_BORRADO, TODOS_LOS_ROLES, requiere_rol
+from app.models.usuario import Usuario
+from app.schemas.productos_candidatos import (
+    TAMANO_PAGINA_MAXIMO,
+    EstadoProducto,
+    ProductoCandidatoDetalle,
+    ProductosCandidatosListado,
+)
 from app.services.consulta_productos_candidatos import (
     eliminar_producto_candidato,
     listar_productos_candidatos,
@@ -14,105 +21,57 @@ from app.services.consulta_productos_candidatos import (
 )
 
 router = APIRouter(prefix="/productos-candidatos", tags=["productos-candidatos"])
-@router.get(
-    "",
-    response_model=ProductosCandidatosListado,
-    status_code=status.HTTP_200_OK,
-)
+
+NO_ENCONTRADO = "No existe ese producto."
+
+
+@router.get("", response_model=ProductosCandidatosListado)
 async def listar_productos(
-    pagina: int = 1,
-    tamano_pagina: int = 20,
-    categoria: str | None = None,
+    pagina: int = Query(default=1, ge=1, le=10_000),
+    tamano_pagina: int = Query(default=20, ge=1, le=TAMANO_PAGINA_MAXIMO),
+    categoria: str | None = Query(default=None, max_length=120),
     estado: EstadoProducto | None = None,
-    mercado_objetivo: str | None = None,
+    mercado_objetivo: str | None = Query(default=None, min_length=2, max_length=2),
     db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(requiere_rol(*TODOS_LOS_ROLES)),
 ) -> ProductosCandidatosListado:
-    """Lista productos candidatos, con filtros opcionales y paginación.
-
-    Args:
-        pagina: número de página (empieza en 1).
-        tamano_pagina: cantidad de resultados por página (máx. 100).
-        categoria: filtro opcional por categoría exacta.
-        estado: filtro opcional por estado (candidato/en_catalogo/descartado).
-        mercado_objetivo: filtro opcional por mercado objetivo.
-        db_session: sesión de base de datos inyectada, usada solo para lectura.
-
-    Returns:
-        ProductosCandidatosListado: la página de resultados pedida.
-    """
+    """Lista los productos de la organización del usuario."""
     productos, total = await listar_productos_candidatos(
         db_session=db_session,
+        organizacion_id=usuario.organizacion_id,
         pagina=pagina,
         tamano_pagina=tamano_pagina,
         categoria=categoria,
         estado=estado,
-        mercado_objetivo=mercado_objetivo,
+        mercado_objetivo=mercado_objetivo.upper() if mercado_objetivo else None,
+    )
+    return ProductosCandidatosListado(
+        productos=productos, total=total, pagina=pagina, tamano_pagina=tamano_pagina
     )
 
-    return ProductosCandidatosListado(
-        productos=productos,
-        total=total,
-        pagina=pagina,
-        tamano_pagina=tamano_pagina,
-    )
-@router.get(
-    "/{producto_id}",
-    response_model=ProductoCandidatoDetalle,
-    status_code=status.HTTP_200_OK,
-)
+
+@router.get("/{producto_id}", response_model=ProductoCandidatoDetalle)
 async def obtener_producto(
     producto_id: uuid.UUID,
     db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(requiere_rol(*TODOS_LOS_ROLES)),
 ) -> ProductoCandidatoDetalle:
-    """Busca un producto candidato específico por su ID.
-
-    Args:
-        producto_id: el UUID del producto a buscar (viene de la URL).
-        db_session: sesión de base de datos inyectada, usada solo para lectura.
-
-    Returns:
-        ProductoCandidatoDetalle: el producto encontrado.
-
-    Raises:
-        HTTPException: 404 si no existe ningún producto con ese ID.
-    """
+    """Detalle de un producto. 404 si no existe o es de otra organización."""
     producto = await obtener_producto_candidato_por_id(
-        db_session=db_session, producto_candidato_id=producto_id
+        db_session, usuario.organizacion_id, producto_id
     )
-
     if producto is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No existe un producto candidato con id {producto_id}.",
-        )
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NO_ENCONTRADO)
     return producto
-@router.delete(
-    "/{producto_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
+
+
+@router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def eliminar_producto(
     producto_id: uuid.UUID,
     db_session: AsyncSession = Depends(get_db_session),
-    usuario: Usuario = Depends(
-        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
-    ),
-) -> None:
-    """Elimina un producto candidato por su ID.
-
-    Args:
-        producto_id: el UUID del producto a eliminar.
-        db_session: sesión de base de datos inyectada.
-
-    Raises:
-        HTTPException: 404 si no existe un producto con ese ID.
-    """
-    eliminado = await eliminar_producto_candidato(
-        db_session=db_session, producto_candidato_id=producto_id
-    )
-
-    if not eliminado:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No existe un producto candidato con id {producto_id}.",
-        )
+    usuario: Usuario = Depends(requiere_rol(*ROLES_BORRADO)),
+) -> Response:
+    """Borrado lógico. Solo admin_principal y responsable_negocio."""
+    if not await eliminar_producto_candidato(db_session, usuario.organizacion_id, producto_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NO_ENCONTRADO)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

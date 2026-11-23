@@ -10,6 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.tests.conftest import ORG_TEST
 from app.schemas.marketing import CanalMarketing, MarketingInput
 from app.services.agente_marketing import AgenteMarketing, ProductosInvalidosError
 from app.services.proveedores.marketing_base import (
@@ -60,7 +61,7 @@ class _ProveedorFalsoQueSiempreFalla(ProveedorMarketing):
 async def test_ejecutar_genera_campana_para_producto_en_catalogo() -> None:
     producto = _producto(estado="en_catalogo")
     session = _db_session_con_productos([producto])
-    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session)
+    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session, organizacion_id=ORG_TEST)
     entrada = MarketingInput(
         productos_candidato_ids=[producto.id],
         canales_objetivo=[CanalMarketing.EMAIL],
@@ -75,7 +76,7 @@ async def test_ejecutar_genera_campana_para_producto_en_catalogo() -> None:
 
 async def test_ejecutar_rechaza_producto_inexistente() -> None:
     session = _db_session_con_productos([])
-    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session)
+    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session, organizacion_id=ORG_TEST)
     entrada = MarketingInput(
         productos_candidato_ids=[uuid.uuid4()],
         canales_objetivo=[CanalMarketing.EMAIL],
@@ -89,7 +90,7 @@ async def test_ejecutar_rechaza_producto_inexistente() -> None:
 async def test_ejecutar_rechaza_producto_que_no_esta_en_catalogo() -> None:
     producto = _producto(estado="candidato")
     session = _db_session_con_productos([producto])
-    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session)
+    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session, organizacion_id=ORG_TEST)
     entrada = MarketingInput(
         productos_candidato_ids=[producto.id],
         canales_objetivo=[CanalMarketing.EMAIL],
@@ -103,7 +104,7 @@ async def test_ejecutar_rechaza_producto_que_no_esta_en_catalogo() -> None:
 async def test_ejecutar_calcula_distribucion_de_presupuesto_uniforme() -> None:
     producto = _producto()
     session = _db_session_con_productos([producto])
-    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session)
+    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session, organizacion_id=ORG_TEST)
     entrada = MarketingInput(
         productos_candidato_ids=[producto.id],
         canales_objetivo=[CanalMarketing.EMAIL, CanalMarketing.REDES_SOCIALES],
@@ -122,7 +123,7 @@ async def test_ejecutar_calcula_distribucion_de_presupuesto_uniforme() -> None:
 async def test_ejecutar_sin_presupuesto_no_calcula_distribucion() -> None:
     producto = _producto()
     session = _db_session_con_productos([producto])
-    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session)
+    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session, organizacion_id=ORG_TEST)
     entrada = MarketingInput(
         productos_candidato_ids=[producto.id],
         canales_objetivo=[CanalMarketing.EMAIL],
@@ -141,7 +142,7 @@ async def test_ejecutar_devuelve_respuesta_vacia_si_el_proveedor_falla(
     producto = _producto()
     session = _db_session_con_productos([producto])
     proveedor = _ProveedorFalsoQueSiempreFalla()
-    agente = AgenteMarketing(proveedor=proveedor, db_session=session)
+    agente = AgenteMarketing(proveedor=proveedor, db_session=session, organizacion_id=ORG_TEST)
     entrada = MarketingInput(
         productos_candidato_ids=[producto.id],
         canales_objetivo=[CanalMarketing.EMAIL],
@@ -160,7 +161,7 @@ async def test_no_persiste_nada_en_la_sesion() -> None:
     """Contrato, sección 3: este agente no persiste resultados."""
     producto = _producto()
     session = _db_session_con_productos([producto])
-    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session)
+    agente = AgenteMarketing(proveedor=_ProveedorFalsoExitoso(), db_session=session, organizacion_id=ORG_TEST)
     entrada = MarketingInput(
         productos_candidato_ids=[producto.id],
         canales_objetivo=[CanalMarketing.EMAIL],

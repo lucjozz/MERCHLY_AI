@@ -1,15 +1,15 @@
 import uuid 
 from datetime import datetime
-from sqlalchemy import  DateTime, ForeignKey, String, Text
+from sqlalchemy import  ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
-from app.models.base import Base, ConMarcaDeTiempo
+from app.models.base import Base, ConMarcaDeTiempo, DeOrganizacion
 
 ACCIONES_VALIDAS = ["approve","discard","request_review"]
 
-class DecisionRecord(ConMarcaDeTiempo, Base):
+class DecisionRecord(DeOrganizacion, ConMarcaDeTiempo, Base):
     """Una decisión humana sobre una entidad del sistema (ej. un producto
     candidato). Es el registro central del que dependen context, evidence
     y outcomes.
@@ -23,8 +23,9 @@ class DecisionRecord(ConMarcaDeTiempo, Base):
             decision_type/entity_type pueden apuntar a distintas tablas
             en el futuro (no solo productos candidatos).
         action: la acción tomada (approve/discard/request_review).
-        user_id: quién tomó la decisión. No es una foreign key todavía
-            porque no existe tabla de usuarios (013-Seguridad pendiente).
+        user_id: quién tomó la decisión (UUID del usuario, sale del token,
+            nunca del body). Se guarda como texto por compatibilidad con
+            filas históricas.
         reason: motivo en texto libre, dado por el humano.
         contexto: relación uno-a-uno hacia DecisionContext, si se guardó
             contexto para esta decisión. Sin esta relación (bug corregido
@@ -54,7 +55,7 @@ class DecisionRecord(ConMarcaDeTiempo, Base):
         cascade="all, delete-orphan",
         order_by="DecisionEvidence.creado_en",
     )
-class DecisionContext(ConMarcaDeTiempo, Base):
+class DecisionContext(DeOrganizacion, ConMarcaDeTiempo, Base):
     """La 'foto' de la información disponible al momento de decidir.
 
     Se guarda separada del producto en sí porque los datos del producto
@@ -77,7 +78,7 @@ class DecisionContext(ConMarcaDeTiempo, Base):
     context_data: Mapped[dict] = mapped_column(JSONB, nullable=False)
 
     decision: Mapped["DecisionRecord"] = relationship(back_populates="contexto")
-class DecisionEvidence(ConMarcaDeTiempo, Base):
+class DecisionEvidence(DeOrganizacion, ConMarcaDeTiempo, Base):
     """Una fuente de evidencia que respaldó una decisión.
 
     Separada de DecisionContext a propósito: el contexto es "qué datos
@@ -105,7 +106,7 @@ class DecisionEvidence(ConMarcaDeTiempo, Base):
     evidence: Mapped[str] = mapped_column(Text, nullable=False)
 
     decision: Mapped["DecisionRecord"] = relationship(back_populates="evidencias")
-class DecisionOutcome(ConMarcaDeTiempo, Base):
+class DecisionOutcome(DeOrganizacion, ConMarcaDeTiempo, Base):
     """El resultado real, medido después de ejecutar una decisión.
 
     Es la pieza que conecta 'qué se decidió' con 'qué pasó realmente' —

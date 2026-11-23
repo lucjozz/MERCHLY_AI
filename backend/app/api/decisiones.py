@@ -1,74 +1,53 @@
+"""Endpoints de decisiones humanas (todos exigen autenticación, 013-04)."""
+
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.dependencias import requiere_rol
-from app.models.usuario import Usuario
 
 from app.core.database import get_db_session
+from app.core.dependencias import ROLES_DECISION, TODOS_LOS_ROLES, requiere_rol
+from app.models.usuario import Usuario
 from app.schemas.decisiones import DecisionInput, DecisionOutput
-from app.services.registrar_decision import obtener_decision_por_id, registrar_decision
+from app.services.registrar_decision import (
+    EntidadNoEncontradaError,
+    TransicionInvalidaError,
+    obtener_decision_por_id,
+    registrar_decision,
+)
 
 router = APIRouter(prefix="/decisiones", tags=["decisiones"])
 
 
-@router.post(
-    "",
-    response_model=DecisionOutput,
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post("", response_model=DecisionOutput, status_code=status.HTTP_201_CREATED)
 async def crear_decision(
     entrada: DecisionInput,
     db_session: AsyncSession = Depends(get_db_session),
-    usuario: Usuario = Depends(
-        requiere_rol("admin_principal", "responsable_tecnico", "responsable_negocio")
-    ),
+    usuario: Usuario = Depends(requiere_rol(*ROLES_DECISION)),
 ) -> DecisionOutput:
-    """Registra una nueva decisión humana.
-
-    Args:
-        entrada: la decisión a registrar (acción, motivo, contexto y
-            evidencias opcionales).
-        db_session: sesión de base de datos inyectada.
-
-    Returns:
-        DecisionOutput: la decisión recién creada.
-
-    Raises:
-        HTTPException: 404 si entity_type es "product_candidate" pero no
-            existe ningún producto con ese entity_id.
-    """
+    """Registra una decisión. 404 si el producto no existe (o es de otra
+    organización); 409 si la transición de estado no es válida."""
     try:
-        decision = await registrar_decision(
-            db_session=db_session, entrada=entrada, user_id=usuario.id
+        return await registrar_decision(
+            db_session=db_session,
+            entrada=entrada,
+            user_id=usuario.id,
+            organizacion_id=usuario.organizacion_id,
         )
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(error),
-        ) from error
-
-    return decision
+    except EntidadNoEncontradaError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except TransicionInvalidaError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
-@router.get(
-    "/{decision_id}",
-    response_model=DecisionOutput,
-    status_code=status.HTTP_200_OK,
-)
+@router.get("/{decision_id}", response_model=DecisionOutput)
 async def obtener_decision(
     decision_id: uuid.UUID,
     db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(requiere_rol(*TODOS_LOS_ROLES)),
 ) -> DecisionOutput:
-    """Busca una decisión específica por su ID."""
-    decision = await obtener_decision_por_id(
-        db_session=db_session, decision_id=decision_id
-    )
-
+    """Una decisión de la organización del usuario (404 si no)."""
+    decision = await obtener_decision_por_id(db_session, usuario.organizacion_id, decision_id)
     if decision is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No existe una decisión con id {decision_id}.",
-        )
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No existe esa decisión.")
     return decision

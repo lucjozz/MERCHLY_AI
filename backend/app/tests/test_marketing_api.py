@@ -90,7 +90,7 @@ def test_marketing_rechaza_canales_vacios_con_422() -> None:
     assert respuesta.status_code == 422
 
 
-def test_marketing_sin_token_devuelve_403() -> None:
+def test_marketing_sin_token_devuelve_401() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session([])
 
     client = TestClient(app)
@@ -103,7 +103,7 @@ def test_marketing_sin_token_devuelve_403() -> None:
         },
     )
 
-    assert respuesta.status_code == 403
+    assert respuesta.status_code == 401
 
 
 def test_marketing_con_rol_insuficiente_devuelve_403() -> None:

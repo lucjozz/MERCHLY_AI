@@ -15,6 +15,7 @@ migrarse a agregación en SQL por rendimiento.
 """
 
 import logging
+import uuid
 from collections import Counter
 from datetime import datetime, time, timezone
 
@@ -56,8 +57,9 @@ class AgenteAnaliticaBasica:
             agente (contrato, sección 4 — ninguna escritura permitida).
     """
 
-    def __init__(self, db_session: AsyncSession) -> None:
+    def __init__(self, db_session: AsyncSession, organizacion_id: uuid.UUID) -> None:
         self.db_session = db_session
+        self.organizacion_id = organizacion_id
 
     async def ejecutar(self, entrada: AnaliticaInput) -> AnaliticaOutput:
         """Genera un reporte de analítica básica.
@@ -86,7 +88,9 @@ class AgenteAnaliticaBasica:
         self, entrada: AnaliticaInput
     ) -> list[ProductoCandidato]:
         """Ejecuta la consulta filtrada, con 1 reintento sin backoff."""
-        consulta = self._construir_consulta(entrada)
+        consulta = self._construir_consulta(entrada).where(
+            ProductoCandidato.organizacion_id == self.organizacion_id
+        )
         ultimo_error: Exception | None = None
 
         for intento in range(MAX_REINTENTOS + 1):

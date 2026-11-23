@@ -11,6 +11,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.schemas.base import EntradaEstricta
+
 _ISO_639_1 = re.compile(r"^[a-z]{2}$")
 
 
@@ -31,7 +33,7 @@ class TonoMarketing(str, Enum):
     PREMIUM = "premium"
 
 
-class MarketingInput(BaseModel):
+class MarketingInput(EntradaEstricta):
     """Entrada de una solicitud de campaña (contrato, sección 2).
 
     Attributes:
@@ -47,10 +49,10 @@ class MarketingInput(BaseModel):
     """
 
     productos_candidato_ids: list[uuid.UUID] = Field(min_length=1, max_length=10)
-    canales_objetivo: list[CanalMarketing] = Field(min_length=1)
+    canales_objetivo: list[CanalMarketing] = Field(min_length=1, max_length=10)
     idioma_destino: str
     tono: TonoMarketing = TonoMarketing.NEUTRAL
-    presupuesto_mensual_referencia: float | None = Field(default=None, gt=0)
+    presupuesto_mensual_referencia: float | None = Field(default=None, gt=0, le=10_000_000)
 
     @field_validator("idioma_destino")
     @classmethod

@@ -12,6 +12,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.schemas.base import EntradaEstricta
+
 _ISO_3166_1_ALPHA_2 = re.compile(r"^[A-Z]{2}$")
 
 _RANGO_MAXIMO_DIAS = 365
@@ -28,7 +30,7 @@ class AgruparPor(str, Enum):
     NIVEL_COMPETENCIA_ESTIMADO = "nivel_competencia_estimado"
 
 
-class AnaliticaInput(BaseModel):
+class AnaliticaInput(EntradaEstricta):
     """Entrada de un reporte de analítica (contrato, sección 2).
 
     Attributes:
@@ -43,8 +45,8 @@ class AnaliticaInput(BaseModel):
         default_factory=lambda: date.today() - timedelta(days=30)
     )
     fecha_hasta: date = Field(default_factory=date.today)
-    categoria: str | None = None
-    mercado_objetivo: str | None = None
+    categoria: str | None = Field(default=None, max_length=120)
+    mercado_objetivo: str | None = Field(default=None, max_length=2)
     agrupar_por: AgruparPor = AgruparPor.CATEGORIA
 
     @field_validator("mercado_objetivo")

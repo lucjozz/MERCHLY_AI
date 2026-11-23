@@ -22,12 +22,14 @@ def _reset_overrides():
 def _override_db_session_para_crear(producto, decision_devuelta) -> None:
     def _get():
         session = AsyncMock()
-        session.get = AsyncMock(return_value=producto)
         session.add = MagicMock()
+        session.in_transaction = MagicMock(return_value=False)
 
+        resultado_producto = MagicMock()
+        resultado_producto.scalar_one_or_none.return_value = producto
         resultado_select = MagicMock()
         resultado_select.scalar_one_or_none.return_value = decision_devuelta
-        session.execute = AsyncMock(return_value=resultado_select)
+        session.execute = AsyncMock(side_effect=[resultado_producto, resultado_select])
         yield session
 
     app.dependency_overrides[get_db_session] = _get
@@ -171,7 +173,7 @@ def test_crear_decision_accion_invalida_devuelve_422() -> None:
     assert respuesta.status_code == 422
 
 
-def test_crear_decision_sin_token_devuelve_403() -> None:
+def test_crear_decision_sin_token_devuelve_401() -> None:
     client = TestClient(app)
     respuesta = client.post(
         "/decisiones",
@@ -184,7 +186,7 @@ def test_crear_decision_sin_token_devuelve_403() -> None:
         },
     )
 
-    assert respuesta.status_code == 403
+    assert respuesta.status_code == 401
 
 
 def test_crear_decision_con_rol_insuficiente_devuelve_403() -> None:
@@ -208,6 +210,7 @@ def test_crear_decision_con_rol_insuficiente_devuelve_403() -> None:
 
 
 def test_obtener_decision_devuelve_200_si_existe() -> None:
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado("usuario_operativo")
     decision_id = uuid.uuid4()
     entity_id = uuid.uuid4()
 
@@ -230,6 +233,7 @@ def test_obtener_decision_devuelve_200_si_existe() -> None:
 
 
 def test_obtener_decision_devuelve_404_si_no_existe() -> None:
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado("usuario_operativo")
     def _get():
         session = AsyncMock()
         resultado_select = MagicMock()
@@ -243,3 +247,58 @@ def test_obtener_decision_devuelve_404_si_no_existe() -> None:
     respuesta = client.get(f"/decisiones/{uuid.uuid4()}")
 
     assert respuesta.status_code == 404
+
+def test_obtener_decision_sin_token_devuelve_401() -> None:
+    respuesta = TestClient(app).get(f"/decisiones/{uuid.uuid4()}")
+    assert respuesta.status_code == 401
+
+
+def test_crear_decision_sobre_producto_ya_aprobado_devuelve_409() -> None:
+    producto = SimpleNamespace(id=uuid.uuid4(), estado="en_catalogo")
+    _override_db_session_para_crear(producto, None)
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
+
+    respuesta = TestClient(app).post(
+        "/decisiones",
+        json={
+            "decision_type": "product_selection",
+            "entity_type": "product_candidate",
+            "entity_id": str(producto.id),
+            "action": "discard",
+            "reason": "Cambié de idea.",
+        },
+    )
+
+    assert respuesta.status_code == 409
+    assert producto.estado == "en_catalogo"
+
+
+def test_crear_decision_con_user_id_u_organizacion_en_el_body_devuelve_422() -> None:
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
+    base = {
+        "decision_type": "product_selection",
+        "entity_type": "product_candidate",
+        "entity_id": str(uuid.uuid4()),
+        "action": "approve",
+        "reason": "x",
+    }
+    for extra in ({"user_id": "otro"}, {"organizacion_id": str(uuid.uuid4())}, {"estado": "en_catalogo"}):
+        respuesta = TestClient(app).post("/decisiones", json={**base, **extra})
+        assert respuesta.status_code == 422, extra
+
+
+def test_crear_decision_con_campos_enormes_devuelve_422() -> None:
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado()
+    respuesta = TestClient(app).post(
+        "/decisiones",
+        json={
+            "decision_type": "x" * 51,
+            "entity_type": "product_candidate",
+            "entity_id": str(uuid.uuid4()),
+            "action": "approve",
+            "reason": "r" * 2001,
+            "context_data": {"k": "v" * 20_000},
+        },
+    )
+    assert respuesta.status_code == 422
+    assert "vvvvvvvvvv" not in respuesta.text  # el 422 no devuelve lo enviado

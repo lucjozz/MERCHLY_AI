@@ -67,13 +67,13 @@ def test_analitica_basica_rechaza_mercado_objetivo_invalido() -> None:
     assert respuesta.status_code == 422
 
 
-def test_analitica_basica_sin_token_devuelve_403() -> None:
+def test_analitica_basica_sin_token_devuelve_401() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session_vacia()
 
     client = TestClient(app)
     respuesta = client.post("/agentes/analitica-basica", json={})
 
-    assert respuesta.status_code == 403
+    assert respuesta.status_code == 401
 
 
 def test_analitica_basica_permite_usuario_operativo() -> None:

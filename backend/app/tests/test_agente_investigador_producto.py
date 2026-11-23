@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.tests.conftest import ORG_TEST
 from app.schemas.investigador_producto import (
     InvestigacionInput,
     NivelEstimado,
@@ -58,7 +59,7 @@ async def test_ejecutar_persiste_y_devuelve_productos(db_session_mock: AsyncMock
         categoria="audifonos", mercado_objetivo="BO", cantidad_resultados=3
     )
     agente = AgenteInvestigadorProducto(
-        proveedor=_ProveedorFalsoExitoso(), db_session=db_session_mock
+        proveedor=_ProveedorFalsoExitoso(), db_session=db_session_mock, organizacion_id=ORG_TEST
     )
 
     resultado = await agente.ejecutar(entrada)
@@ -78,7 +79,7 @@ async def test_ejecutar_agrupa_productos_bajo_el_mismo_investigacion_id(
         categoria="audifonos", mercado_objetivo="BO", cantidad_resultados=2
     )
     agente = AgenteInvestigadorProducto(
-        proveedor=_ProveedorFalsoExitoso(), db_session=db_session_mock
+        proveedor=_ProveedorFalsoExitoso(), db_session=db_session_mock, organizacion_id=ORG_TEST
     )
 
     resultado = await agente.ejecutar(entrada)
@@ -87,12 +88,14 @@ async def test_ejecutar_agrupa_productos_bajo_el_mismo_investigacion_id(
     investigacion_ids = {fila.investigacion_id for fila in filas_persistidas}
 
     assert len(investigacion_ids) == 1
+    # Todas las filas quedan en la organización del usuario (013-04).
+    assert {fila.organizacion_id for fila in filas_persistidas} == {ORG_TEST}
     assert investigacion_ids.pop() == resultado.metadata.investigacion_id
 
 
 async def test_ejecutar_no_persiste_si_el_proveedor_falla(db_session_mock: AsyncMock) -> None:
     proveedor = _ProveedorFalsoQueSiempreFalla()
-    agente = AgenteInvestigadorProducto(proveedor=proveedor, db_session=db_session_mock)
+    agente = AgenteInvestigadorProducto(proveedor=proveedor, db_session=db_session_mock, organizacion_id=ORG_TEST)
     entrada = InvestigacionInput(categoria="audifonos", mercado_objetivo="BO")
 
     resultado = await agente.ejecutar(entrada)
@@ -110,7 +113,7 @@ async def test_ejecutar_reintenta_hasta_el_maximo_definido_en_el_contrato(
     monkeypatch.setattr("asyncio.sleep", AsyncMock())
 
     proveedor = _ProveedorFalsoQueSiempreFalla()
-    agente = AgenteInvestigadorProducto(proveedor=proveedor, db_session=db_session_mock)
+    agente = AgenteInvestigadorProducto(proveedor=proveedor, db_session=db_session_mock, organizacion_id=ORG_TEST)
     entrada = InvestigacionInput(categoria="audifonos", mercado_objetivo="BO")
 
     await agente.ejecutar(entrada)

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.dependencias import requiere_rol
+from app.core.dependencias import TODOS_LOS_ROLES, requiere_rol
 from app.models.usuario import Usuario
 from app.schemas.analitica_basica import AnaliticaInput, AnaliticaOutput
 from app.services.agente_analitica_basica import AgenteAnaliticaBasica
@@ -26,14 +26,7 @@ router = APIRouter(prefix="/agentes", tags=["agentes"])
 async def generar_reporte_analitica_basica(
     entrada: AnaliticaInput,
     db_session: AsyncSession = Depends(get_db_session),
-    usuario: Usuario = Depends(
-        requiere_rol(
-            "admin_principal",
-            "responsable_tecnico",
-            "responsable_negocio",
-            "usuario_operativo",
-        )
-    ),
+    usuario: Usuario = Depends(requiere_rol(*TODOS_LOS_ROLES)),
 ) -> AnaliticaOutput:
     """Genera un reporte de analítica básica sobre productos candidatos.
 
@@ -48,5 +41,5 @@ async def generar_reporte_analitica_basica(
     Returns:
         AnaliticaOutput: el reporte completo (sección 3 del contrato).
     """
-    agente = AgenteAnaliticaBasica(db_session=db_session)
+    agente = AgenteAnaliticaBasica(db_session=db_session, organizacion_id=usuario.organizacion_id)
     return await agente.ejecutar(entrada)

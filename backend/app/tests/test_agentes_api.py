@@ -73,7 +73,7 @@ def test_investigar_producto_rechaza_mercado_objetivo_invalido() -> None:
     assert respuesta.status_code == 422
 
 
-def test_investigar_producto_sin_token_devuelve_403() -> None:
+def test_investigar_producto_sin_token_devuelve_401() -> None:
     app.dependency_overrides[get_db_session] = _override_db_session()
 
     client = TestClient(app)
@@ -82,7 +82,7 @@ def test_investigar_producto_sin_token_devuelve_403() -> None:
         json={"categoria": "audifonos", "mercado_objetivo": "BO"},
     )
 
-    assert respuesta.status_code == 403
+    assert respuesta.status_code == 401
 
 
 def test_investigar_producto_con_rol_insuficiente_devuelve_403() -> None:

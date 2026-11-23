@@ -22,7 +22,9 @@ if config.config_file_name is not None:
 # Alembic runs synchronously; psycopg 3 supports both sync and async with
 # the same "postgresql+psycopg" dialect, so no separate sync driver needed.
 settings = get_settings()
-config.set_main_option("sqlalchemy.url", settings.database_url_async)
+# Las migraciones corren con el rol dueño de las tablas (013-04, sección 2.3),
+# nunca con el rol de la app (merchly_app, sujeto a RLS y sin DDL).
+config.set_main_option("sqlalchemy.url", settings.database_url_migraciones_async)
 
 target_metadata = Base.metadata
 
