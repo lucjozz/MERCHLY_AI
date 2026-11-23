@@ -784,3 +784,18 @@ Estado:
 
 **Pedido por Daniel el 2026-11-24. Pendiente visto bueno del CTO.**
 
+
+## DEC-037
+
+Fecha:
+
+2026-11-24
+
+Decisión:
+
+1. **Bitácora de auditoría** (`docs/013-Seguridad/06`): tabla `eventos_auditoria` append-only (el rol de la app solo INSERT/SELECT), RLS de lectura por organización e inserción permitida sin organización (logins fallidos). Registra inicios de sesión (el fallido solo con hash del email), sesiones, recuperación de contraseña, equipo (con rol anterior y nuevo), borrados y perfil; nunca contraseñas, tokens, códigos ni links. No bloquea la acción si falla. Pantalla "Actividad de seguridad" para el admin. Se detectó y corrigió que un INSERT ... RETURNING bajo RLS exige la política de lectura (los eventos sin organización fallaban en silencio).
+2. **Documentos de lanzamiento:** plan de respuesta a incidentes (013-07), checklist de release (013-08) y borradores de términos y privacidad para el abogado (`docs/021-Legal`, no vigentes).
+
+Estado:
+
+**Pedido por Daniel el 2026-11-24. Pendiente visto bueno del CTO (y del abogado para 021-Legal).**
