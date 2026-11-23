@@ -7,6 +7,7 @@ interface CardProps {
   interactiva?: boolean;
   as?: "div" | "section" | "article" | "li";
   "aria-label"?: string;
+  id?: string;
   style?: React.CSSProperties;
 }
 

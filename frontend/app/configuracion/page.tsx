@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Check, Lock, Settings, Mail, Share2, Search, MessageCircle, ArrowRight, Users } from "lucide-react";
 import FormularioPerfil from "@/components/FormularioPerfil";
 import { obtenerOrganizacion, type Organizacion } from "@/lib/api/organizacion";
+import { obtenerTipoCambioBcb, type TipoCambioBcb } from "@/lib/api/tipo-cambio";
 import BotonCerrarSesion from "@/components/BotonCerrarSesion";
 import SesionInfo from "@/components/SesionInfo";
 import { SesionInvalidaError } from "@/lib/api/errores";
@@ -49,8 +50,9 @@ export default async function Configuracion() {
   let error: string | null = null;
 
   let organizacion: Organizacion | null = null;
+  let bcb: TipoCambioBcb | null = null;
   try {
-    [usuario, organizacion] = await Promise.all([obtenerUsuarioActual(), obtenerOrganizacion()]);
+    [usuario, organizacion, bcb] = await Promise.all([obtenerUsuarioActual(), obtenerOrganizacion(), obtenerTipoCambioBcb()]);
   } catch (e) {
     if (e instanceof SesionInvalidaError) redirect("/login");
     error = MENSAJE_SIN_BACKEND;
@@ -172,7 +174,7 @@ export default async function Configuracion() {
           </Card>
 
           {organizacion && (
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 scroll-mt-6" id="tu-negocio">
               <TituloCard
                 descripcion="La IA usa estos datos para buscar productos pensando en tu negocio, y los precios se muestran en tu moneda."
                 accion={
@@ -186,7 +188,7 @@ export default async function Configuracion() {
                 Tu negocio
               </TituloCard>
               {rolActual === "admin_principal" ? (
-                <FormularioPerfil organizacion={organizacion} />
+                <FormularioPerfil organizacion={organizacion} dolarBcb={bcb?.valor ?? null} />
               ) : (
                 <dl className="grid gap-3 text-sm sm:grid-cols-2">
                   <div><dt className="text-texto-2">Negocio</dt><dd className="text-texto">{organizacion.nombre}</dd></div>

@@ -11,6 +11,8 @@ import { BOTON_PRIMARIO, CAMPO, ETIQUETA_CAMPO } from "@/components/ui/estilos";
 
 interface FormularioPerfilProps {
   organizacion: Organizacion;
+  /** Dólar oficial del BCB de hoy, para mostrarlo en la elección. */
+  dolarBcb?: number | null;
   destino?: string; // a dónde ir después de guardar
   textoBoton?: string;
 }
@@ -20,7 +22,7 @@ function numero(valor: string): number | null {
   return valor.trim() === "" || !Number.isFinite(n) ? null : n;
 }
 
-export default function FormularioPerfil({ organizacion, destino, textoBoton = "Guardar" }: FormularioPerfilProps) {
+export default function FormularioPerfil({ organizacion, dolarBcb = null, destino, textoBoton = "Guardar" }: FormularioPerfilProps) {
   const router = useRouter();
   const [nombre, setNombre] = useState(organizacion.nombre);
   const [pais, setPais] = useState(organizacion.pais || "BO");
@@ -28,6 +30,7 @@ export default function FormularioPerfil({ organizacion, destino, textoBoton = "
   const [presupuesto, setPresupuesto] = useState(organizacion.presupuesto_mensual?.toString() ?? "");
   const [moneda, setMoneda] = useState<"BOB" | "USD">(organizacion.moneda);
   const [tipoCambio, setTipoCambio] = useState(organizacion.tipo_cambio?.toString() ?? "");
+  const [modoCambio, setModoCambio] = useState<"bcb" | "propio">(organizacion.tipo_cambio ? "propio" : "bcb");
   const [envio, setEnvio] = useState(organizacion.costo_envio_unitario_usd.toString());
   const [impuestos, setImpuestos] = useState(organizacion.impuestos_importacion_pct.toString());
   const [guardando, setGuardando] = useState(false);
@@ -37,6 +40,10 @@ export default function FormularioPerfil({ organizacion, destino, textoBoton = "
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (moneda === "BOB" && modoCambio === "propio" && !numero(tipoCambio)) {
+      setError("Escribí tu tipo de cambio o elegí el oficial del BCB.");
+      return;
+    }
     setGuardando(true);
     try {
       await guardarPerfil({
@@ -45,7 +52,8 @@ export default function FormularioPerfil({ organizacion, destino, textoBoton = "
         rubro: rubro.trim(),
         presupuesto_mensual: numero(presupuesto),
         moneda,
-        tipo_cambio: numero(tipoCambio),
+        // Automático = sin valor propio: se usa el dólar oficial del BCB del día.
+        tipo_cambio: modoCambio === "propio" ? numero(tipoCambio) : null,
         costo_envio_unitario_usd: numero(envio) ?? 0,
         impuestos_importacion_pct: numero(impuestos) ?? 0,
       });
@@ -84,13 +92,40 @@ export default function FormularioPerfil({ organizacion, destino, textoBoton = "
           <option value="USD">Dólares (US$)</option>
         </select>
       </div>
-      <div>
-        <label htmlFor="p-cambio" className={ETIQUETA_CAMPO}>
-          Tipo de cambio propio (Bs por 1 US$)
-        </label>
-        <input id="p-cambio" inputMode="decimal" placeholder="Vacío = dólar oficial del BCB (automático)" value={tipoCambio} onChange={(e) => setTipoCambio(e.target.value)} className={CAMPO} />
-        <p className="mt-1 text-xs text-texto-3">Dejalo vacío para usar el oficial del BCB, que se actualiza solo.</p>
-      </div>
+      {moneda === "BOB" && (
+        <fieldset className="sm:col-span-2">
+          <legend className={ETIQUETA_CAMPO}>¿Qué dólar usamos para tus precios?</legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className={`flex cursor-pointer gap-3 rounded-xl border p-4 text-sm ${modoCambio === "bcb" ? "border-acento bg-acento-hondo/30" : "border-borde"}`}>
+              <input type="radio" name="modo-cambio" checked={modoCambio === "bcb"} onChange={() => setModoCambio("bcb")} className="mt-1" />
+              <span>
+                <span className="block font-medium text-texto">
+                  Oficial del BCB{dolarBcb ? ` · hoy Bs ${dolarBcb.toLocaleString("es-BO")}` : ""}
+                </span>
+                <span className="text-xs text-texto-2">Se actualiza solo todos los días.</span>
+              </span>
+            </label>
+            <label className={`flex cursor-pointer gap-3 rounded-xl border p-4 text-sm ${modoCambio === "propio" ? "border-acento bg-acento-hondo/30" : "border-borde"}`}>
+              <input type="radio" name="modo-cambio" checked={modoCambio === "propio"} onChange={() => setModoCambio("propio")} className="mt-1" />
+              <span className="flex-1">
+                <span className="block font-medium text-texto">El que pago yo</span>
+                <span className="text-xs text-texto-2">Fijo, hasta que lo cambies.</span>
+                {modoCambio === "propio" && (
+                  <input
+                    id="p-cambio"
+                    inputMode="decimal"
+                    aria-label="Tipo de cambio propio (Bs por 1 US$)"
+                    placeholder="Bs por 1 US$"
+                    value={tipoCambio}
+                    onChange={(e) => setTipoCambio(e.target.value)}
+                    className={`${CAMPO} mt-2`}
+                  />
+                )}
+              </span>
+            </label>
+          </div>
+        </fieldset>
+      )}
       <div>
         <label htmlFor="p-presupuesto" className={ETIQUETA_CAMPO}>Presupuesto mensual para comprar mercadería ({moneda === "BOB" ? "Bs" : "US$"}) · opcional</label>
         <input id="p-presupuesto" inputMode="decimal" value={presupuesto} onChange={(e) => setPresupuesto(e.target.value)} className={CAMPO} />
