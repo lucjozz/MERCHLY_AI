@@ -40,7 +40,14 @@ Catálogo real de los endpoints HTTP que expone el backend hoy.
 | `GET /decisiones/{id}` | Bearer | los 4 |
 | `GET /productos-candidatos` | Bearer | los 4 |
 | `GET /productos-candidatos/{id}` | Bearer | los 4 |
-| `DELETE /productos-candidatos/{id}` | Bearer | admin, negocio (borrado lógico) | Se actualiza en el mismo cambio que agrega o modifica un endpoint — no es una API pública versionada todavía (eso corresponde a una decisión futura, cuando exista Fase 7 o consumidores externos reales).
+| `DELETE /productos-candidatos/{id}` | Bearer | admin, negocio (borrado lógico) |
+| `GET /campanas`, `GET /campanas/{id}` | Bearer | los 4 (004-03, DEC-034) |
+| `PATCH /campanas/{id}`, `DELETE /campanas/{id}` | Bearer | admin, técnico, negocio |
+| `GET /organizacion`, `GET /organizacion/uso` | Bearer | los 4 |
+| `PUT /organizacion/perfil` | Bearer | solo admin |
+| `GET /usuarios`, `PATCH /usuarios/{id}`, `GET/POST /usuarios/invitaciones`, `DELETE /usuarios/invitaciones/{id}` | Bearer | solo admin (en su organización) |
+| `POST /auth/aceptar-invitacion` | pública (token de invitación) | — (límite de intentos por IP) |
+| `POST /agentes/marketing` | — | además guarda la campaña en el historial (`metadata.campana_id`) | Se actualiza en el mismo cambio que agrega o modifica un endpoint — no es una API pública versionada todavía (eso corresponde a una decisión futura, cuando exista Fase 7 o consumidores externos reales).
 
 ---
 

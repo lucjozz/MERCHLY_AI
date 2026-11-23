@@ -174,6 +174,12 @@ BASE (DEC-031) + ENDURECIMIENTO PARA LANZAMIENTO (DEC-032) IMPLEMENTADOS — pen
 
 Frontend: pantalla "Plan y pagos" (beta gratuita, cobros no activos todavía).
 
+## Proveedores reales y funciones de producto (DEC-033, DEC-034)
+
+* Gemini y OpenAI reales listos, con modelo de IA según el plan (beta, emprendedor, negocio); se activan al cargar `GEMINI_API_KEY` y `OPENAI_API_KEY`. `scripts.probar_ia` mide costo real. Sin claves, siguen los simulados.
+* Historial de campañas (guardar, editar, compartir), canales reales (copiar, WhatsApp, email, descargar), perfil del negocio con onboarding, precios en bolivianos con calculadora de margen y búsqueda de proveedores, equipo con invitaciones y roles, uso del plan visible, página de Ayuda y botón de WhatsApp de soporte (falta el número).
+* 269 tests de backend; E2E por el BFF 32/32.
+
 Pendientes para lanzar: ver docs/013-Seguridad/05-Pendientes-para-Lanzar.md.
 
 

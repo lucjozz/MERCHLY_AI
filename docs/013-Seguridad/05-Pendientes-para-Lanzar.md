@@ -86,7 +86,7 @@ Lista única de lo que falta para poner MERCHLY AI en producción. Separa lo que
 
 | Prioridad | Tarea | Depende de |
 |---|---|---|
-| Alta | Gestión de usuarios: invitar, desactivar, cambiar rol (solo admin de la organización; nadie cambia su propio rol) | Email transaccional para las invitaciones |
+| ✅ | Gestión de usuarios: invitar por link, desactivar y cambiar rol (2026-11-24). Falta enviar la invitación por email | Email transaccional |
 | Alta | Bitácora de auditoría append-only (login ok/fallido, logout, cambios de rol, borrados) | — |
 | ✅ | Botón "Continuar con Google": implementado (2026-11-23), falta la prueba con una cuenta real | — |
 | Alta | Pagos: la pantalla "Plan y pagos" existe (beta gratuita, precios a definir); falta integrar la pasarela con checkout alojado y webhooks firmados | Pasarela elegida, empresa registrada |
