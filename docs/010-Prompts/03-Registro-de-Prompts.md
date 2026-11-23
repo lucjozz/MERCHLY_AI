@@ -29,7 +29,8 @@ Mantener un catálogo vivo de qué prompt está activo por agente, en qué versi
 
 | Agente | Documento de prompt | Versión | Proveedor destino | Estado |
 |---|---|---|---|---|
-| Agente Investigador de Producto | `02-Prompt-Investigador-de-Producto.md` | 1.0.0 | Gemini (`ProveedorInvestigacionGemini`) | Activo — verificado contra la API real de Gemini (2026-08-03). |
+| Agente Investigador de Producto | `02-Prompt-Investigador-de-Producto.md` | 1.1.0 | Gemini (`ProveedorInvestigacionGemini`) | Activo — verificado contra la API real de Gemini (2026-08-03). |
+| Agente de Marketing | `04-Prompt-Agente-de-Marketing.md` | 1.0.0 | OpenAI (`ProveedorMarketingOpenAI`) | Documentado — se activa al cargar `OPENAI_API_KEY` (2026-11-23). |
 
 ---
 

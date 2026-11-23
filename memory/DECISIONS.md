@@ -711,3 +711,22 @@ Auditoría del 2026-11-22: 25 de 37 pruebas de seguridad fallaron (datos legible
 Estado:
 
 **Aprobado por Daniel (admin_principal) el 2026-11-22 en sus decisiones de alcance (refresh tokens, transiciones, borrado lógico, quién borra, fail-closed en login, login con Google). Pendiente del visto bueno del CTO. Implementación en curso.**
+
+## DEC-033
+
+Fecha:
+
+2026-11-23
+
+Decisión:
+
+Se activan proveedores de IA reales: Gemini para el Investigador de Producto y OpenAI para el Agente de Marketing (`docs/007-Agentes/07-Proveedores-Reales-y-Modelos-por-Plan.md`, prompt en `docs/010-Prompts/04-Prompt-Agente-de-Marketing.md`). Cada organización tiene un plan (`beta`, `emprendedor`, `negocio`) y **cuanto mejor el plan, mejor el modelo** de cada agente; los modelos se configuran por variable de entorno. Se agregan defensas específicas de LLM: timeouts, tope de tokens, datos de usuario delimitados contra prompt injection, validación y recorte de la salida, `store=false` en OpenAI.
+
+Motivo:
+
+Daniel pidió probar con APIs reales y diferenciar los planes de pago por calidad de modelo.
+
+Estado:
+
+**Aprobado por Daniel el 2026-11-23. Pendiente visto bueno del CTO.**
+
