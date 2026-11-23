@@ -15,12 +15,22 @@ from app.api.cuotas import aplicar_cuota
 from app.core.config import get_settings
 from app.core.dependencias import ROLES_DECISION, requiere_rol
 from app.core.redis import get_redis_client
+from app.services.planes import modelo_para, plan_de_organizacion
+from app.services.proveedores.marketing_base import ProveedorMarketing
+from app.services.proveedores.marketing_openai import ProveedorMarketingOpenAI
 from app.models.usuario import Usuario
 from app.schemas.marketing import MarketingInput, MarketingOutput
 from app.services.agente_marketing import AgenteMarketing, ProductosInvalidosError
 from app.services.proveedores.marketing_simulado import ProveedorMarketingSimulado
 
 router = APIRouter(prefix="/agentes", tags=["agentes"])
+
+
+def _obtener_proveedor(plan: str = "beta") -> ProveedorMarketing:
+    """OpenAI (modelo según el plan) si hay OPENAI_API_KEY; si no, el simulado."""
+    if get_settings().openai_api_key:
+        return ProveedorMarketingOpenAI(modelo=modelo_para("marketing", plan))
+    return ProveedorMarketingSimulado()
 
 
 @router.post(
@@ -49,13 +59,11 @@ async def generar_campana_marketing(
         HTTPException: 422 si algún producto referenciado no existe o no
             está en estado 'en_catalogo' (``ProductosInvalidosError``).
     """
-    # Proveedor provisional (ver
-    # app/services/proveedores/marketing_simulado.py): todavía no hay
-    # integración real con ChatGPT (rol "Marketing IA").
     await aplicar_cuota(
         redis, "marketing", usuario.organizacion_id, get_settings().cuota_marketing_por_hora
     )
-    proveedor = ProveedorMarketingSimulado()
+    plan = await plan_de_organizacion(db_session, usuario.organizacion_id)
+    proveedor = _obtener_proveedor(plan)
     agente = AgenteMarketing(
         proveedor=proveedor, db_session=db_session, organizacion_id=usuario.organizacion_id
     )

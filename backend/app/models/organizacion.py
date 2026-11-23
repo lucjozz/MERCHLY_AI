@@ -19,9 +19,14 @@ class Organizacion(ConMarcaDeTiempo, Base):
         nombre: nombre para mostrar del negocio.
         activo: una organización inactiva no puede operar (sus usuarios
             reciben 401), sin perder su historial.
+        plan: beta, emprendedor o negocio. Define los modelos de IA de sus
+            agentes (docs/007-Agentes/07). Lo cambia solo el sistema.
     """
 
     __tablename__ = "organizaciones"
 
     nombre: Mapped[str] = mapped_column(String(120), nullable=False)
     activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    plan: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="beta", server_default="beta"
+    )

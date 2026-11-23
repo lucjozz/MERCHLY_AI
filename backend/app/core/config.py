@@ -65,6 +65,19 @@ class Settings(BaseSettings):
 
     google_client_id: str | None = None
 
+    # IA real (docs/007-Agentes/07). Sin clave = proveedor simulado.
+    openai_api_key: str | None = None
+    ia_timeout_segundos: float = 45.0
+    ia_max_tokens_salida: int = 8192
+    # Modelo por agente y por plan: mejor plan = mejor modelo. Configurables
+    # porque los nombres de modelos cambian; se validan con scripts.probar_ia.
+    modelo_investigador_beta: str = "gemini-2.5-flash-lite"
+    modelo_investigador_emprendedor: str = "gemini-2.5-flash"
+    modelo_investigador_negocio: str = "gemini-2.5-pro"
+    modelo_marketing_beta: str = "gpt-5-nano"
+    modelo_marketing_emprendedor: str = "gpt-5-mini"
+    modelo_marketing_negocio: str = "gpt-5"
+
     db_pool_size: int = 5
     db_max_overflow: int = 5
     db_statement_timeout_ms: int = 15_000

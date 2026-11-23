@@ -119,6 +119,7 @@ class InvestigacionMetadata(BaseModel):
     total_productos_devueltos: int
     confianza: Literal["normal", "baja"] = "normal"
     investigacion_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    modelo: str | None = None  # modelo de IA usado ("simulado" si no hay clave)
 
 
 class InvestigacionOutput(BaseModel):

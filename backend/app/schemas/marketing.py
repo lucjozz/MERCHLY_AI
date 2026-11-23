@@ -93,6 +93,7 @@ class MarketingMetadata(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
     campana_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    modelo: str | None = None  # modelo de IA usado ("simulado" si no hay clave)
 
 
 class MarketingOutput(BaseModel):

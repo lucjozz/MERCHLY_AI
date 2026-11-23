@@ -33,6 +33,7 @@ const PLANES: Plan[] = [
     precio: "Gratis",
     actual: true,
     incluye: [
+      "IA estándar para buscar productos y crear campañas",
       "Investigador de productos (hasta 30 búsquedas por hora)",
       "Campañas de marketing (hasta 60 por hora)",
       "Decisiones con historial",
@@ -46,14 +47,14 @@ const PLANES: Plan[] = [
     para: "Para tiendas que ya venden",
     precio: "Precio a definir",
     destacado: true,
-    incluye: ["Todo lo de Beta", "Más búsquedas y campañas por mes", "Soporte por email"],
+    incluye: ["Todo lo de Beta", "IA avanzada: mejores búsquedas y textos", "Más búsquedas y campañas por mes", "Soporte por email"],
   },
   {
     id: "negocio",
     nombre: "Negocio",
     para: "Para equipos con varias personas",
     precio: "Precio a definir",
-    incluye: ["Todo lo de Emprendedor", "Más usuarios y roles", "Soporte prioritario"],
+    incluye: ["Todo lo de Emprendedor", "IA premium: el modelo más potente", "Más usuarios y roles", "Soporte prioritario"],
   },
 ];
 

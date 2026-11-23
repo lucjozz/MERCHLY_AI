@@ -79,7 +79,8 @@ class AgenteMarketing:
                     "marketing falló tras agotar los reintentos."
                 ],
                 metadata=MarketingMetadata(
-                    idioma_destino=entrada.idioma_destino, tono=entrada.tono
+                    idioma_destino=entrada.idioma_destino, tono=entrada.tono,
+                    modelo=getattr(self.proveedor, "modelo", "simulado"),
                 ),
             )
 
@@ -91,7 +92,8 @@ class AgenteMarketing:
             distribucion_presupuesto_sugerida=self._distribuir_presupuesto(entrada),
             advertencias=resultado.advertencias,
             metadata=MarketingMetadata(
-                idioma_destino=entrada.idioma_destino, tono=entrada.tono
+                idioma_destino=entrada.idioma_destino, tono=entrada.tono,
+                modelo=getattr(self.proveedor, "modelo", "simulado"),
             ),
         )
 

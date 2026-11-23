@@ -84,6 +84,7 @@ class AgenteInvestigadorProducto:
             total_productos_devueltos=len(productos),
             confianza=confianza,
             investigacion_id=investigacion_id,
+            modelo=getattr(self.proveedor, "modelo", "simulado"),
         )
 
         return InvestigacionOutput(productos=productos, metadata=metadata)
