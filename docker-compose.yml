@@ -1,33 +1,65 @@
 name: merchly-ai
 
+# Endurecido según docs/013-Seguridad/04, sección 7:
+# - Postgres, Redis y backend publicados SOLO en 127.0.0.1 (nadie del wifi entra).
+# - Contraseñas desde el archivo .env de la raíz (fuera de git; ver .env.example).
+# - El backend se conecta con el rol merchly_app (sin superusuario, sujeto a RLS);
+#   las migraciones usan el rol dueño (merchly).
+# - Contenedores sin privilegios extra, raíz de solo lectura y con límites.
+
+x-seguridad: &seguridad
+  security_opt:
+    - no-new-privileges:true
+  restart: unless-stopped
+
 services:
   backend:
+    <<: *seguridad
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: merchly-backend
     env_file:
       - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://merchly_app:${DB_APP_PASSWORD:?Falta DB_APP_PASSWORD en .env}@db:5432/merchly
+      DATABASE_URL_MIGRACIONES: postgresql://merchly:${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}@db:5432/merchly
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?Falta REDIS_PASSWORD en .env}@redis:6379/0
+      # El backend solo es alcanzable desde esta máquina (127.0.0.1) por el BFF de
+      # Next, que le reenvía la IP real del cliente en X-Forwarded-For.
+      CONFIAR_PROXY: "true"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-      - ./backend/app:/app/app
-    restart: unless-stopped
+      # Solo desarrollo: código del disco, de solo lectura dentro del contenedor.
+      - ./backend/app:/app/app:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop:
+      - ALL
+    mem_limit: 768m
+    cpus: 1.5
+    pids_limit: 256
+    networks:
+      - interna
 
   db:
-    image: pgvector/pgvector:pg16
+    <<: *seguridad
+    image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
     container_name: merchly-db
     environment:
       POSTGRES_USER: merchly
-      POSTGRES_PASSWORD: merchly
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
       POSTGRES_DB: merchly
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - merchly_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -35,19 +67,39 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    restart: unless-stopped
+    mem_limit: 1g
+    pids_limit: 256
+    networks:
+      - interna
 
   redis:
-    image: redis:7-alpine
+    <<: *seguridad
+    image: redis:7-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
     container_name: merchly-redis
+    user: "redis"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Falta REDIS_PASSWORD en .env}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes --protected-mode yes"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - merchly_redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
       interval: 5s
       timeout: 5s
       retries: 10
-    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    mem_limit: 256m
+    pids_limit: 128
+    networks:
+      - interna
+
+networks:
+  interna:
 
 volumes:
   merchly_pgdata:
+  merchly_redisdata:

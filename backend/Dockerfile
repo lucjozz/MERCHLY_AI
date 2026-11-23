@@ -1,19 +1,45 @@
-FROM python:3.12-slim
+# Imagen del backend (docs/013-Seguridad/04, sección 7).
+# - Multi-etapa: la imagen final no tiene pip cache ni herramientas de build.
+# - psycopg[binary] trae su propia libpq: no hace falta gcc ni libpq-dev.
+# - Corre como usuario sin privilegios.
+# - Base fijada por digest (actualizar a propósito, no por accidente).
 
-WORKDIR /app
+FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b AS build
 
-# System dependencies required by psycopg (PostgreSQL client libs)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends libpq-dev gcc \
-    && rm -rf /var/lib/apt/lists/*
-
+ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app ./app
-COPY alembic ./alembic
-COPY alembic.ini .
+
+FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Parches de seguridad del sistema base (p. ej. zlib) sin esperar a una
+# nueva imagen oficial.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --system --gid 10001 merchly \
+    && useradd --system --uid 10001 --gid merchly --no-create-home --shell /usr/sbin/nologin merchly
+
+WORKDIR /app
+COPY --from=build /opt/venv /opt/venv
+COPY --chown=root:root app ./app
+COPY --chown=root:root alembic ./alembic
+COPY --chown=root:root alembic.ini .
+COPY --chown=root:root scripts ./scripts
+
+USER merchly
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4).status == 200 else 1)"
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--no-server-header", "--no-proxy-headers"]

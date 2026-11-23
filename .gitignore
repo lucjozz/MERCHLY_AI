@@ -23,3 +23,9 @@ node_modules/
 
 # Sistema
 .DS_Store
+
+# Next.js: variables locales
+.env*.local
+
+# Configuración local del editor (no se sube)
+.vscode/
