@@ -47,6 +47,11 @@ def obtener_ip_cliente(request: Request) -> str:
     return request.client.host if request.client else "desconocida"
 
 
+def contexto_peticion(request: Request) -> dict[str, str | None]:
+    """IP real y navegador, para la bitácora de auditoría."""
+    return {"ip": obtener_ip_cliente(request), "user_agent": request.headers.get("user-agent")}
+
+
 async def obtener_claims(
     request: Request,
     credenciales: HTTPAuthorizationCredentials | None = Depends(security_scheme),

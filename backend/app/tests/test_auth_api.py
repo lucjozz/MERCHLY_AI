@@ -233,3 +233,15 @@ def test_refresh_invalido_devuelve_401() -> None:
     app.dependency_overrides[get_db_session] = _get
     r = TestClient(app).post("/auth/refresh", json={"refresh_token": "x" * 40})
     assert r.status_code == 401
+
+
+def test_login_registra_eventos_sin_datos_sensibles(redis_falso, eventos_auditoria) -> None:
+    _db(_usuario())
+    _login()
+    _login(password="otra-password-incorrecta")
+    acciones = [e.accion for e in eventos_auditoria]
+    assert acciones == ["login_ok", "login_fallido"]
+    fallido = eventos_auditoria[1]
+    assert fallido.usuario_id is None and "email_hash" in fallido.detalle
+    assert "test@merchly.ai" not in str(fallido.detalle) and PASSWORD not in str([e.detalle for e in eventos_auditoria])
+

@@ -12,6 +12,7 @@ from app.models.decisiones import (
     DecisionOutcome,
     DecisionRecord,
 )
+from app.models.evento_auditoria import EventoAuditoria
 from app.models.invitacion import Invitacion
 from app.models.organizacion import Organizacion
 from app.models.producto_candidato import ProductoCandidato
@@ -26,6 +27,7 @@ __all__ = [
     "DecisionEvidence",
     "DecisionOutcome",
     "DecisionRecord",
+    "EventoAuditoria",
     "Invitacion",
     "Organizacion",
     "ProductoCandidato",

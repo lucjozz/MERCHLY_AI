@@ -1,4 +1,5 @@
-import { Users } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, Users } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
 import Alerta from "@/components/ui/Alerta";
 import PanelEquipo from "@/components/PanelEquipo";
@@ -30,6 +31,11 @@ export default async function Equipo() {
         icono={Users}
         descripcion="Invitá a tu socio o a tus empleados y elegí qué puede hacer cada uno."
         ayuda="Creás una invitación, copiás el link y se lo mandás. La persona entra, elige su contraseña y ya forma parte de tu negocio. Nadie puede cambiarse su propio rol."
+        acciones={
+          <Link href="/equipo/actividad" className="inline-flex items-center gap-2 rounded-lg border border-borde px-4 py-2 text-sm text-texto-2 hover:text-texto">
+            <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Actividad de seguridad
+          </Link>
+        }
       />
       {error ? <Alerta>{error}</Alerta> : <PanelEquipo miembros={miembros} invitaciones={invitaciones} miId={miId} />}
     </>

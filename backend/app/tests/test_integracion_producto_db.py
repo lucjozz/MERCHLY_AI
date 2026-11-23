@@ -52,6 +52,7 @@ def mundo():
     with psycopg.connect(URLS[0], autocommit=True) as c:
         orgs = [org_a, org_b]
         c.execute("DELETE FROM campanas WHERE organizacion_id = ANY(%s)", (orgs,))
+        c.execute("DELETE FROM eventos_auditoria WHERE organizacion_id = ANY(%s) OR usuario_id IN (SELECT id FROM usuarios WHERE organizacion_id = ANY(%s))", (orgs, orgs))
         c.execute("DELETE FROM invitaciones WHERE organizacion_id = ANY(%s)", (orgs,))
         c.execute("DELETE FROM refresh_tokens WHERE usuario_id IN (SELECT id FROM usuarios WHERE organizacion_id = ANY(%s))", (orgs,))
         c.execute("DELETE FROM restablecimientos_password WHERE usuario_id IN (SELECT id FROM usuarios WHERE organizacion_id = ANY(%s))", (orgs,))
@@ -262,3 +263,34 @@ async def test_link_de_restablecimiento_vencido_o_reemplazado(mundo, fabrica, mo
     async with fabrica() as s:
         with pytest.raises(rp.TokenRestablecimientoInvalidoError):
             await rp.restablecer_password(s, segundo, "nueva-password-segura-123")
+
+
+# ------------------------------------------------------------ bitácora de auditoría (DEC-037)
+
+
+async def test_bitacora_append_only_y_aislada(mundo, fabrica) -> None:
+    from app.models.evento_auditoria import EventoAuditoria
+    from app.services.auditoria import listar_eventos
+
+    # Inserta con el rol de la app y SIN organización fijada (como un login): la política lo permite.
+    async with fabrica() as s:
+        s.add_all([
+            EventoAuditoria(organizacion_id=mundo["a"], usuario_id=mundo["admin_a"], accion="login_ok", detalle={}),
+            EventoAuditoria(organizacion_id=mundo["b"], usuario_id=mundo["admin_b"], accion="login_ok", detalle={}),
+            EventoAuditoria(organizacion_id=None, accion="login_fallido", detalle={"email_hash": "x"}),
+        ])
+        await s.commit()
+
+    async with await _sesion(fabrica, mundo["a"]) as s:
+        eventos, total = await listar_eventos(s, mundo["a"], 1, 50)
+        assert total >= 1 and {e.organizacion_id for e in eventos} == {mundo["a"]}
+        otros, total_b = await listar_eventos(s, mundo["b"], 1, 50)  # aunque pida los de B: RLS
+        assert total_b == 0 and otros == []
+
+    with psycopg.connect(URLS[1]) as c, c.cursor() as cur:  # el rol de la app no puede alterar la bitácora
+        cur.execute("SELECT set_config('app.organizacion_id', %s, true)", (str(mundo["a"]),))
+        for sql in ("UPDATE eventos_auditoria SET accion = 'nada'", "DELETE FROM eventos_auditoria"):
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                cur.execute(sql)
+            c.rollback()
+            cur.execute("SELECT set_config('app.organizacion_id', %s, true)", (str(mundo["a"]),))

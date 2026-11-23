@@ -17,6 +17,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.agentes import router as agentes_router
 from app.api.analitica import router as analitica_router
+from app.api.auditoria import router as auditoria_router
 from app.api.auth import router as auth_router
 from app.api.campanas import router as campanas_router
 from app.api.decisiones import router as decisiones_router
@@ -110,3 +111,4 @@ app.include_router(campanas_router)
 app.include_router(organizacion_router)
 app.include_router(usuarios_router)
 app.include_router(tipo_cambio_router)
+app.include_router(auditoria_router)

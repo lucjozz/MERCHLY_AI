@@ -2,11 +2,12 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.dependencias import ROLES_BORRADO, TODOS_LOS_ROLES, requiere_rol
+from app.core.dependencias import ROLES_BORRADO, TODOS_LOS_ROLES, contexto_peticion, requiere_rol
+from app.services.auditoria import registrar_evento
 from app.models.usuario import Usuario
 from app.schemas.productos_candidatos import (
     TAMANO_PAGINA_MAXIMO,
@@ -68,10 +69,15 @@ async def obtener_producto(
 @router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def eliminar_producto(
     producto_id: uuid.UUID,
+    request: Request,
     db_session: AsyncSession = Depends(get_db_session),
     usuario: Usuario = Depends(requiere_rol(*ROLES_BORRADO)),
 ) -> Response:
     """Borrado lógico. Solo admin_principal y responsable_negocio."""
     if not await eliminar_producto_candidato(db_session, usuario.organizacion_id, producto_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NO_ENCONTRADO)
+    await registrar_evento(
+        "producto_borrado", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id,
+        objetivo_tipo="producto", objetivo_id=producto_id, **contexto_peticion(request),
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)

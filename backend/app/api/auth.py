@@ -13,7 +13,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.database import get_db_session
-from app.core.dependencias import obtener_claims, obtener_ip_cliente, obtener_usuario_autenticado
+from sqlalchemy import or_, select
+
+from app.core.dependencias import contexto_peticion, obtener_claims, obtener_ip_cliente, obtener_usuario_autenticado
+from app.services.auditoria import hash_corto, registrar_evento
 from app.core.redis import get_redis_client
 from app.core.security import ClaimsAcceso
 from app.models.organizacion import Organizacion
@@ -116,6 +119,7 @@ async def login(
         except RedisError:
             raise _servicio_no_disponible()
         logger.info("login_fallido")
+        await registrar_evento("login_fallido", detalle={"email_hash": hash_corto(entrada.email)}, **contexto_peticion(request))
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=_CREDENCIALES_INVALIDAS)
 
     try:
@@ -123,6 +127,7 @@ async def login(
     except RedisError:
         pass
     logger.info("login_ok usuario=%s", usuario.id)
+    await registrar_evento("login_ok", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request))
     return _a_output(await emitir_sesion(db_session, usuario))
 
 
@@ -168,9 +173,16 @@ async def login_google(
         await limites.registrar_fallo("google", ip)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No se pudo validar tu cuenta de Google.")
 
+    existia = await db_session.scalar(
+        select(Usuario.id).where(or_(Usuario.google_sub == identidad.sub, Usuario.email == identidad.email.strip().lower()))
+    )
     usuario = await usuario_desde_google(db_session, identidad.sub, identidad.email, identidad.nombre)
     if usuario is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No se pudo validar tu cuenta de Google.")
+    await registrar_evento(
+        "login_google" if existia else "registro_google",
+        organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request),
+    )
     return _a_output(await emitir_sesion(db_session, usuario))
 
 
@@ -208,6 +220,10 @@ async def aceptar(
             detail="La invitación no es válida o ya venció. Pedile una nueva al admin de tu negocio.",
         )
     logger.info("invitacion_aceptada usuario=%s", usuario.id)
+    await registrar_evento(
+        "invitacion_aceptada", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id,
+        detalle={"rol": usuario.rol}, **contexto_peticion(request),
+    )
     return _a_output(await emitir_sesion(db_session, usuario))
 
 
@@ -229,7 +245,12 @@ async def olvide_password(
         await limites.registrar_fallo(f"olvido:{entrada.email}", ip)  # cada pedido cuenta
     except RedisError:
         raise _servicio_no_disponible()
-    await solicitar_restablecimiento(db_session, entrada.email)
+    usuario = await solicitar_restablecimiento(db_session, entrada.email)
+    if usuario is not None:
+        await registrar_evento(
+            "password_restablecimiento_pedido", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id,
+            **contexto_peticion(request),
+        )
     return {"detail": "Si el email está registrado, te mandamos un link para restablecer la contraseña."}
 
 
@@ -250,7 +271,7 @@ async def restablecer(
     if espera:
         raise _demasiados_intentos(espera)
     try:
-        await restablecer_password(db_session, entrada.token, entrada.password)
+        usuario = await restablecer_password(db_session, entrada.token, entrada.password)
     except PasswordInvalidaError as error:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
     except TokenRestablecimientoInvalidoError:
@@ -262,12 +283,17 @@ async def restablecer(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El link no es válido o ya venció. Pedí uno nuevo.",
         )
+    await registrar_evento(
+        "password_restablecida", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id,
+        **contexto_peticion(request),
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
     entrada: LogoutInput,
+    request: Request,
     claims: ClaimsAcceso = Depends(obtener_claims),
     usuario: Usuario = Depends(obtener_usuario_autenticado),
     db_session: AsyncSession = Depends(get_db_session),
@@ -280,16 +306,21 @@ async def logout(
         logger.warning("Redis no disponible: el access token vence solo en <=15 min")
     if entrada.refresh_token:
         await revocar_refresh(db_session, entrada.refresh_token, usuario.id)
+    await registrar_evento("logout", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/cerrar-todas-las-sesiones", status_code=status.HTTP_204_NO_CONTENT)
 async def cerrar_sesiones(
+    request: Request,
     usuario: Usuario = Depends(obtener_usuario_autenticado),
     db_session: AsyncSession = Depends(get_db_session),
 ) -> Response:
     """Invalida todas las sesiones del usuario en todos sus dispositivos."""
     await cerrar_todas_las_sesiones(db_session, usuario)
+    await registrar_evento(
+        "sesiones_cerradas", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request)
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

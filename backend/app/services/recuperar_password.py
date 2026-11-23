@@ -30,13 +30,13 @@ class TokenRestablecimientoInvalidoError(Exception):
     pass
 
 
-async def solicitar_restablecimiento(db_session: AsyncSession, email: str) -> None:
+async def solicitar_restablecimiento(db_session: AsyncSession, email: str) -> Usuario | None:
     """Si el email corresponde a un usuario activo, le manda el link. Nunca revela si existe."""
     usuario = (
         await db_session.execute(select(Usuario).where(Usuario.email == email.strip().lower()))
     ).scalar_one_or_none()
     if usuario is None or not usuario.activo or usuario.eliminado_en is not None:
-        return
+        return None
 
     ahora = datetime.now(timezone.utc)
     await db_session.execute(  # vale solo el último link pedido
@@ -71,6 +71,7 @@ async def solicitar_restablecimiento(db_session: AsyncSession, email: str) -> No
         )
     except EmailNoEnviadoError:
         logger.error("No se pudo enviar el email de restablecimiento")
+    return usuario
 
 
 async def restablecer_password(db_session: AsyncSession, token: str, password_nueva: str) -> Usuario:

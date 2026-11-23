@@ -354,6 +354,7 @@ def test_matriz_rol_x_endpoint(metodo, ruta, body, prohibidos, rol) -> None:
         ("post", "/usuarios/invitaciones"),
         ("delete", f"/usuarios/invitaciones/{_ID}"),
         ("get", "/tipo-cambio"),
+        ("get", "/auditoria"),
     ],
 )
 def test_todo_exige_autenticacion(metodo: str, ruta: str) -> None:

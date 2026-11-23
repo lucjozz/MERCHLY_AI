@@ -131,3 +131,17 @@ def _aislar_infraestructura():
         if app.dependency_overrides.get(dependencia) is reemplazo:
             del app.dependency_overrides[dependencia]
 
+
+@pytest.fixture(autouse=True)
+def eventos_auditoria(monkeypatch):
+    """Los eventos de auditoría de los tests unitarios quedan en una lista."""
+    from app.services import auditoria
+
+    registrados = []
+
+    async def _en_memoria(evento):
+        registrados.append(evento)
+
+    monkeypatch.setattr(auditoria, "_guardar", _en_memoria)
+    return registrados
+
