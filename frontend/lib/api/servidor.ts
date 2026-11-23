@@ -1,29 +1,29 @@
 import { cookies } from "next/headers";
-import { COOKIE_TOKEN } from "@/lib/auth";
-import { SesionInvalidaError } from "@/lib/api/errores";
+import { BACKEND_URL, COOKIE_ACCESS } from "@/lib/sesion/config";
+import { SesionInvalidaError, SinPermisoError } from "@/lib/api/errores";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-export async function fetchAutenticadoServidor(
-  ruta: string,
-  init: RequestInit = {}
-): Promise<Response> {
-  const almacen = await cookies();
-  const token = almacen.get(COOKIE_TOKEN)?.value;
+/**
+ * Fetch al backend desde Server Components. Lee el access token de la
+ * cookie HttpOnly (el proxy ya lo refrescó si hacía falta).
+ *
+ * - 401 → SesionInvalidaError (la página redirige a /login).
+ * - 403 → SinPermisoError (NO es sesión vencida: se muestra "sin permiso").
+ */
+export async function fetchAutenticadoServidor(ruta: string, init: RequestInit = {}): Promise<Response> {
+  const token = (await cookies()).get(COOKIE_ACCESS)?.value;
   if (!token) throw new SesionInvalidaError();
 
   const headers = new Headers(init.headers);
   headers.set("Authorization", `Bearer ${token}`);
 
-  const respuesta = await fetch(`${API_URL}${ruta}`, {
+  const respuesta = await fetch(`${BACKEND_URL}${ruta}`, {
     ...init,
     headers,
     cache: "no-store",
+    signal: init.signal ?? AbortSignal.timeout(30_000),
   });
 
-  if (respuesta.status === 401 || respuesta.status === 403) {
-    throw new SesionInvalidaError();
-  }
-
+  if (respuesta.status === 401) throw new SesionInvalidaError();
+  if (respuesta.status === 403) throw new SinPermisoError();
   return respuesta;
 }

@@ -1,17 +1,32 @@
 import { listarProductosCandidatos } from "@/lib/api/productos-candidatos";
 import Link from "next/link";
+import { Package, SearchX, Sparkles, Filter, X } from "lucide-react";
 import BuscarProductos from "@/components/BuscarProductos";
 import BotonEliminar from "@/components/BotonEliminar";
+import TarjetaProducto from "@/components/TarjetaProducto";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
+import Alerta from "@/components/ui/Alerta";
+import { BOTON_SECUNDARIO, CAMPO } from "@/components/ui/estilos";
+import { ESTADOS, plural } from "@/lib/etiquetas";
+import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
 
 interface PageProps {
   searchParams: Promise<{ categoria?: string; estado?: string }>;
 }
 
-const ESTILO_ESTADO: Record<string, string> = {
-  candidato: "bg-[#3A2E12] text-[#E8B84B] border border-[#4A3A17]",
-  en_catalogo: "bg-[#123420] text-[#4ADE80] border border-[#1B4A2C]",
-  descartado: "bg-[#1C2029] text-[#7C8699] border border-[#242938]",
-};
+const PESTANAS = [
+  { valor: "", etiqueta: "Todos" },
+  ...Object.entries(ESTADOS).map(([valor, info]) => ({ valor, etiqueta: info.etiqueta })),
+];
+
+function hrefFiltro(categoria: string | undefined, estado: string) {
+  const parametros = new URLSearchParams();
+  if (categoria) parametros.set("categoria", categoria);
+  if (estado) parametros.set("estado", estado);
+  const query = parametros.toString();
+  return query ? `/productos?${query}` : "/productos";
+}
 
 export default async function Productos({ searchParams }: PageProps) {
   const filtros = await searchParams;
@@ -25,126 +40,138 @@ export default async function Productos({ searchParams }: PageProps) {
       filtros.categoria,
       filtros.estado
     );
-  } catch {
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+  } catch (e) {
+    error = mensajeDeErrorDePagina(e);
   }
 
+  const hayFiltros = Boolean(filtros.categoria || filtros.estado);
+  const estadoActual = filtros.estado ?? "";
+
   return (
-    <div className="px-10 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[#F5F7FA]">Productos</h1>
-        <p className="text-[#7C8699] mt-1">
-          Oportunidades descubiertas por el Investigador de Producto.
-        </p>
-      </header>
+    <>
+      <PageHeader
+        titulo="Productos"
+        icono={Package}
+        descripcion="Las oportunidades de venta que encontró la IA, con su evidencia."
+        ayuda={
+          <>
+            Buscá una categoría, abrí cada producto para revisar la evidencia y
+            decidí si entra a tu catálogo. Los que están <strong className="text-ambar">Por revisar</strong>{" "}
+            esperan tu decisión.
+          </>
+        }
+      />
 
       <BuscarProductos />
 
-      <form className="flex flex-wrap gap-3 mb-6 bg-[#12151C] border border-[#1F2430] p-4 rounded-lg">
-        <input
-          type="text"
-          name="categoria"
-          placeholder="Filtrar por categoría"
-          defaultValue={filtros.categoria}
-          className="bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] placeholder-[#5B6272] rounded-md px-3 py-2 text-sm flex-1 min-w-[180px] outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors"
-        />
-        <select
-          name="estado"
-          defaultValue={filtros.estado ?? ""}
-          className="bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] rounded-md px-3 py-2 text-sm outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors"
-        >
-          <option value="">Todos los estados</option>
-          <option value="candidato">Candidato</option>
-          <option value="en_catalogo">En catálogo</option>
-          <option value="descartado">Descartado</option>
-        </select>
-        <button
-          type="submit"
-          className="bg-[#1E3A5F] hover:bg-[#28507F] border border-[#2B4A73] text-white px-5 py-2 rounded-md text-sm font-medium transition-all hover:scale-[1.02]"
-        >
-          Filtrar
-        </button>
-      </form>
+      <section aria-labelledby="titulo-lista">
+        <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <h2 id="titulo-lista" className="text-lg font-semibold text-texto">
+            Tus productos
+          </h2>
 
-      {error && (
-        <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm">
-          {error}
-        </div>
-      )}
-
-      {datos && datos.productos.length === 0 && (
-        <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-12 text-center">
-          <p className="text-[#7C8699] text-sm">
-            No hay productos candidatos todavía.
-          </p>
-          <p className="text-[#5B6272] text-xs mt-1">
-            Usá el buscador de arriba para investigar tu primera categoría.
-          </p>
-        </div>
-      )}
-
-      {datos && datos.productos.length > 0 && (
-        <>
-          <div className="bg-[#12151C] border border-[#1F2430] rounded-lg overflow-hidden">
-            <table className="w-full border-collapse text-sm">
-              <thead className="border-b border-[#1F2430]">
-                <tr className="text-left text-[#7C8699] text-xs uppercase tracking-wide">
-                  <th className="p-4 font-medium">Producto</th>
-                  <th className="p-4 font-medium">Categoría</th>
-                  <th className="p-4 font-medium">Estado</th>
-                  <th className="p-4 font-medium">Demanda</th>
-                  <th className="p-4 font-medium">Competencia</th>
-                  <th className="p-4 font-medium w-12"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {datos.productos.map((producto) => (
-                  <tr
-                    key={producto.id}
-                    className="border-t border-[#1F2430] hover:bg-[#161922] transition-colors"
-                  >
-                    <td className="p-0 font-medium">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <nav aria-label="Filtrar por estado" className="-mx-1 overflow-x-auto px-1">
+              <ul className="flex w-max gap-1 rounded-xl border border-borde bg-superficie p-1">
+                {PESTANAS.map((p) => {
+                  const activa = estadoActual === p.valor;
+                  return (
+                    <li key={p.valor || "todos"}>
                       <Link
-                        href={`/productos/${producto.id}`}
-                        className="block p-4 text-[#F5F7FA] hover:text-[#3D7DD8] transition-colors"
-                      >
-                        {producto.nombre_producto}
-                      </Link>
-                    </td>
-                    <td className="p-4 text-[#7C8699]">{producto.categoria}</td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-md text-xs font-medium ${
-                          ESTILO_ESTADO[producto.estado] ??
-                          "bg-[#1C2029] text-[#7C8699] border border-[#242938]"
+                        href={hrefFiltro(filtros.categoria, p.valor)}
+                        aria-current={activa ? "page" : undefined}
+                        className={`block whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                          activa
+                            ? "bg-acento-hondo font-medium text-texto"
+                            : "text-texto-2 hover:text-texto"
                         }`}
                       >
-                        {producto.estado}
-                      </span>
-                    </td>
-                    <td className="p-4 text-[#F5F7FA]">
-                      {producto.nivel_demanda_estimado}
-                    </td>
-                    <td className="p-4 text-[#7C8699]">
-                      {producto.nivel_competencia_estimado}
-                    </td>
-                    <td className="p-4">
-                      <BotonEliminar
-                        productoId={producto.id}
-                        nombreProducto={producto.nombre_producto}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        {p.etiqueta}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            <form className="flex gap-2" role="search">
+              {filtros.estado && <input type="hidden" name="estado" value={filtros.estado} />}
+              <label htmlFor="filtro-categoria" className="sr-only">
+                Filtrar por categoría
+              </label>
+              <input
+                id="filtro-categoria"
+                type="text"
+                name="categoria"
+                placeholder="Filtrar por categoría"
+                defaultValue={filtros.categoria}
+                className={`${CAMPO} min-w-0 py-2 sm:w-52`}
+              />
+              <button type="submit" className={`${BOTON_SECUNDARIO} py-2`} aria-label="Aplicar filtro">
+                <Filter className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Filtrar</span>
+              </button>
+            </form>
           </div>
-          <p className="text-[#5B6272] text-xs mt-3 font-mono">
-            {datos.total} producto{datos.total !== 1 ? "s" : ""} · filtros por
-            categoría y estado
+        </div>
+
+        {filtros.categoria && (
+          <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-texto-2">
+            Mostrando la categoría{" "}
+            <span className="font-medium text-texto">“{filtros.categoria}”</span>
+            <Link
+              href={hrefFiltro(undefined, estadoActual)}
+              className="inline-flex items-center gap-1 rounded-full border border-borde-fuerte px-2 py-0.5 text-xs text-texto-2 hover:text-texto"
+            >
+              <X className="h-3 w-3" aria-hidden="true" />
+              Quitar
+            </Link>
           </p>
-        </>
-      )}
-    </div>
+        )}
+
+        {error && <Alerta>{error}</Alerta>}
+
+        {datos && datos.productos.length === 0 &&
+          (hayFiltros ? (
+            <EmptyState
+              icono={SearchX}
+              titulo="No hay productos con estos filtros"
+              descripcion="Probá con otra categoría u otro estado, o mirá todos tus productos."
+              accion={{ href: "/productos", texto: "Ver todos" }}
+            />
+          ) : (
+            <EmptyState
+              icono={Sparkles}
+              titulo="Todavía no investigaste nada"
+              descripcion="Escribí una categoría como “mochilas antirrobo” en el buscador de arriba y la IA te sugiere productos."
+            />
+          ))}
+
+        {datos && datos.productos.length > 0 && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {datos.productos.map((producto, i) => (
+                <TarjetaProducto
+                  key={producto.id}
+                  producto={producto}
+                  retraso={Math.min(i, 8) * 40}
+                  acciones={
+                    <BotonEliminar
+                      productoId={producto.id}
+                      nombreProducto={producto.nombre_producto}
+                    />
+                  }
+                />
+              ))}
+            </div>
+            <p className="mt-4 text-xs text-texto-2">
+              {datos.total > datos.productos.length
+                ? `Mostrando ${datos.productos.length} de ${datos.total} productos.`
+                : plural(datos.total, "producto") + "."}
+            </p>
+          </>
+        )}
+      </section>
+    </>
   );
 }

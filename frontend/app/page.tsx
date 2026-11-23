@@ -1,9 +1,28 @@
 import { obtenerReporteAnalitica } from "@/lib/api/analitica";
 import { listarProductosCandidatos } from "@/lib/api/productos-candidatos";
 import Link from "next/link";
-import { Package, CircleCheck, Zap, Bot } from "lucide-react";
-import { redirect } from "next/navigation";
-import { SesionInvalidaError } from "@/lib/api/errores";
+import {
+  Package,
+  CircleCheck,
+  Hourglass,
+  CircleSlash,
+  Search,
+  Inbox,
+  Tags,
+  ArrowRight,
+  LayoutDashboard,
+} from "lucide-react";
+import PageHeader from "@/components/ui/PageHeader";
+import Card, { TituloCard } from "@/components/ui/Card";
+import Metrica from "@/components/ui/Metrica";
+import EmptyState from "@/components/ui/EmptyState";
+import Alerta from "@/components/ui/Alerta";
+import Badge from "@/components/ui/Badge";
+import { BOTON_PRIMARIO, ENLACE } from "@/components/ui/estilos";
+import RecorridoGuiado from "@/components/RecorridoGuiado";
+import TarjetaProducto from "@/components/TarjetaProducto";
+import { plural } from "@/lib/etiquetas";
+import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
 
 export const dynamic = "force-dynamic";
 
@@ -17,151 +36,162 @@ export default async function Dashboard() {
       obtenerReporteAnalitica(),
       listarProductosCandidatos(1, 5, undefined, "candidato"),
     ]);
-    } catch (e) {
-    if (e instanceof SesionInvalidaError) redirect("/login");
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+  } catch (e) {
+    error = mensajeDeErrorDePagina(e);
   }
 
+  const conversion = reporte?.tasa_conversion_catalogo;
+  const actividad = reporte?.actividad_agente_investigador;
+
   return (
-    <div className="px-10 py-8">
-      <header className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-[#F5F7FA]">Buenos días</h1>
-          <p className="text-[#7C8699] mt-1">
-            Aquí está el estado actual de Merchly AI.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ADE80] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4ADE80]" />
-          </span>
-          <span className="text-[#7C8699]">SISTEMA OPERATIVO</span>
-        </div>
-      </header>
+    <>
+      <PageHeader
+        titulo="Hola, este es tu panel"
+        icono={LayoutDashboard}
+        descripcion="Un resumen de lo que encontró la IA y de lo que está esperando tu decisión."
+        acciones={
+          <Link href="/productos" className={BOTON_PRIMARIO}>
+            <Search className="h-4 w-4" aria-hidden="true" />
+            Buscar productos con IA
+          </Link>
+        }
+      />
 
-      {error && (
-        <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Alerta>{error}</Alerta>}
 
-      {reporte && (
-        <>
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <div className="flex items-center gap-2 text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                <Package className="h-4 w-4" aria-hidden="true" />
-                Productos
-              </div>
-              <p className="text-3xl font-bold text-[#F5F7FA]">
-                {reporte.resumen_catalogo.total_productos_candidatos}
-              </p>
-            </div>
+      {reporte && conversion && actividad && (
+        <div className="space-y-8">
+          <RecorridoGuiado
+            investigaciones={actividad.total_investigaciones}
+            porRevisar={conversion.candidato}
+            aprobados={conversion.en_catalogo}
+            descartados={conversion.descartado}
+          />
 
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <div className="flex items-center gap-2 text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                <CircleCheck className="h-4 w-4" aria-hidden="true" />
-                En Catálogo
-              </div>
-              <p className="text-3xl font-bold text-[#4ADE80]">
-                {reporte.tasa_conversion_catalogo.en_catalogo}
-              </p>
-            </div>
-
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <div className="flex items-center gap-2 text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                <Zap className="h-4 w-4" aria-hidden="true" />
-                Pendientes
-              </div>
-              <p className="text-3xl font-bold text-[#E8B84B]">
-                {reporte.tasa_conversion_catalogo.candidato}
-              </p>
-            </div>
-
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <div className="flex items-center gap-2 text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                <Bot className="h-4 w-4" aria-hidden="true" />
-                Agentes
-              </div>
-              <p className="text-3xl font-bold text-[#3D7DD8]">3 / 3</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[#F5F7FA] mb-1">
-                Requiere tu atención
+          <section aria-labelledby="titulo-numeros">
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 id="titulo-numeros" className="text-base font-semibold text-texto">
+                Tus números
               </h2>
-              <p className="text-[#E8B84B] text-sm mb-4">
-                {reporte.tasa_conversion_catalogo.candidato} decisiones pendientes
-              </p>
+              <p className="text-xs text-texto-2">Últimos 30 días</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+              <Metrica
+                etiqueta="Productos encontrados"
+                valor={reporte.resumen_catalogo.total_productos_candidatos}
+                icono={Package}
+                color="azul"
+                detalle="Sugeridos por la IA"
+              />
+              <Metrica
+                etiqueta="Por revisar"
+                valor={conversion.candidato}
+                icono={Hourglass}
+                color="ambar"
+                detalle="Esperan tu decisión"
+                retraso={60}
+              />
+              <Metrica
+                etiqueta="En catálogo"
+                valor={conversion.en_catalogo}
+                icono={CircleCheck}
+                color="verde"
+                detalle="Aprobados por vos"
+                retraso={120}
+              />
+              <Metrica
+                etiqueta="Descartados"
+                valor={conversion.descartado}
+                icono={CircleSlash}
+                color="gris"
+                detalle="No avanzan"
+                retraso={180}
+              />
+            </div>
+          </section>
+
+          <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+            <Card as="section" aria-label="Requiere tu atención">
+              <TituloCard
+                descripcion="Productos que la IA sugirió y todavía no revisaste."
+                accion={
+                  conversion.candidato > 0 ? (
+                    <Badge tono="ambar" punto>
+                      {plural(conversion.candidato, "pendiente")}
+                    </Badge>
+                  ) : undefined
+                }
+              >
+                Requiere tu atención
+              </TituloCard>
 
               {recientes && recientes.productos.length === 0 && (
-                <p className="text-[#5B6272] text-sm">
-                  No hay productos pendientes de revisión.
-                </p>
+                <EmptyState
+                  compacto
+                  icono={Inbox}
+                  titulo="Estás al día"
+                  descripcion="No hay productos esperando tu decisión. Buscá una categoría nueva para que la IA te sugiera más."
+                  accion={{ href: "/productos", texto: "Buscar productos" }}
+                />
               )}
 
-              <div className="space-y-3">
-                {recientes?.productos.map((producto) => (
-                  <div
-                    key={producto.id}
-                    className="bg-[#0B0D12] border border-[#1F2430] rounded-md p-4 flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="text-[#E8B84B] text-xs font-medium mb-1">
-                        NUEVO PRODUCTO
-                      </p>
-                      <p className="text-[#F5F7FA] font-medium">
-                        {producto.nombre_producto}
-                      </p>
-                      <p className="text-[#7C8699] text-xs mt-1">
-                        Demanda {producto.nivel_demanda_estimado} · Competencia{" "}
-                        {producto.nivel_competencia_estimado}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/productos/${producto.id}`}
-                      className="text-[#3D7DD8] text-sm font-medium hover:underline whitespace-nowrap ml-4"
-                    >
-                      Ver análisis →
-                    </Link>
+              {recientes && recientes.productos.length > 0 && (
+                <>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {recientes.productos.map((producto, i) => (
+                      <TarjetaProducto key={producto.id} producto={producto} retraso={i * 60} />
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[#F5F7FA] mb-4">
-                Categorías más investigadas
-              </h2>
-              {reporte.actividad_agente_investigador.categorias_mas_investigadas
-                .length === 0 && (
-                <p className="text-[#5B6272] text-sm">Todavía no hay actividad.</p>
+                  {recientes.total > recientes.productos.length && (
+                    <Link href="/productos?estado=candidato" className={`mt-5 ${ENLACE}`}>
+                      Ver los {recientes.total} pendientes
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  )}
+                </>
               )}
-              <div className="space-y-3">
-                {reporte.actividad_agente_investigador.categorias_mas_investigadas.map(
-                  (categoria, i) => (
-                    <div key={categoria} className="flex items-center gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#3D7DD8]" />
-                      <p className="text-[#F5F7FA] text-sm">{categoria}</p>
-                    </div>
-                  )
-                )}
+            </Card>
+
+            <Card as="section" aria-label="Categorías más investigadas" className="h-fit">
+              <TituloCard descripcion="Lo que más le pediste investigar a la IA.">
+                Categorías más buscadas
+              </TituloCard>
+
+              {actividad.categorias_mas_investigadas.length === 0 ? (
+                <EmptyState
+                  compacto
+                  icono={Tags}
+                  titulo="Todavía no investigaste nada"
+                  descripcion="Escribí una categoría como “mochilas antirrobo” y la IA te sugiere productos."
+                />
+              ) : (
+                <ol className="space-y-2">
+                  {actividad.categorias_mas_investigadas.map((categoria, i) => (
+                    <li key={categoria}>
+                      <Link
+                        href={`/productos?categoria=${encodeURIComponent(categoria)}`}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-texto transition-colors hover:bg-superficie-2"
+                      >
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-acento-hondo text-xs font-semibold text-acento-claro">
+                          {i + 1}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate">{categoria}</span>
+                        <ArrowRight className="h-4 w-4 text-texto-2" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              )}
+
+              <div className="mt-5 border-t border-borde pt-4 text-xs leading-relaxed text-texto-2">
+                {plural(actividad.total_investigaciones, "búsqueda")} con IA ·{" "}
+                {actividad.promedio_productos_por_investigacion} productos por búsqueda
+                en promedio
               </div>
-              <div className="border-t border-[#1F2430] mt-5 pt-4">
-                <p className="text-[#7C8699] text-xs">
-                  {reporte.actividad_agente_investigador.total_investigaciones}{" "}
-                  investigaciones ·{" "}
-                  {reporte.actividad_agente_investigador.promedio_productos_por_investigacion}{" "}
-                  productos en promedio
-                </p>
-              </div>
-            </div>
+            </Card>
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }

@@ -1,6 +1,10 @@
-import Link from "next/link";
+import { Megaphone, PackageCheck } from "lucide-react";
 import { listarProductosCandidatos } from "@/lib/api/productos-candidatos";
 import PanelMarketing from "@/components/PanelMarketing";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
+import Alerta from "@/components/ui/Alerta";
+import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
 
 export const dynamic = "force-dynamic";
 
@@ -14,43 +18,31 @@ export default async function Marketing() {
       id: p.id,
       nombre_producto: p.nombre_producto,
     }));
-  } catch {
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+  } catch (e) {
+    error = mensajeDeErrorDePagina(e);
   }
 
   return (
-    <div className="px-10 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[#F5F7FA]">Marketing IA</h1>
-        <p className="text-[#7C8699] mt-1">
-          Campañas generadas a partir de productos aprobados.
-        </p>
-      </header>
+    <>
+      <PageHeader
+        titulo="Marketing"
+        icono={Megaphone}
+        descripcion="Ideas y textos para promocionar los productos que ya aprobaste."
+        ayuda="Elegí un producto de tu catálogo, los canales donde lo vas a mostrar y el tono. La IA te propone una campaña; no publica ni gasta nada por su cuenta."
+      />
 
-      {error && (
-        <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Alerta>{error}</Alerta>}
 
       {!error && productos.length === 0 && (
-        <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-12 text-center">
-          <p className="text-[#F5F7FA] text-sm mb-1">
-            Todavía no hay productos aprobados.
-          </p>
-          <p className="text-[#7C8699] text-xs mb-4">
-            Marketing solo trabaja sobre productos que un humano ya aprobó.
-          </p>
-          <Link
-            href="/productos"
-            className="text-[#3D7DD8] text-sm font-medium hover:underline"
-          >
-            Ir a Productos →
-          </Link>
-        </div>
+        <EmptyState
+          icono={PackageCheck}
+          titulo="Todavía no tenés productos aprobados"
+          descripcion="Marketing solo trabaja con productos que una persona ya aprobó. Revisá tus productos pendientes y aprobá el primero."
+          accion={{ href: "/productos?estado=candidato", texto: "Revisar productos" }}
+        />
       )}
 
       {productos.length > 0 && <PanelMarketing productos={productos} />}
-    </div>
+    </>
   );
 }

@@ -1,17 +1,57 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Suspense, useCallback, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Sparkles,
+  Loader2,
+  Search,
+  FileSearch,
+  Scale,
+  Megaphone,
+  ShieldCheck,
+} from "lucide-react";
 import { iniciarSesion } from "@/lib/api/auth";
-import { guardarToken } from "@/lib/auth";
+import { rutaInternaSegura } from "@/lib/sesion/config";
+import { BOTON_PRIMARIO, CAMPO, ETIQUETA_CAMPO } from "@/components/ui/estilos";
+import BotonGoogle from "@/components/BotonGoogle";
 
-export default function Login() {
+const PASOS = [
+  {
+    icono: Search,
+    titulo: "Buscá productos con IA",
+    texto: "Escribí una categoría y la IA te sugiere qué vender en tu país.",
+  },
+  {
+    icono: FileSearch,
+    titulo: "Revisá la evidencia",
+    texto: "Demanda, competencia, precios y riesgos, todo en un solo lugar.",
+  },
+  {
+    icono: Scale,
+    titulo: "Decidí vos",
+    texto: "Aprobás o descartás. La IA nunca aprueba nada por su cuenta.",
+  },
+  {
+    icono: Megaphone,
+    titulo: "Generá la campaña",
+    texto: "Ideas y textos para redes, email y anuncios, listos para usar.",
+  },
+];
+
+function Login() {
   const router = useRouter();
+  const parametros = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Solo rutas internas: evita usar el login para redirigir a otro sitio.
+  const irAlDestino = useCallback(() => {
+    router.push(rutaInternaSegura(parametros.get("siguiente")));
+    router.refresh();
+  }, [router, parametros]);
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault();
@@ -19,10 +59,8 @@ export default function Login() {
     setCargando(true);
 
     try {
-      const sesion = await iniciarSesion(email.trim(), password);
-      guardarToken(sesion.access_token, sesion.expira_en);
-      router.push("/");
-      router.refresh();
+      await iniciarSesion(email.trim(), password);
+      irAlDestino();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "No se pudo iniciar sesión."
@@ -32,58 +70,146 @@ export default function Login() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0B0D12] flex items-center justify-center px-6">
-      <form
-        onSubmit={entrar}
-        className="w-full max-w-sm bg-[#12151C] border border-[#1F2430] rounded-lg p-8"
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="h-5 w-5 text-[#F5F7FA]" aria-hidden="true" />
-          <span className="text-[#F5F7FA] font-bold text-xl">MERCHLY</span>
-        </div>
-        <p className="text-[#5B6272] text-xs mb-8 ml-7">AI COMMERCE OS</p>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-fondo">
+      {/* Halo de color sutil derivado del acento. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(61,125,216,0.18),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(232,184,75,0.08),transparent_50%)]"
+      />
 
-        <label className="text-[#7C8699] text-xs uppercase tracking-wide block mb-2">
-          Email
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="username"
-          required
-          className="w-full bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] mb-5"
-        />
+      <div className="relative mx-auto grid min-h-full max-w-6xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-10">
+        {/* Propuesta de valor */}
+        <section className="animate-aparecer" aria-labelledby="titulo-propuesta">
+          <div className="mb-8 flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-acento to-acento-hondo shadow-lg shadow-acento/25">
+              <Sparkles className="h-5 w-5 text-white" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-lg font-bold leading-tight text-texto">MERCHLY AI</p>
+              <p className="text-[11px] font-medium tracking-widest text-texto-2">
+                AI COMMERCE OS
+              </p>
+            </div>
+          </div>
 
-        <label className="text-[#7C8699] text-xs uppercase tracking-wide block mb-2">
-          Contraseña
-        </label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          required
-          className="w-full bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] mb-6"
-        />
-
-        {error && (
-          <p className="mb-4 text-sm text-[#E88B8B] bg-[#2A1414] border border-[#4A2020] rounded-md px-3 py-2">
-            {error}
+          <h1
+            id="titulo-propuesta"
+            className="text-3xl font-bold leading-tight tracking-tight text-texto sm:text-4xl lg:text-5xl"
+          >
+            Descubrí qué vender.{" "}
+            <span className="bg-gradient-to-r from-acento-claro to-ambar bg-clip-text text-transparent">
+              Vos decidís.
+            </span>
+          </h1>
+          <p className="mt-4 max-w-lg text-base leading-relaxed text-texto-2">
+            Un equipo de agentes de IA investiga productos y arma campañas para
+            tu tienda online. Vos tenés siempre la última palabra.
           </p>
-        )}
 
-        <button
-          type="submit"
-          disabled={cargando}
-          className="w-full inline-flex items-center justify-center gap-2 bg-[#1E3A5F] hover:bg-[#28507F] border border-[#2B4A73] text-white px-5 py-2.5 rounded-md text-sm font-semibold transition-colors disabled:opacity-50"
-        >
-          {cargando && (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          )}
-          {cargando ? "Entrando..." : "Entrar"}
-        </button>
-      </form>
+          <ol className="mt-8 hidden gap-3 sm:grid sm:grid-cols-2">
+            {PASOS.map((paso, i) => {
+              const Icono = paso.icono;
+              return (
+                <li
+                  key={paso.titulo}
+                  className="rounded-2xl border border-borde bg-superficie/70 p-4 animate-aparecer"
+                  style={{ animationDelay: `${120 + i * 80}ms` }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-acento-hondo text-acento-claro">
+                      <Icono className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="text-xs font-semibold text-texto-2">Paso {i + 1}</span>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-texto">{paso.titulo}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-texto-2">{paso.texto}</p>
+                </li>
+              );
+            })}
+          </ol>
+
+          <p className="mt-6 flex items-center gap-2 text-sm text-texto-2">
+            <ShieldCheck className="h-4 w-4 text-verde" aria-hidden="true" />
+            Cada decisión queda registrada con su motivo.
+          </p>
+        </section>
+
+        {/* Formulario (misma lógica de siempre) */}
+        <div className="animate-aparecer [animation-delay:150ms]">
+          <form
+            onSubmit={entrar}
+            className="mx-auto w-full max-w-md rounded-3xl border border-borde bg-superficie/90 p-6 shadow-2xl shadow-black/40 backdrop-blur sm:p-8"
+          >
+            <h2 className="text-xl font-bold text-texto">Entrá a tu cuenta</h2>
+            <p className="mt-1 text-sm text-texto-2">
+              Usá el email y la contraseña que te dio tu administrador.
+            </p>
+
+            <div className="mt-7">
+              <label htmlFor="email" className={ETIQUETA_CAMPO}>
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+                placeholder="vos@tutienda.com"
+                required
+                className={CAMPO}
+              />
+            </div>
+
+            <div className="mt-5">
+              <label htmlFor="password" className={ETIQUETA_CAMPO}>
+                Contraseña
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                className={CAMPO}
+              />
+            </div>
+
+            {error && (
+              <p
+                role="alert"
+                className="mt-5 rounded-lg border border-rojo-borde bg-rojo-fondo px-3 py-2 text-sm text-rojo"
+              >
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={cargando}
+              className={`mt-6 w-full py-3 ${BOTON_PRIMARIO}`}
+            >
+              {cargando && (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              )}
+              {cargando ? "Entrando..." : "Entrar"}
+            </button>
+
+            {/* El botón de Google no envía este formulario: abre su propia ventana. */}
+            <BotonGoogle onSesion={irAlDestino} />
+          </form>
+        </div>
+      </div>
     </div>
+  );
+}
+
+// useSearchParams (para volver a la página de origen) necesita Suspense.
+export default function PaginaLogin() {
+  return (
+    <Suspense fallback={null}>
+      <Login />
+    </Suspense>
   );
 }

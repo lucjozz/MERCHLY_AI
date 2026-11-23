@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Sparkles } from "lucide-react";
 import { investigarProductos } from "@/lib/api/investigador";
+import { MERCADOS } from "@/lib/etiquetas";
+import { BOTON_PRIMARIO, CAMPO } from "@/components/ui/estilos";
+
+const EJEMPLOS = [
+  "mochilas antirrobo",
+  "lámparas de escritorio",
+  "accesorios para mascotas",
+  "botellas térmicas",
+];
 
 export default function BuscarProductos() {
   const router = useRouter();
@@ -11,6 +20,7 @@ export default function BuscarProductos() {
   const [mercado, setMercado] = useState("MX");
   const [buscando, setBuscando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [exito, setExito] = useState<string | null>(null);
 
   async function buscar(e: React.FormEvent) {
     e.preventDefault();
@@ -21,63 +31,127 @@ export default function BuscarProductos() {
     }
 
     setError(null);
+    setExito(null);
     setBuscando(true);
 
     try {
       await investigarProductos(categoria, mercado);
+      setExito(`Listo: la IA terminó de investigar “${categoria.trim()}”. Revisá los resultados abajo.`);
       setCategoria("");
       router.refresh();
-    } catch {
-      setError("No se pudo completar la búsqueda. ¿Está corriendo el backend?");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo completar la búsqueda. Probá de nuevo en unos segundos.");
     } finally {
       setBuscando(false);
     }
   }
 
   return (
-    <form
-      onSubmit={buscar}
-      className="flex flex-wrap gap-3 mb-6 bg-[#12151C] border border-[#1E3A5F] p-4 rounded-lg"
+    <section
+      aria-labelledby="titulo-buscador"
+      className="relative mb-8 overflow-hidden rounded-3xl border border-acento-borde/70 bg-gradient-to-br from-acento-hondo/50 via-superficie to-superficie p-5 sm:p-7 animate-aparecer"
     >
-      <div className="flex-1 min-w-[200px]">
-        <input
-          type="text"
-          value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
-          placeholder="Ej: mochilas antirrobo, lámparas de escritorio..."
-          disabled={buscando}
-          className="w-full bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] placeholder-[#5B6272] rounded-md px-3 py-2 text-sm outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors disabled:opacity-50"
-        />
-      </div>
-      <select
-        value={mercado}
-        onChange={(e) => setMercado(e.target.value)}
-        disabled={buscando}
-        className="bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] rounded-md px-3 py-2 text-sm outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors disabled:opacity-50"
-      >
-        <option value="MX">México</option>
-        <option value="US">Estados Unidos</option>
-        <option value="BO">Bolivia</option>
-        <option value="AR">Argentina</option>
-      </select>
-      <button
-        type="submit"
-        disabled={buscando}
-        className="inline-flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#28507F] border border-[#2B4A73] text-white px-5 py-2 rounded-md text-sm font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
-      >
-        {buscando ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            Buscando...
-          </>
-        ) : (
-          <>
-            <Search className="h-4 w-4" aria-hidden="true" />
-            Buscar Productos
-          </>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-acento/10 blur-3xl"
+      />
+      <div className="relative">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-acento-claro">
+          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+          Paso 1 · Buscá con IA
+        </p>
+        <h2 id="titulo-buscador" className="mt-1 text-lg font-bold text-texto sm:text-xl">
+          ¿Qué te gustaría vender?
+        </h2>
+        <p className="mt-1 text-sm text-texto-2">
+          Escribí una categoría y elegí el país. La IA te sugiere hasta 5 productos con su evidencia.
+        </p>
+
+        <form onSubmit={buscar} className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <label htmlFor="buscar-categoria" className="sr-only">
+            Categoría a investigar
+          </label>
+          <input
+            id="buscar-categoria"
+            type="text"
+            value={categoria}
+            onChange={(e) => {
+              setCategoria(e.target.value);
+              if (error) setError(null);
+            }}
+            placeholder="Ej: mochilas antirrobo"
+            disabled={buscando}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "buscar-error" : undefined}
+            className={`${CAMPO} sm:flex-1 py-3 text-base sm:text-sm`}
+          />
+          <label htmlFor="buscar-mercado" className="sr-only">
+            País donde vas a vender
+          </label>
+          <select
+            id="buscar-mercado"
+            value={mercado}
+            onChange={(e) => setMercado(e.target.value)}
+            disabled={buscando}
+            className={`${CAMPO} py-3 sm:w-52`}
+          >
+            {Object.entries(MERCADOS).map(([codigo, m]) => (
+              <option key={codigo} value={codigo}>
+                {m.bandera} {m.nombre}
+              </option>
+            ))}
+          </select>
+          <button type="submit" disabled={buscando} className={`${BOTON_PRIMARIO} py-3`}>
+            {buscando ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Buscando...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4" aria-hidden="true" />
+                Buscar productos
+              </>
+            )}
+          </button>
+        </form>
+
+        {!buscando && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-texto-2">Probá con:</span>
+            {EJEMPLOS.map((ejemplo) => (
+              <button
+                key={ejemplo}
+                type="button"
+                onClick={() => setCategoria(ejemplo)}
+                className="rounded-full border border-borde-fuerte bg-fondo/60 px-3 py-1 text-texto-2 transition-colors hover:border-acento-borde hover:text-texto"
+              >
+                {ejemplo}
+              </button>
+            ))}
+          </div>
         )}
-      </button>
-      {error && <p className="w-full text-[#E88B8B] text-sm">{error}</p>}
-    </form>
+
+        <div aria-live="polite">
+          {buscando && (
+            <p className="mt-4 flex items-center gap-2 text-sm text-texto-2 animate-aparecer">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-acento opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-acento" />
+              </span>
+              La IA está investigando. Puede tardar unos segundos...
+            </p>
+          )}
+          {exito && !buscando && (
+            <p className="mt-4 text-sm text-verde animate-aparecer">{exito}</p>
+          )}
+        </div>
+        {error && (
+          <p id="buscar-error" role="alert" className="mt-4 text-sm text-rojo">
+            {error}
+          </p>
+        )}
+      </div>
+    </section>
   );
 }

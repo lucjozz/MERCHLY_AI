@@ -1,7 +1,9 @@
-import { redirect } from "next/navigation";
-import { Search, Sparkles, BarChart3, type LucideIcon } from "lucide-react";
+import { Bot, Search, Megaphone, BarChart3, type LucideIcon } from "lucide-react";
 import { obtenerReporteAnalitica } from "@/lib/api/analitica";
-import { SesionInvalidaError } from "@/lib/api/errores";
+import PageHeader from "@/components/ui/PageHeader";
+import Alerta from "@/components/ui/Alerta";
+import Badge, { BadgeSimulado } from "@/components/ui/Badge";
+import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +16,13 @@ const ROLES_NEGOCIO = [
 interface AgenteInfo {
   nombre: string;
   descripcion: string;
+  queHace: string;
   icono: LucideIcon;
-  color: string;
+  colorIcono: string;
   nivel: string;
   proveedor: string;
+  /** "si": siempre simulado; "puede": depende de la configuración; "no": no usa IA. */
+  simulado: "si" | "puede" | "no";
   roles: string[];
   metricas: { valor: string; etiqueta: string }[];
   nota?: string;
@@ -30,8 +35,7 @@ export default async function Agentes() {
   try {
     reporte = await obtenerReporteAnalitica();
   } catch (e) {
-    if (e instanceof SesionInvalidaError) redirect("/login");
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+    error = mensajeDeErrorDePagina(e);
   }
 
   const investigaciones = reporte
@@ -46,136 +50,129 @@ export default async function Agentes() {
       nombre: "Investigador de Producto",
       descripcion:
         "Dado un nicho, identifica productos con potencial de venta y devuelve evidencia de demanda y competencia.",
+      queHace: "Te sugiere qué vender",
       icono: Search,
-      color: "#3D7DD8",
-      nivel: "1 · Análisis y recomendación",
+      colorIcono: "text-acento-claro bg-acento-hondo/60",
+      nivel: "Solo analiza y recomienda",
       proveedor: "Gemini si hay clave configurada; si no, simulado",
+      simulado: "puede",
       roles: ROLES_NEGOCIO,
       metricas: [
-        { valor: investigaciones, etiqueta: "investigaciones · últimos 30 días" },
-        { valor: productos, etiqueta: "productos descubiertos · últimos 30 días" },
+        { valor: investigaciones, etiqueta: "búsquedas en los últimos 30 días" },
+        { valor: productos, etiqueta: "productos encontrados en los últimos 30 días" },
       ],
     },
     {
       nombre: "Marketing IA",
       descripcion:
         "Propone ángulos, copys y público objetivo para productos ya aprobados. Nunca publica ni gasta.",
-      icono: Sparkles,
-      color: "#A78BFA",
-      nivel: "1 · Análisis y recomendación",
+      queHace: "Te propone campañas",
+      icono: Megaphone,
+      colorIcono: "text-ambar bg-ambar-fondo",
+      nivel: "Solo analiza y recomienda",
       proveedor: "Simulado (integración con ChatGPT pendiente)",
+      simulado: "si",
       roles: ROLES_NEGOCIO,
       metricas: [],
-      nota: "Las campañas generadas no se guardan: el contrato no persiste nada.",
+      nota: "Las campañas generadas no se guardan todavía.",
     },
     {
       nombre: "Analítica Básica",
       descripcion:
         "Resume el catálogo: distribución por categoría, estado y conversión a catálogo.",
+      queHace: "Te resume tus números",
       icono: BarChart3,
-      color: "#4ADE80",
-      nivel: "0 · Solo lectura",
-      proveedor: "Sin IA: agregación de datos",
+      colorIcono: "text-verde bg-verde-fondo",
+      nivel: "Solo lectura",
+      proveedor: "Sin IA: cuenta y agrupa tus datos",
+      simulado: "no",
       roles: [...ROLES_NEGOCIO, "Usuario operativo"],
       metricas: [
-        { valor: productos, etiqueta: "productos analizados · últimos 30 días" },
+        { valor: productos, etiqueta: "productos analizados en los últimos 30 días" },
       ],
     },
   ];
 
   return (
-    <div className="px-10 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[#F5F7FA]">Agentes</h1>
-        <p className="text-[#7C8699] mt-1">
-          Tu organización digital. La IA recomienda; las personas deciden.
-        </p>
-      </header>
+    <>
+      <PageHeader
+        titulo="Agentes"
+        icono={Bot}
+        descripcion="Tu equipo digital. La IA recomienda; las personas deciden."
+        ayuda="Cada agente hace una tarea concreta. Ninguno puede aprobar productos, publicar ni gastar dinero: eso siempre lo hace una persona."
+      />
 
-      {error && (
-        <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm mb-6">
-          {error}
-        </div>
-      )}
+      {error && <Alerta className="mb-6">{error}</Alerta>}
 
-      <div className="space-y-4 max-w-4xl">
-        {agentes.map((agente) => {
+      <div className="grid gap-4 lg:grid-cols-3">
+        {agentes.map((agente, i) => {
           const Icono = agente.icono;
           return (
-            <div
+            <article
               key={agente.nombre}
-              className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6 flex items-start gap-5"
+              className="flex flex-col rounded-3xl border border-borde bg-superficie p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-borde-fuerte sm:p-6 animate-aparecer"
+              style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="h-11 w-11 rounded-lg bg-[#0B0D12] border border-[#1F2430] flex items-center justify-center shrink-0">
-                <Icono
-                  className="h-5 w-5"
-                  style={{ color: agente.color }}
-                  aria-hidden="true"
-                />
+              <div className="flex items-start justify-between gap-3">
+                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${agente.colorIcono}`}>
+                  <Icono className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  <Badge tono="verde" punto>
+                    Disponible
+                  </Badge>
+                  {agente.simulado === "si" && <BadgeSimulado />}
+                </div>
               </div>
 
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-[#F5F7FA]">
-                    {agente.nombre}
-                  </h2>
-                  <span
-                    className="flex items-center gap-2 text-xs font-medium"
-                    style={{ color: agente.color }}
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: agente.color }}
-                    />
-                    DISPONIBLE
-                  </span>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-texto-2">
+                {agente.queHace}
+              </p>
+              <h2 className="mt-1 text-lg font-semibold text-texto">{agente.nombre}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-texto-2">{agente.descripcion}</p>
+
+              <dl className="mt-5 space-y-3 rounded-2xl bg-fondo/60 p-4 text-sm">
+                <div>
+                  <dt className="text-xs text-texto-2">Qué puede hacer</dt>
+                  <dd className="mt-0.5 text-texto">{agente.nivel}</dd>
                 </div>
-                <p className="text-[#7C8699] text-sm mt-1">{agente.descripcion}</p>
-
-                <div className="grid grid-cols-3 gap-4 mt-5 text-xs">
-                  <div>
-                    <p className="text-[#5B6272] uppercase tracking-wide mb-1">
-                      Nivel de permiso
-                    </p>
-                    <p className="text-[#F5F7FA]">{agente.nivel}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#5B6272] uppercase tracking-wide mb-1">
-                      Proveedor
-                    </p>
-                    <p className="text-[#F5F7FA]">{agente.proveedor}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#5B6272] uppercase tracking-wide mb-1">
-                      Pueden usarlo
-                    </p>
-                    <p className="text-[#F5F7FA]">{agente.roles.join(", ")}</p>
-                  </div>
+                <div>
+                  <dt className="text-xs text-texto-2">Motor</dt>
+                  <dd className="mt-0.5 text-texto">
+                    {agente.proveedor}
+                    {agente.simulado === "puede" && (
+                      <span className="mt-1 block text-xs text-texto-2">
+                        Si es simulado, sus resultados llevan la marca “Simulado”.
+                      </span>
+                    )}
+                  </dd>
                 </div>
+                <div>
+                  <dt className="text-xs text-texto-2">Quién puede usarlo</dt>
+                  <dd className="mt-0.5 text-texto">{agente.roles.join(", ")}</dd>
+                </div>
+              </dl>
 
-                {agente.metricas.length > 0 && (
-                  <div className="flex gap-10 mt-5 pt-5 border-t border-[#1F2430]">
-                    {agente.metricas.map((metrica) => (
-                      <div key={metrica.etiqueta}>
-                        <p className="text-2xl font-bold text-[#F5F7FA]">
-                          {metrica.valor}
-                        </p>
-                        <p className="text-[#7C8699] text-xs">{metrica.etiqueta}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {agente.metricas.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-6 border-t border-borde pt-5">
+                  {agente.metricas.map((metrica) => (
+                    <div key={metrica.etiqueta} className="min-w-0 flex-1">
+                      <p className="text-2xl font-bold tabular-nums text-texto">{metrica.valor}</p>
+                      <p className="text-xs leading-snug text-texto-2">{metrica.etiqueta}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-                {agente.nota && (
-                  <p className="text-[#5B6272] text-xs mt-5 pt-5 border-t border-[#1F2430]">
-                    {agente.nota}
-                  </p>
-                )}
-              </div>
-            </div>
+              {agente.nota && (
+                <p className="mt-5 border-t border-borde pt-5 text-xs text-texto-2">
+                  {agente.nota}
+                </p>
+              )}
+            </article>
           );
         })}
       </div>
-    </div>
+    </>
   );
 }

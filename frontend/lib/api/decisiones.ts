@@ -1,6 +1,6 @@
-import { fetchAutenticado } from "@/lib/api/cliente";
+import { fetchJson } from "@/lib/api/cliente";
 
-export type AccionDecision = "approve" | "discard";
+export type AccionDecision = "approve" | "discard" | "request_review";
 
 export interface DecisionInput {
   decision_type: string;
@@ -10,14 +10,11 @@ export interface DecisionInput {
   reason: string;
 }
 
+/** Registra una decisión. 409 = el producto ya fue decidido (estado final). */
 export async function registrarDecision(entrada: DecisionInput): Promise<void> {
-  const respuesta = await fetchAutenticado("/decisiones", {
+  await fetchJson("/decisiones", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(entrada),
   });
-
-  if (!respuesta.ok) {
-    throw new Error(`Error al registrar la decisión: ${respuesta.status}`);
-  }
 }

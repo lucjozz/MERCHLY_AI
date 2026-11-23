@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Loader2, Megaphone, Sparkles } from "lucide-react";
 import { generarCampanaMarketing, type CampanaMarketing } from "@/lib/api/marketing";
-import TextoAnimado from "@/components/TextoAnimado";
+import ResultadoCampana from "@/components/ResultadoCampana";
+import Skeleton from "@/components/ui/Skeleton";
+import { BOTON_PRIMARIO } from "@/components/ui/estilos";
 
 interface CampanaMarketingProps {
   productoId: string;
@@ -25,8 +27,8 @@ export default function CampanaMarketingPanel({
     try {
       const resultado = await generarCampanaMarketing(productoId);
       setCampana(resultado);
-    } catch {
-      setError("No se pudo generar la campaña. ¿Está corriendo el backend?");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo generar la campaña. Probá de nuevo en unos segundos.");
     } finally {
       setGenerando(false);
     }
@@ -37,73 +39,54 @@ export default function CampanaMarketingPanel({
   }
 
   return (
-    <section className="rounded-lg border border-[#2D1F47] bg-[#1A1229] p-6 mt-8">
-      <h2 className="text-sm font-medium uppercase tracking-widest text-[#A78BFA] mb-4 flex items-center gap-2">
-        <Sparkles className="h-4 w-4" aria-hidden="true" />
-        Agente de Marketing (IA)
+    <section
+      aria-labelledby="titulo-campana"
+      className="relative mt-8 overflow-hidden rounded-3xl border border-acento-borde/70 bg-gradient-to-br from-acento-hondo/40 via-superficie to-superficie p-5 sm:p-7 animate-aparecer"
+    >
+      <p className="text-xs font-semibold uppercase tracking-wider text-acento-claro">
+        Paso 4 · Generá la campaña
+      </p>
+      <h2
+        id="titulo-campana"
+        className="mt-1 flex items-center gap-2 text-lg font-bold text-texto sm:text-xl"
+      >
+        <Megaphone className="h-5 w-5 text-acento-claro" aria-hidden="true" />
+        Campaña de marketing con IA
       </h2>
+      <p className="mt-2 text-sm leading-relaxed text-texto-2">
+        La IA propone ideas y textos para email. No publica ni gasta nada: vos
+        elegís qué usar. Para más canales y tonos, usá la sección Marketing.
+      </p>
 
       {!campana && (
-        <button
-          onClick={generar}
-          disabled={generando}
-          className="inline-flex items-center gap-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-5 py-3 rounded-md text-sm font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
-        >
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
-          {generando ? "Generando campaña..." : "Generar Campaña de Marketing"}
+        <button onClick={generar} disabled={generando} className={`mt-5 ${BOTON_PRIMARIO}`}>
+          {generando ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+          )}
+          {generando ? "Generando campaña..." : "Generar campaña"}
         </button>
       )}
 
-      {error && <p className="mt-4 text-sm text-[#E88B8B]">{error}</p>}
+      {generando && (
+        <div className="mt-6 space-y-3" role="status">
+          <span className="sr-only">Generando campaña...</span>
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-5/6" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+      )}
+
+      {error && (
+        <p role="alert" className="mt-4 text-sm text-rojo">
+          {error}
+        </p>
+      )}
 
       {campana && (
-        <div className="space-y-6 animate-in fade-in duration-500">
-          <div>
-            <p className="text-[#A78BFA] text-xs mb-2">Ángulos de campaña</p>
-            <ul className="space-y-1">
-              {campana.angulos_de_campana.map((angulo, i) => (
-                <li key={i} className="text-[#F5F7FA] text-sm">
-                  <TextoAnimado texto={`• ${angulo}`} />
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-[#A78BFA] text-xs mb-2">Público objetivo sugerido</p>
-            <p className="text-[#F5F7FA] text-sm">
-              <TextoAnimado texto={campana.publico_objetivo_sugerido} />
-            </p>
-          </div>
-
-          {Object.entries(campana.copy_por_canal).map(([canal, copies]) => (
-            <div key={canal}>
-              <p className="text-[#A78BFA] text-xs mb-2 font-mono">{canal}</p>
-              {copies.map((copy, i) => (
-                <div
-                  key={i}
-                  className="bg-[#0B0D12] border border-[#2D1F47] rounded-md p-4 mb-2"
-                >
-                  <p className="text-[#A78BFA] text-sm font-semibold mb-1">
-                    <TextoAnimado texto={copy.titulo} />
-                  </p>
-                  <p className="text-[#7C8699] text-sm">
-                    <TextoAnimado texto={copy.cuerpo} velocidad={8} />
-                  </p>
-                </div>
-              ))}
-            </div>
-          ))}
-
-          {campana.advertencias.length > 0 && (
-            <div className="bg-[#3A2E12] border border-[#4A3A17] rounded-md p-3">
-              {campana.advertencias.map((advertencia, i) => (
-                <p key={i} className="text-[#E8B84B] text-xs">
-                  ⚠ {advertencia}
-                </p>
-              ))}
-            </div>
-          )}
+        <div className="mt-6">
+          <ResultadoCampana campana={campana} />
         </div>
       )}
     </section>

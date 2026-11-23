@@ -1,105 +1,68 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { borrarToken, obtenerTokenCliente } from "@/lib/auth";
+import { useState } from "react";
+import { Building2, KeyRound, LogOut, RefreshCw, ShieldCheck } from "lucide-react";
+import { cerrarSesion } from "@/lib/api/auth";
 
-interface Sesion {
-  emitido: number;
-  vence: number;
+interface SesionInfoProps {
+  organizacion?: string | null;
 }
 
-function leerSesion(): Sesion | null {
-  const token = obtenerTokenCliente();
-  if (!token) return null;
-  try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    const relleno = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-    const datos = JSON.parse(atob(relleno));
-    return { emitido: datos.iat * 1000, vence: datos.exp * 1000 };
-  } catch {
-    return null;
-  }
-}
+/**
+ * Información de la sesión. El token vive en una cookie HttpOnly que
+ * JavaScript NO puede leer (protección contra robo por XSS), así que acá
+ * se explica cómo funciona la sesión en vez de mostrar el token.
+ */
+export default function SesionInfo({ organizacion }: SesionInfoProps) {
+  const [cerrando, setCerrando] = useState(false);
 
-function fecha(ms: number): string {
-  return new Date(ms).toLocaleString("es-BO", {
-    timeZone: "America/La_Paz",
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
-
-function reloj(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const h = String(Math.floor(total / 3600)).padStart(2, "0");
-  const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
-  const s = String(total % 60).padStart(2, "0");
-  return `${h}:${m}:${s}`;
-}
-
-export default function SesionInfo() {
-  const router = useRouter();
-  const [sesion, setSesion] = useState<Sesion | null>(null);
-  const [ahora, setAhora] = useState(0);
-
-  useEffect(() => {
-    setSesion(leerSesion());
-    setAhora(Date.now());
-    const intervalo = setInterval(() => setAhora(Date.now()), 1000);
-    return () => clearInterval(intervalo);
-  }, []);
-
-  const restante = sesion ? sesion.vence - ahora : 0;
-
-  useEffect(() => {
-    if (sesion && ahora > 0 && restante <= 0) {
-      borrarToken();
-      router.push("/login");
-    }
-  }, [sesion, ahora, restante, router]);
-
-  if (!sesion || ahora === 0) {
-    return <p className="text-sm text-[#5B6272]">Leyendo sesión...</p>;
+  async function cerrarTodas() {
+    if (!window.confirm("Se va a cerrar tu sesión en todos tus dispositivos (también en este). ¿Seguimos?")) return;
+    setCerrando(true);
+    await cerrarSesion(true);
   }
 
-  const total = sesion.vence - sesion.emitido;
-  const horas = Math.round(total / 3600000);
-  const avance = Math.min(100, Math.max(0, ((ahora - sesion.emitido) / total) * 100));
-  const porVencer = restante < 15 * 60 * 1000;
+  const filas = [
+    { icono: Building2, titulo: "Negocio", texto: organizacion ?? "—" },
+    {
+      icono: RefreshCw,
+      titulo: "Renovación automática",
+      texto: "Tu acceso se renueva solo cada 15 minutos mientras usás la app.",
+    },
+    {
+      icono: KeyRound,
+      titulo: "Vencimiento",
+      texto: "Si no entrás durante 14 días, vas a tener que iniciar sesión de nuevo.",
+    },
+    {
+      icono: ShieldCheck,
+      titulo: "Protección",
+      texto: "Tu sesión está guardada de forma que ningún script de la página puede leerla.",
+    },
+  ];
 
   return (
     <div className="space-y-4 text-sm">
-      <div className="flex justify-between">
-        <span className="text-[#7C8699]">Iniciada</span>
-        <span className="text-[#F5F7FA]">{fecha(sesion.emitido)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-[#7C8699]">Vence</span>
-        <span className="text-[#F5F7FA]">{fecha(sesion.vence)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-[#7C8699]">Duración total</span>
-        <span className="text-[#F5F7FA]">{horas} h</span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="text-[#7C8699]">Tiempo restante</span>
-        <span
-          className={`font-mono text-base ${
-            porVencer ? "text-[#E8B84B]" : "text-[#4ADE80]"
-          }`}
-        >
-          {reloj(restante)}
-        </span>
-      </div>
-      <div className="h-1.5 rounded-full bg-[#0B0D12]">
-        <div
-          className={`h-1.5 rounded-full transition-all duration-1000 ${
-            porVencer ? "bg-[#E8B84B]" : "bg-[#3D7DD8]"
-          }`}
-          style={{ width: `${avance}%` }}
-        />
-      </div>
+      <ul className="space-y-3">
+        {filas.map(({ icono: Icono, titulo, texto }) => (
+          <li key={titulo} className="flex gap-3">
+            <Icono className="mt-0.5 h-4 w-4 shrink-0 text-acento-claro" aria-hidden="true" />
+            <div>
+              <p className="font-medium text-texto">{titulo}</p>
+              <p className="text-texto-2">{texto}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <button
+        type="button"
+        onClick={cerrarTodas}
+        disabled={cerrando}
+        className="inline-flex items-center gap-2 rounded-lg border border-borde px-4 py-2 text-sm text-texto-2 transition-colors hover:border-rojo-borde hover:text-rojo disabled:opacity-60"
+      >
+        <LogOut className="h-4 w-4" aria-hidden="true" />
+        {cerrando ? "Cerrando sesiones…" : "Cerrar sesión en todos mis dispositivos"}
+      </button>
     </div>
   );
 }

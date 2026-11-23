@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2 } from "lucide-react";
-import { eliminarProductoCandidato } from "@/lib/api/productos-candidatos";
+import { eliminarProductoCandidato } from "@/lib/api/productos-acciones";
 
 interface BotonEliminarProps {
   productoId: string;
@@ -30,18 +30,20 @@ export default function BotonEliminar({
     try {
       await eliminarProductoCandidato(productoId);
       router.refresh();
-    } catch {
-      window.alert("No se pudo eliminar el producto. ¿Está corriendo el backend?");
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : "No se pudo eliminar el producto. Probá de nuevo en unos segundos.");
       setEliminando(false);
     }
   }
 
   return (
     <button
+      type="button"
       onClick={eliminar}
       disabled={eliminando}
-      className="p-2 text-[#7C8699] hover:text-[#E88B8B] hover:bg-[#2A1414] rounded-md transition-colors disabled:opacity-50"
+      className="rounded-lg p-2 text-texto-2 transition-colors hover:bg-rojo-fondo hover:text-rojo disabled:opacity-50"
       aria-label={`Eliminar ${nombreProducto}`}
+      title="Eliminar producto"
     >
       {eliminando ? (
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

@@ -5,15 +5,94 @@
   --foreground: #f5f7fa;
 }
 
+/*
+ * Paleta MERCHLY AI (se mantiene la original; solo se agregan matices
+ * derivados). Cada token genera utilidades: bg-superficie, text-ambar, etc.
+ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-fondo: #0b0d12;
+  --color-superficie: #12151c;
+  --color-superficie-2: #161922;
+  --color-borde: #1f2430;
+  --color-borde-fuerte: #242938;
+  --color-texto: #f5f7fa;
+  --color-texto-2: #7c8699;
+  --color-texto-3: #5b6272;
+
+  --color-acento: #3d7dd8;
+  --color-acento-claro: #6aa3ee;
+  --color-acento-boton: #2f6bc4;
+  --color-acento-hondo: #1e3a5f;
+  --color-acento-borde: #2b4a73;
+
+  --color-ambar: #e8b84b;
+  --color-ambar-fondo: #3a2e12;
+  --color-ambar-borde: #4a3a17;
+  --color-verde: #4ade80;
+  --color-verde-fondo: #123420;
+  --color-verde-borde: #1b4a2c;
+  --color-rojo: #e88b8b;
+  --color-rojo-fondo: #2a1414;
+  --color-rojo-borde: #4a2020;
+  --color-gris-fondo: #1c2029;
+
+  --animate-aparecer: aparecer 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-brillo: brillo 1.6s ease-in-out infinite;
+
+  @keyframes aparecer {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes brillo {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+html {
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Foco de teclado visible y consistente en toda la app. */
+:focus-visible {
+  outline: 2px solid #6aa3ee;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: #1e3a5f;
+  color: #f5f7fa;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

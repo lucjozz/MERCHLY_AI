@@ -1,24 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Check, Wand2 } from "lucide-react";
 import {
   generarCampanaMarketing,
   type CampanaMarketing,
   type CanalMarketing,
   type TonoMarketing,
 } from "@/lib/api/marketing";
-import TextoAnimado from "@/components/TextoAnimado";
+import ResultadoCampana from "@/components/ResultadoCampana";
+import Skeleton from "@/components/ui/Skeleton";
+import { BOTON_PRIMARIO, CAMPO, ETIQUETA_CAMPO } from "@/components/ui/estilos";
+import { nombreLimpio } from "@/lib/etiquetas";
 
 interface ProductoAprobado {
   id: string;
   nombre_producto: string;
 }
 
-const CANALES: { valor: CanalMarketing; etiqueta: string }[] = [
-  { valor: "redes_sociales", etiqueta: "Redes sociales" },
-  { valor: "busqueda_paga", etiqueta: "Búsqueda paga" },
-  { valor: "email", etiqueta: "Email" },
+const CANALES: { valor: CanalMarketing; etiqueta: string; ayuda: string }[] = [
+  { valor: "redes_sociales", etiqueta: "Redes sociales", ayuda: "Instagram, Facebook, TikTok" },
+  { valor: "busqueda_paga", etiqueta: "Búsqueda paga", ayuda: "Anuncios en Google" },
+  { valor: "email", etiqueta: "Email", ayuda: "Correos a tus clientes" },
 ];
 
 const TONOS: { valor: TonoMarketing; etiqueta: string }[] = [
@@ -27,12 +30,6 @@ const TONOS: { valor: TonoMarketing; etiqueta: string }[] = [
   { valor: "tecnico", etiqueta: "Técnico" },
   { valor: "premium", etiqueta: "Premium" },
 ];
-
-const ETIQUETA_CANAL: Record<string, string> = {
-  redes_sociales: "Redes sociales",
-  busqueda_paga: "Búsqueda paga",
-  email: "Email",
-};
 
 export default function PanelMarketing({
   productos,
@@ -65,8 +62,8 @@ export default function PanelMarketing({
 
     try {
       setCampana(await generarCampanaMarketing(productoId, canales, tono));
-    } catch {
-      setError("No se pudo generar la campaña. ¿Está corriendo el backend?");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo generar la campaña. Probá de nuevo en unos segundos.");
     } finally {
       setGenerando(false);
     }
@@ -78,67 +75,83 @@ export default function PanelMarketing({
   const nombreProducto = productos.find((p) => p.id === productoId)?.nombre_producto;
 
   return (
-    <div className="grid grid-cols-[1fr_320px] gap-6">
-      <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6">
-        <label className="text-[#7C8699] text-xs uppercase tracking-wide block mb-2">
-          Producto aprobado
-        </label>
-        <select
-          value={productoId}
-          onChange={(e) => setProductoId(e.target.value)}
-          className="w-full bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] rounded-md px-3 py-2.5 text-sm outline-none focus:border-[#8B5CF6] mb-6"
-        >
-          {productos.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.nombre_producto}
-            </option>
-          ))}
-        </select>
+    <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="min-w-0 rounded-3xl border border-borde bg-superficie p-5 sm:p-7">
+        <div>
+          <label htmlFor="producto-campana" className={ETIQUETA_CAMPO}>
+            1. Elegí un producto aprobado
+          </label>
+          <select
+            id="producto-campana"
+            value={productoId}
+            onChange={(e) => setProductoId(e.target.value)}
+            className={CAMPO}
+          >
+            {productos.map((p) => (
+              <option key={p.id} value={p.id}>
+                {nombreLimpio(p.nombre_producto)}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-2">Canales</p>
-        <div className="flex flex-wrap gap-2 mb-6">
-          {CANALES.map((c) => {
-            const activo = canales.includes(c.valor);
-            return (
+        <fieldset className="mt-6">
+          <legend className={ETIQUETA_CAMPO}>2. ¿Dónde lo vas a promocionar?</legend>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {CANALES.map((c) => {
+              const activo = canales.includes(c.valor);
+              return (
+                <button
+                  key={c.valor}
+                  type="button"
+                  onClick={() => alternarCanal(c.valor)}
+                  aria-pressed={activo}
+                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-all ${
+                    activo
+                      ? "border-acento bg-acento-hondo/50"
+                      : "border-borde-fuerte bg-fondo hover:border-acento-borde"
+                  }`}
+                >
+                  <span
+                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                      activo ? "border-acento bg-acento text-white" : "border-borde-fuerte"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {activo && <Check className="h-3 w-3" />}
+                  </span>
+                  <span>
+                    <span className="block text-sm font-medium text-texto">{c.etiqueta}</span>
+                    <span className="block text-xs text-texto-2">{c.ayuda}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <fieldset className="mt-6">
+          <legend className={ETIQUETA_CAMPO}>3. ¿Con qué tono?</legend>
+          <div className="flex flex-wrap gap-2">
+            {TONOS.map((t) => (
               <button
-                key={c.valor}
+                key={t.valor}
                 type="button"
-                onClick={() => alternarCanal(c.valor)}
-                className={`px-4 py-2 rounded-md text-sm border transition-colors ${
-                  activo
-                    ? "bg-[#1A1229] border-[#8B5CF6] text-[#A78BFA]"
-                    : "bg-[#0B0D12] border-[#242938] text-[#7C8699] hover:text-[#F5F7FA]"
+                onClick={() => setTono(t.valor)}
+                aria-pressed={tono === t.valor}
+                className={`rounded-full border px-4 py-2 text-sm transition-colors ${
+                  tono === t.valor
+                    ? "border-acento bg-acento-hondo text-texto"
+                    : "border-borde-fuerte bg-fondo text-texto-2 hover:text-texto"
                 }`}
               >
-                {c.etiqueta}
+                {t.etiqueta}
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        </fieldset>
 
-        <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-2">Tono</p>
-        <div className="flex flex-wrap gap-2 mb-6">
-          {TONOS.map((t) => (
-            <button
-              key={t.valor}
-              type="button"
-              onClick={() => setTono(t.valor)}
-              className={`px-4 py-2 rounded-md text-sm border transition-colors ${
-                tono === t.valor
-                  ? "bg-[#1E3A5F] border-[#3D7DD8] text-[#F5F7FA]"
-                  : "bg-[#0B0D12] border-[#242938] text-[#7C8699] hover:text-[#F5F7FA]"
-              }`}
-            >
-              {t.etiqueta}
-            </button>
-          ))}
-        </div>
-
-        <button
-          onClick={generar}
-          disabled={generando}
-          className="inline-flex items-center gap-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-5 py-3 rounded-md text-sm font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
-        >
+        <button onClick={generar} disabled={generando} className={`mt-7 w-full py-3 sm:w-auto ${BOTON_PRIMARIO}`}>
           {generando ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
@@ -147,99 +160,57 @@ export default function PanelMarketing({
           {generando ? "Generando campaña..." : "Generar campaña"}
         </button>
 
-        {error && <p className="mt-4 text-sm text-[#E88B8B]">{error}</p>}
+        {error && (
+          <p role="alert" className="mt-4 text-sm text-rojo">
+            {error}
+          </p>
+        )}
+
+        {generando && (
+          <div className="mt-8 space-y-3 border-t border-borde pt-6" role="status">
+            <span className="sr-only">Generando campaña...</span>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-11/12" />
+            <Skeleton className="h-28 w-full" />
+          </div>
+        )}
 
         {campana && (
-          <div className="mt-8 pt-6 border-t border-[#1F2430] space-y-6">
-            <h2 className="text-lg font-semibold text-[#F5F7FA]">
-              Campaña: {nombreProducto}
+          <div className="mt-8 border-t border-borde pt-6">
+            <h2 className="mb-5 text-lg font-semibold text-texto">
+              Campaña para {nombreProducto ? nombreLimpio(nombreProducto) : "tu producto"}
             </h2>
+            <ResultadoCampana campana={campana} />
+          </div>
+        )}
+      </div>
 
-            <div>
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                Ángulos creativos
-              </p>
-              <div className="space-y-2">
-                {campana.angulos_de_campana.map((angulo, i) => (
-                  <div key={i} className="flex gap-3 text-sm">
-                    <span className="text-[#3D7DD8] font-mono">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="text-[#F5F7FA]">
-                      <TextoAnimado texto={angulo} />
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {Object.entries(campana.copy_por_canal).map(([canal, copies]) => (
-              <div key={canal}>
-                <p className="text-[#A78BFA] text-xs uppercase tracking-wide mb-2">
-                  {ETIQUETA_CANAL[canal] ?? canal}
-                </p>
-                {copies.map((copy, i) => (
-                  <div
-                    key={i}
-                    className="bg-[#0B0D12] border border-[#2D1F47] rounded-md p-4 mb-2"
-                  >
-                    <p className="text-[#F5F7FA] text-sm font-semibold mb-1">
-                      <TextoAnimado texto={copy.titulo} />
-                    </p>
-                    <p className="text-[#7C8699] text-sm">
-                      <TextoAnimado texto={copy.cuerpo} velocidad={8} />
-                    </p>
-                  </div>
-                ))}
+      <aside className="h-fit rounded-3xl border border-acento-borde/60 bg-gradient-to-b from-acento-hondo/40 to-superficie p-5 sm:p-6">
+        <p className="flex items-center gap-2 text-sm font-semibold text-texto">
+          <Wand2 className="h-4 w-4 text-acento-claro" aria-hidden="true" />
+          Lo que generó la IA
+        </p>
+        {!campana ? (
+          <p className="mt-3 text-sm leading-relaxed text-texto-2">
+            Acá vas a ver un resumen cuando generes tu campaña. Las campañas no
+            se guardan todavía: copiá lo que te sirva antes de salir.
+          </p>
+        ) : (
+          <dl className="mt-5 grid grid-cols-3 gap-3 lg:grid-cols-1">
+            {[
+              { valor: campana.angulos_de_campana.length, etiqueta: "ideas" },
+              { valor: totalCopys, etiqueta: "textos" },
+              { valor: Object.keys(campana.copy_por_canal).length, etiqueta: "canales" },
+            ].map((d) => (
+              <div key={d.etiqueta} className="flex flex-col-reverse rounded-xl bg-fondo/60 p-3">
+                <dt className="text-xs text-texto-2">{d.etiqueta}</dt>
+                <dd className="text-2xl font-bold tabular-nums text-texto lg:text-3xl">{d.valor}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         )}
-      </div>
-
-      <div className="bg-[#1A1229] border border-[#2D1F47] rounded-lg p-6 h-fit">
-        <p className="text-[#A78BFA] text-xs uppercase tracking-wide mb-5">
-          Salida IA
-        </p>
-        <div className="space-y-5">
-          <div>
-            <p className="text-4xl font-bold text-[#F5F7FA]">
-              {campana ? campana.angulos_de_campana.length : 0}
-            </p>
-            <p className="text-[#7C8699] text-sm">ángulos</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-[#F5F7FA]">{totalCopys}</p>
-            <p className="text-[#7C8699] text-sm">copys</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-[#F5F7FA]">
-              {campana ? Object.keys(campana.copy_por_canal).length : 0}
-            </p>
-            <p className="text-[#7C8699] text-sm">canales</p>
-          </div>
-        </div>
-
-        {campana && (
-          <div className="border-t border-[#2D1F47] mt-6 pt-5">
-            <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-2">
-              Público sugerido
-            </p>
-            <p className="text-[#F5F7FA] text-sm">
-              {campana.publico_objetivo_sugerido}
-            </p>
-            {campana.advertencias.length > 0 && (
-              <div className="mt-4 bg-[#3A2E12] border border-[#4A3A17] rounded-md p-3 space-y-1">
-                {campana.advertencias.map((a, i) => (
-                  <p key={i} className="text-[#E8B84B] text-xs">
-                    ⚠ {a}
-                  </p>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      </aside>
     </div>
   );
 }

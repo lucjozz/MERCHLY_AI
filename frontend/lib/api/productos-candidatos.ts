@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+/** Lecturas de productos desde Server Components (con la sesión del usuario). */
+import { fetchAutenticadoServidor } from "@/lib/api/servidor";
+import { errorDeRespuesta } from "@/lib/api/errores";
 
 export interface ProductoCandidato {
   id: string;
@@ -9,11 +11,19 @@ export interface ProductoCandidato {
   precio_sugerido_venta: number | null;
   nivel_demanda_estimado: string;
   nivel_competencia_estimado: string;
-  fuentes_evidencia: string[];
+  /** Solo en el detalle (el listado usa un schema resumido). */
+  fuentes_evidencia?: string[];
   riesgos_identificados: string[];
   estado: string;
-  investigacion_id: string;
+  /** Solo en el detalle. */
+  investigacion_id?: string;
   creado_en: string;
+}
+
+/** El detalle siempre trae evidencia e id de investigación. */
+export interface ProductoCandidatoDetalle extends ProductoCandidato {
+  fuentes_evidencia: string[];
+  investigacion_id: string;
 }
 
 export interface ProductosCandidatosListado {
@@ -37,38 +47,19 @@ export async function listarProductosCandidatos(
   if (categoria) parametros.set("categoria", categoria);
   if (estado) parametros.set("estado", estado);
 
-  const respuesta = await fetch(`${API_URL}/productos-candidatos?${parametros}`);
-
-  if (!respuesta.ok) {
-    throw new Error(
-      `Error al obtener productos candidatos: ${respuesta.status}`
-    );
-  }
+  const respuesta = await fetchAutenticadoServidor(`/productos-candidatos?${parametros}`);
+  if (!respuesta.ok) throw await errorDeRespuesta(respuesta);
 
   return respuesta.json();
 }
 
 export async function obtenerProductoCandidato(
   id: string
-): Promise<ProductoCandidato | null> {
-  const respuesta = await fetch(`${API_URL}/productos-candidatos/${id}`);
-
-  if (respuesta.status === 404) {
-    return null;
-  }
-
-  if (!respuesta.ok) {
-    throw new Error(`Error al obtener el producto: ${respuesta.status}`);
-  }
+): Promise<ProductoCandidatoDetalle | null> {
+  // 422 = id con formato inválido: para la persona es lo mismo que "no existe".
+  const respuesta = await fetchAutenticadoServidor(`/productos-candidatos/${encodeURIComponent(id)}`);
+  if (respuesta.status === 404 || respuesta.status === 422) return null;
+  if (!respuesta.ok) throw await errorDeRespuesta(respuesta);
 
   return respuesta.json();
-}
-export async function eliminarProductoCandidato(id: string): Promise<void> {
-  const respuesta = await fetch(`${API_URL}/productos-candidatos/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!respuesta.ok) {
-    throw new Error(`Error al eliminar el producto: ${respuesta.status}`);
-  }
 }

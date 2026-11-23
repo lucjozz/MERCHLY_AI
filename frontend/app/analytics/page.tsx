@@ -1,6 +1,14 @@
 import { obtenerReporteAnalitica } from "@/lib/api/analitica";
-import { redirect } from "next/navigation";
-import { SesionInvalidaError } from "@/lib/api/errores";
+import { BarChart3, Percent, Package, Search, PieChart } from "lucide-react";
+import PageHeader from "@/components/ui/PageHeader";
+import Card, { TituloCard } from "@/components/ui/Card";
+import Metrica from "@/components/ui/Metrica";
+import EmptyState from "@/components/ui/EmptyState";
+import Alerta from "@/components/ui/Alerta";
+import { PISTA_BARRA } from "@/components/ui/estilos";
+import { ESTADOS } from "@/lib/etiquetas";
+import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
+
 export const dynamic = "force-dynamic";
 
 export default async function Analytics() {
@@ -9,10 +17,8 @@ export default async function Analytics() {
 
   try {
     reporte = await obtenerReporteAnalitica();
-    
-    } catch (e) {
-    if (e instanceof SesionInvalidaError) redirect("/login");
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+  } catch (e) {
+    error = mensajeDeErrorDePagina(e);
   }
 
   const conversion = reporte?.tasa_conversion_catalogo;
@@ -20,112 +26,113 @@ export default async function Analytics() {
 
   const embudo = conversion
     ? [
-        { etiqueta: "Candidato", valor: conversion.candidato, color: "#E8B84B" },
-        { etiqueta: "En catálogo", valor: conversion.en_catalogo, color: "#4ADE80" },
-        { etiqueta: "Descartado", valor: conversion.descartado, color: "#7C8699" },
+        { etiqueta: ESTADOS.candidato.etiqueta, valor: conversion.candidato, color: "bg-ambar" },
+        { etiqueta: ESTADOS.en_catalogo.etiqueta, valor: conversion.en_catalogo, color: "bg-verde" },
+        { etiqueta: ESTADOS.descartado.etiqueta, valor: conversion.descartado, color: "bg-texto-2" },
       ]
     : [];
   const maxEmbudo = Math.max(1, ...embudo.map((e) => e.valor));
+  const sinDatos = (reporte?.resumen_catalogo.total_productos_candidatos ?? 0) === 0;
 
   return (
-    <div className="px-10 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[#F5F7FA]">Analytics</h1>
-        <p className="text-[#7C8699] mt-1">
-          Métricas del catálogo y del trabajo del Investigador de Producto.
-        </p>
-      </header>
+    <>
+      <PageHeader
+        titulo="Analytics"
+        icono={BarChart3}
+        descripcion="Cómo viene tu catálogo y el trabajo de la IA en los últimos 30 días."
+        ayuda="Mirá cuántos productos encontró la IA, cuántos aprobaste y en qué categorías estás buscando más. Son datos reales de tu cuenta."
+      />
 
-      {error && (
-        <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Alerta>{error}</Alerta>}
 
       {reporte && conversion && (
-        <>
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                Conversión a catálogo
-              </p>
-              <p className="text-3xl font-bold text-[#4ADE80]">
-                {(conversion.tasa_candidato_a_en_catalogo * 100).toFixed(1)}%
-              </p>
-            </div>
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                Productos analizados
-              </p>
-              <p className="text-3xl font-bold text-[#F5F7FA]">
-                {reporte.resumen_catalogo.total_productos_candidatos}
-              </p>
-            </div>
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                Investigaciones
-              </p>
-              <p className="text-3xl font-bold text-[#3D7DD8]">
-                {reporte.actividad_agente_investigador.total_investigaciones}
-              </p>
-            </div>
+        <div className="space-y-6">
+          <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+            <Metrica
+              etiqueta="Pasaron al catálogo"
+              valor={`${(conversion.tasa_candidato_a_en_catalogo * 100).toFixed(1)}%`}
+              icono={Percent}
+              color="verde"
+              detalle="De cada 100 productos sugeridos, cuántos aprobaste"
+            />
+            <Metrica
+              etiqueta="Productos analizados"
+              valor={reporte.resumen_catalogo.total_productos_candidatos}
+              icono={Package}
+              detalle="Sugeridos por la IA"
+              retraso={60}
+            />
+            <Metrica
+              etiqueta="Búsquedas con IA"
+              valor={reporte.actividad_agente_investigador.total_investigaciones}
+              icono={Search}
+              color="azul"
+              detalle="Categorías que le pediste investigar"
+              retraso={120}
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[#F5F7FA] mb-5">
-                Embudo de decisión
-              </h2>
-              <div className="space-y-4">
-                {embudo.map((fila) => (
-                  <div key={fila.etiqueta}>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-[#7C8699]">{fila.etiqueta}</span>
-                      <span className="text-[#F5F7FA] font-medium">{fila.valor}</span>
+          {sinDatos ? (
+            <EmptyState
+              icono={PieChart}
+              titulo="Todavía no hay datos para graficar"
+              descripcion="Cuando busques productos con IA y tomes decisiones, acá vas a ver cómo evoluciona tu catálogo."
+              accion={{ href: "/productos", texto: "Buscar productos" }}
+            />
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card as="section" aria-label="Embudo de decisión">
+                <TituloCard descripcion="En qué estado están los productos que sugirió la IA.">
+                  ¿Qué pasó con cada producto?
+                </TituloCard>
+                <div className="space-y-5">
+                  {embudo.map((fila) => (
+                    <div key={fila.etiqueta}>
+                      <div className="mb-1.5 flex justify-between text-sm">
+                        <span className="text-texto-2">{fila.etiqueta}</span>
+                        <span className="font-semibold tabular-nums text-texto">{fila.valor}</span>
+                      </div>
+                      <div className={PISTA_BARRA}>
+                        <div
+                          className={`h-full rounded-full transition-[width] duration-700 ${fila.color}`}
+                          style={{ width: `${(fila.valor / maxEmbudo) * 100}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 rounded-full bg-[#0B0D12]">
-                      <div
-                        className="h-2 rounded-full transition-all duration-700"
-                        style={{
-                          width: `${(fila.valor / maxEmbudo) * 100}%`,
-                          backgroundColor: fila.color,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  ))}
+                </div>
+              </Card>
 
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[#F5F7FA] mb-5">
-                Productos por categoría
-              </h2>
-              {grupos.length === 0 && (
-                <p className="text-[#5B6272] text-sm">Todavía no hay datos.</p>
-              )}
-              <div className="space-y-4">
-                {grupos.map((grupo) => (
-                  <div key={grupo.clave}>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-[#F5F7FA]">{grupo.clave}</span>
-                      <span className="text-[#7C8699]">
-                        {grupo.cantidad} · {grupo.porcentaje_del_total}%
-                      </span>
+              <Card as="section" aria-label="Productos por categoría">
+                <TituloCard descripcion="Dónde se concentran tus oportunidades.">
+                  Productos por categoría
+                </TituloCard>
+                {grupos.length === 0 && (
+                  <p className="text-sm text-texto-2">Todavía no hay datos.</p>
+                )}
+                <div className="space-y-5">
+                  {grupos.map((grupo) => (
+                    <div key={grupo.clave}>
+                      <div className="mb-1.5 flex justify-between gap-3 text-sm">
+                        <span className="min-w-0 truncate text-texto">{grupo.clave}</span>
+                        <span className="shrink-0 tabular-nums text-texto-2">
+                          {grupo.cantidad} · {grupo.porcentaje_del_total}%
+                        </span>
+                      </div>
+                      <div className={PISTA_BARRA}>
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-acento-boton to-acento-claro transition-[width] duration-700"
+                          style={{ width: `${grupo.porcentaje_del_total}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 rounded-full bg-[#0B0D12]">
-                      <div
-                        className="h-2 rounded-full bg-[#3D7DD8] transition-all duration-700"
-                        style={{ width: `${grupo.porcentaje_del_total}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </Card>
             </div>
-          </div>
-        </>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }

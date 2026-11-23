@@ -1,171 +1,233 @@
-import { listarProductosCandidatos } from "@/lib/api/productos-candidatos";
+import { obtenerProductoCandidato } from "@/lib/api/productos-candidatos";
+import AccionesDecision from "@/components/AccionesDecision";
+import CampanaMarketingPanel from "@/components/CampanaMarketing";
 import Link from "next/link";
-import BuscarProductos from "@/components/BuscarProductos";
-import BotonEliminar from "@/components/BotonEliminar";
+import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  ExternalLink,
+  FileSearch,
+  MapPin,
+  ShieldAlert,
+  Tag,
+  DollarSign,
+  TrendingUp,
+} from "lucide-react";
+import { BadgeEstado, BadgeSimulado } from "@/components/ui/Badge";
+import Card, { TituloCard } from "@/components/ui/Card";
+import Medidor from "@/components/ui/Medidor";
+import Alerta from "@/components/ui/Alerta";
+import { ENLACE } from "@/components/ui/estilos";
+import {
+  esProductoSimulado,
+  etiquetaMercado,
+  formatearFecha,
+  formatearPrecio,
+  infoEstado,
+  nombreLimpio,
+} from "@/lib/etiquetas";
+import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ categoria?: string; estado?: string }>;
+  params: Promise<{ id: string }>;
 }
 
-const ESTILO_ESTADO: Record<string, string> = {
-  candidato: "bg-[#3A2E12] text-[#E8B84B] border border-[#4A3A17]",
-  en_catalogo: "bg-[#123420] text-[#4ADE80] border border-[#1B4A2C]",
-  descartado: "bg-[#1C2029] text-[#7C8699] border border-[#242938]",
-};
-
-export default async function Home({ searchParams }: PageProps) {
-  const filtros = await searchParams;
-  let datos;
-  let error: string | null = null;
-
+/** Solo se enlazan URLs http(s); cualquier otro texto de la IA se muestra como texto. */
+function esUrlSegura(texto: string): boolean {
   try {
-    datos = await listarProductosCandidatos(
-      1,
-      20,
-      filtros.categoria,
-      filtros.estado
-    );
+    const url = new URL(texto);
+    return url.protocol === "https:" || url.protocol === "http:";
   } catch {
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+    return false;
+  }
+}
+
+export default async function DetalleProducto({ params }: PageProps) {
+  const { id } = await params;
+  let producto;
+
+  let mensajeError: string | null = null;
+  try {
+    producto = await obtenerProductoCandidato(id);
+  } catch (e) {
+    mensajeError = mensajeDeErrorDePagina(e);
+  }
+  if (mensajeError) {
+    return (
+      <div className="mx-auto max-w-md py-16">
+        <Alerta>{mensajeError}</Alerta>
+        <Link href="/productos" className={`mt-6 ${ENLACE}`}>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Volver a productos
+        </Link>
+      </div>
+    );
   }
 
+  if (!producto) {
+    notFound();
+  }
+
+  const simulado = esProductoSimulado(producto);
+  const estado = infoEstado(producto.estado);
+  const margen =
+    producto.precio_estimado_proveedor !== null &&
+    producto.precio_sugerido_venta !== null
+      ? producto.precio_sugerido_venta - producto.precio_estimado_proveedor
+      : null;
+
   return (
-    <div className="min-h-screen bg-[#0B0D12]">
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        {/* Header */}
-        <header className="mb-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-[#F5F7FA] tracking-tight">
-              Panel General
-            </h1>
-            <p className="text-[#7C8699] mt-1 text-sm">
-              Productos candidatos descubiertos por el Investigador de Producto
+    <div className="mx-auto max-w-4xl">
+      <Link href="/productos" className={`mb-6 ${ENLACE}`}>
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        Volver a productos
+      </Link>
+
+      {/* Encabezado */}
+      <header className="animate-aparecer">
+        <div className="flex flex-wrap items-center gap-2">
+          <BadgeEstado estado={producto.estado} />
+          {simulado && <BadgeSimulado />}
+        </div>
+        <h1 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-texto sm:text-3xl">
+          {nombreLimpio(producto.nombre_producto)}
+        </h1>
+        <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-texto-2">
+          <span className="inline-flex items-center gap-1.5">
+            <Tag className="h-4 w-4" aria-hidden="true" />
+            {producto.categoria}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin className="h-4 w-4" aria-hidden="true" />
+            {etiquetaMercado(producto.mercado_objetivo)}
+          </span>
+          <span>Encontrado el {formatearFecha(producto.creado_en)}</span>
+        </p>
+        {estado.descripcion && (
+          <p className="mt-3 text-sm text-texto-2">{estado.descripcion}</p>
+        )}
+      </header>
+
+      {simulado && (
+        <Alerta tipo="info" className="mt-6">
+          Este resultado viene de un <strong className="text-texto">proveedor simulado</strong>:
+          sirve para probar el flujo, pero no refleja el mercado real.
+        </Alerta>
+      )}
+
+      {/* Paso 2: evidencia */}
+      <section aria-labelledby="titulo-evidencia" className="mt-8">
+        <p className="text-xs font-semibold uppercase tracking-wider text-acento-claro">
+          Paso 2 · Revisá la evidencia
+        </p>
+        <h2 id="titulo-evidencia" className="sr-only">
+          Evidencia del producto
+        </h2>
+
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Card className="!p-4 animate-aparecer">
+            <p className="flex items-center gap-1.5 text-xs text-texto-2">
+              <DollarSign className="h-3.5 w-3.5" aria-hidden="true" />
+              Te cuesta (aprox.)
             </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[#7C8699] font-mono">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3D7DD8] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3D7DD8]" />
+            <p className="mt-2 text-lg font-semibold tabular-nums text-texto">
+              {formatearPrecio(producto.precio_estimado_proveedor)}
+            </p>
+          </Card>
+          <Card className="!p-4 animate-aparecer [animation-delay:60ms]">
+            <p className="flex items-center gap-1.5 text-xs text-texto-2">
+              <Tag className="h-3.5 w-3.5" aria-hidden="true" />
+              Precio de venta sugerido
+            </p>
+            <p className="mt-2 text-lg font-semibold tabular-nums text-texto">
+              {formatearPrecio(producto.precio_sugerido_venta)}
+            </p>
+          </Card>
+          <Card className="!p-4 animate-aparecer [animation-delay:120ms]">
+            <Medidor etiqueta="Demanda estimada" nivel={producto.nivel_demanda_estimado} sentido="favorable-alto" />
+          </Card>
+          <Card className="!p-4 animate-aparecer [animation-delay:180ms]">
+            <Medidor etiqueta="Competencia estimada" nivel={producto.nivel_competencia_estimado} sentido="favorable-bajo" />
+          </Card>
+        </div>
+
+        {margen !== null && (
+          <p className="mt-3 flex items-center gap-2 text-sm text-texto-2">
+            <TrendingUp className={`h-4 w-4 ${margen > 0 ? "text-verde" : "text-ambar"}`} aria-hidden="true" />
+            Ganancia bruta estimada por unidad:{" "}
+            <span className={`font-semibold ${margen > 0 ? "text-verde" : "text-ambar"}`}>
+              {formatearPrecio(margen)}
             </span>
-            MERCHLY AI
-          </div>
-        </header>
-
-        {/* Buscar productos nuevos (IA) */}
-        <BuscarProductos />
-
-        {/* Filtros sobre lo ya existente */}
-        <form className="flex flex-wrap gap-3 mb-6 bg-[#12151C] border border-[#1F2430] p-4 rounded-lg">
-          <input
-            type="text"
-            name="categoria"
-            placeholder="Filtrar por categoría"
-            defaultValue={filtros.categoria}
-            className="bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] placeholder-[#5B6272] rounded-md px-3 py-2 text-sm flex-1 min-w-[180px] outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors"
-          />
-          <select
-            name="estado"
-            defaultValue={filtros.estado ?? ""}
-            className="bg-[#0B0D12] border border-[#242938] text-[#F5F7FA] rounded-md px-3 py-2 text-sm outline-none focus:border-[#3D7DD8] focus:ring-1 focus:ring-[#3D7DD8] transition-colors"
-          >
-            <option value="">Todos los estados</option>
-            <option value="candidato">Candidato</option>
-            <option value="en_catalogo">En catálogo</option>
-            <option value="descartado">Descartado</option>
-          </select>
-          <button
-            type="submit"
-            className="bg-[#1E3A5F] hover:bg-[#28507F] border border-[#2B4A73] text-white px-5 py-2 rounded-md text-sm font-medium transition-all hover:scale-[1.02]"
-          >
-            Filtrar
-          </button>
-        </form>
-
-        {/* Error de conexión */}
-        {error && (
-          <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm animate-in fade-in duration-300">
-            {error}
-          </div>
+            <span className="text-texto-2">(antes de envío, impuestos y comisiones)</span>
+          </p>
         )}
 
-        {/* Estado vacío */}
-        {datos && datos.productos.length === 0 && (
-          <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-12 text-center animate-in fade-in duration-300">
-            <p className="text-[#7C8699] text-sm">
-              No hay productos candidatos todavía.
-            </p>
-            <p className="text-[#5B6272] text-xs mt-1">
-              Usá el buscador de arriba para investigar tu primera categoría.
-            </p>
-          </div>
-        )}
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <Card>
+            <TituloCard descripcion="De dónde sacó la IA esta información.">
+              <span className="inline-flex items-center gap-2">
+                <FileSearch className="h-4 w-4 text-acento-claro" aria-hidden="true" />
+                Fuentes
+              </span>
+            </TituloCard>
+            {producto.fuentes_evidencia.length === 0 ? (
+              <p className="text-sm leading-relaxed text-texto-2">
+                La IA no trajo fuentes para este producto. Si decidís, hacelo con
+                más cuidado.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {producto.fuentes_evidencia.map((fuente, i) => (
+                  <li key={i} className="min-w-0 text-sm">
+                    {esUrlSegura(fuente) ? (
+                      <a
+                        href={fuente}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        className="inline-flex max-w-full items-center gap-1.5 text-acento-claro hover:text-texto"
+                      >
+                        <span className="truncate">{fuente}</span>
+                        <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <span className="break-words text-texto">{fuente}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
 
-        {/* Tabla de resultados */}
-        {datos && datos.productos.length > 0 && (
-          <>
-            <p className="text-[#5B6272] text-xs mb-2 font-mono">
-              {datos.total} producto{datos.total !== 1 ? "s" : ""} encontrado
-              {datos.total !== 1 ? "s" : ""}
-            </p>
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg overflow-hidden animate-in fade-in duration-300">
-              <table className="w-full border-collapse text-sm">
-                <thead className="bg-[#0B0D12] border-b border-[#1F2430]">
-                  <tr className="text-left text-[#7C8699]">
-                    <th className="p-3 font-medium">Producto</th>
-                    <th className="p-3 font-medium">Categoría</th>
-                    <th className="p-3 font-medium">Estado</th>
-                    <th className="p-3 font-medium">Demanda</th>
-                    <th className="p-3 font-medium">Competencia</th>
-                    <th className="p-3 font-medium w-12"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {datos.productos.map((producto) => (
-                    <tr
-                      key={producto.id}
-                      className="border-t border-[#1F2430] hover:bg-[#161922] transition-colors"
-                    >
-                      <td className="p-0 font-medium">
-                        <Link
-                          href={`/productos/${producto.id}`}
-                          className="block p-3 text-[#F5F7FA] hover:text-[#3D7DD8] transition-colors"
-                        >
-                          {producto.nombre_producto}
-                        </Link>
-                      </td>
-                      <td className="p-3 text-[#7C8699] font-mono text-xs">
-                        {producto.categoria}
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            ESTILO_ESTADO[producto.estado] ??
-                            "bg-[#1C2029] text-[#7C8699] border border-[#242938]"
-                          }`}
-                        >
-                          {producto.estado}
-                        </span>
-                      </td>
-                      <td className="p-3 text-[#7C8699]">
-                        {producto.nivel_demanda_estimado}
-                      </td>
-                      <td className="p-3 text-[#7C8699]">
-                        {producto.nivel_competencia_estimado}
-                      </td>
-                      <td className="p-3">
-                        <BotonEliminar
-                          productoId={producto.id}
-                          nombreProducto={producto.nombre_producto}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </div>
+          <Card>
+            <TituloCard descripcion="Cosas a tener en cuenta antes de decidir.">
+              <span className="inline-flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-ambar" aria-hidden="true" />
+                Riesgos
+              </span>
+            </TituloCard>
+            {producto.riesgos_identificados.length === 0 ? (
+              <p className="text-sm text-texto-2">La IA no identificó riesgos.</p>
+            ) : (
+              <ul className="space-y-2">
+                {producto.riesgos_identificados.map((riesgo, i) => (
+                  <li
+                    key={i}
+                    className="flex gap-2 rounded-lg border border-ambar-borde/60 bg-ambar-fondo/40 px-3 py-2 text-sm leading-relaxed text-texto"
+                  >
+                    <span className="mt-0.5 text-ambar" aria-hidden="true">⚠</span>
+                    <span className="break-words">{riesgo}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+      </section>
+
+      <AccionesDecision productoId={producto.id} estado={producto.estado} />
+      <CampanaMarketingPanel productoId={producto.id} estado={producto.estado} />
     </div>
   );
 }

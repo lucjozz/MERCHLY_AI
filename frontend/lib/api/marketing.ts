@@ -1,4 +1,4 @@
-import { fetchAutenticado } from "@/lib/api/cliente";
+import { fetchJson } from "@/lib/api/cliente";
 
 export type CanalMarketing = "busqueda_paga" | "redes_sociales" | "email";
 export type TonoMarketing = "neutral" | "entusiasta" | "tecnico" | "premium";
@@ -20,7 +20,7 @@ export async function generarCampanaMarketing(
   canales: CanalMarketing[] = ["email"],
   tono: TonoMarketing = "neutral"
 ): Promise<CampanaMarketing> {
-  const respuesta = await fetchAutenticado("/agentes/marketing", {
+  return fetchJson<CampanaMarketing>("/agentes/marketing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -30,10 +30,4 @@ export async function generarCampanaMarketing(
       tono,
     }),
   });
-
-  if (!respuesta.ok) {
-    throw new Error(`Error al generar la campaña: ${respuesta.status}`);
-  }
-
-  return respuesta.json();
 }

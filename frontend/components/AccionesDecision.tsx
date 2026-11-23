@@ -2,14 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Check, X } from "lucide-react";
+import { AlertCircle, Check, CircleCheck, X, ShieldCheck } from "lucide-react";
 import { registrarDecision } from "@/lib/api/decisiones";
+import { CAMPO } from "@/components/ui/estilos";
 
 interface AccionesDecisionProps {
   productoId: string;
+  /** Estado actual: si es final (en catálogo / descartado) ya no se decide. */
+  estado?: string;
 }
 
-export default function AccionesDecision({ productoId }: AccionesDecisionProps) {
+const ESTADOS_FINALES = ["en_catalogo", "descartado"];
+
+const MINIMO_MOTIVO = 8;
+
+export default function AccionesDecision({ productoId, estado }: AccionesDecisionProps) {
   const router = useRouter();
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +26,7 @@ export default function AccionesDecision({ productoId }: AccionesDecisionProps) 
   );
 
   async function decidir(decision: "aprobado" | "descartado") {
-    if (motivo.trim().length < 8) {
+    if (motivo.trim().length < MINIMO_MOTIVO) {
       setError(
         "Escribí el motivo de la decisión (mínimo 8 caracteres) antes de confirmar."
       );
@@ -39,34 +46,69 @@ export default function AccionesDecision({ productoId }: AccionesDecisionProps) 
       });
       setResultado(decision);
       router.refresh();
-    } catch {
-      setError("No se pudo registrar la decisión. ¿Está corriendo el backend?");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo registrar la decisión. Probá de nuevo en unos segundos.");
     } finally {
       setEnviando(false);
     }
   }
 
+  const largo = motivo.trim().length;
+  const decisionFinal = resultado ?? (estado && ESTADOS_FINALES.includes(estado)
+    ? (estado === "en_catalogo" ? "aprobado" : "descartado")
+    : null);
+
+  if (decisionFinal && !resultado) {
+    return (
+      <section
+        className="mt-8 rounded-3xl border border-borde bg-superficie p-5 sm:p-7 animate-aparecer"
+        aria-labelledby="titulo-decision"
+      >
+        <p className="text-xs font-semibold uppercase tracking-wider text-acento-claro">Paso 3 · Decidí</p>
+        <h2 id="titulo-decision" className="mt-1 flex items-center gap-2 text-lg font-bold text-texto sm:text-xl">
+          <CircleCheck className={`h-5 w-5 ${decisionFinal === "aprobado" ? "text-verde" : "text-texto-2"}`} aria-hidden="true" />
+          {decisionFinal === "aprobado" ? "Ya lo aprobaste" : "Ya lo descartaste"}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-texto-2">
+          Las decisiones finales no se cambian: quedan en el historial para que
+          el equipo sepa qué se decidió y por qué. Si cambiaron las condiciones,
+          investigá la categoría de nuevo y decidí sobre el resultado nuevo.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section
-      className="rounded-lg border border-[#1F2430] bg-[#12151C] p-6 mt-8"
-      aria-label="Decisión sobre el producto"
+      className="mt-8 rounded-3xl border border-borde bg-superficie p-5 sm:p-7 animate-aparecer"
+      aria-labelledby="titulo-decision"
     >
-      <h2 className="text-sm font-medium uppercase tracking-widest text-[#7C8699]">
-        Decisión
+      <p className="text-xs font-semibold uppercase tracking-wider text-acento-claro">
+        Paso 3 · Decidí
+      </p>
+      <h2 id="titulo-decision" className="mt-1 text-lg font-bold text-texto sm:text-xl">
+        ¿Lo sumás a tu catálogo?
       </h2>
-      <p className="mt-2 text-sm leading-relaxed text-[#7C8699]">
-        Esta acción cambia el estado del producto{" "}
-        <span className="font-mono text-[#F5F7FA]">{productoId}</span> y
-        queda registrada en la bitácora de auditoría.
+      <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-texto-2">
+        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-verde" aria-hidden="true" />
+        La IA solo recomienda: la decisión es tuya. Queda registrada con tu
+        motivo en el historial, para que el equipo sepa por qué se eligió.
       </p>
 
       <div className="mt-5 flex flex-col gap-2">
-        <label
-          htmlFor="motivo"
-          className="text-xs font-medium uppercase tracking-widest text-[#7C8699]"
-        >
-          Motivo de la decisión
-        </label>
+        <div className="flex items-baseline justify-between gap-2">
+          <label htmlFor="motivo" className="text-sm font-medium text-texto">
+            ¿Por qué decidís esto?
+          </label>
+          <span
+            className={`text-xs tabular-nums ${
+              largo >= MINIMO_MOTIVO ? "text-verde" : "text-texto-2"
+            }`}
+            aria-hidden="true"
+          >
+            {largo >= MINIMO_MOTIVO ? "✓ Listo" : `${largo}/${MINIMO_MOTIVO} mínimo`}
+          </span>
+        </div>
         <textarea
           id="motivo"
           rows={3}
@@ -78,7 +120,7 @@ export default function AccionesDecision({ productoId }: AccionesDecisionProps) 
           placeholder="Ej.: margen suficiente y competencia moderada, avanzamos con lote de prueba de 200 unidades."
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "motivo-error" : undefined}
-          className="resize-y rounded-md border border-[#1F2430] bg-[#0B0D12] p-3 text-sm leading-relaxed text-[#F5F7FA] placeholder:text-[#7C8699] outline-none focus:border-[#3D7DD8] focus:ring-2 focus:ring-[#1E3A5F]"
+          className={`${CAMPO} resize-y leading-relaxed`}
         />
       </div>
 
@@ -86,7 +128,7 @@ export default function AccionesDecision({ productoId }: AccionesDecisionProps) 
         <p
           id="motivo-error"
           role="alert"
-          className="mt-4 flex items-start gap-2 rounded-md border border-[#4A2020] bg-[#2A1414] px-3 py-2.5 text-sm text-[#E88B8B]"
+          className="mt-4 flex items-start gap-2 rounded-lg border border-rojo-borde bg-rojo-fondo px-3 py-2.5 text-sm text-rojo animate-aparecer"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           {error}
@@ -96,24 +138,26 @@ export default function AccionesDecision({ productoId }: AccionesDecisionProps) 
       {resultado && (
         <p
           role="status"
-          className={`mt-4 rounded-md px-3 py-2.5 text-sm ${
+          className={`mt-4 flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm animate-aparecer ${
             resultado === "aprobado"
-              ? "bg-[#123420] text-[#4ADE80]"
-              : "bg-[#1C2029] text-[#7C8699]"
+              ? "border-verde-borde bg-verde-fondo text-verde"
+              : "border-borde-fuerte bg-gris-fondo text-texto-2"
           }`}
         >
+          <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           {resultado === "aprobado"
             ? "Producto aprobado y enviado al catálogo."
-            : "Producto descartado. El agente no volverá a proponerlo."}
+            : "Producto descartado. La decisión queda guardada en tu historial."}
         </p>
       )}
 
+      {!resultado && (
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => decidir("aprobado")}
           disabled={enviando}
-          className="inline-flex h-14 items-center justify-center gap-2.5 rounded-md bg-[#123420] text-base font-semibold text-[#4ADE80] ring-1 ring-inset ring-[#4ADE80]/25 transition-colors hover:bg-[#4ADE80] hover:text-[#0B0D12] focus:outline-none focus:ring-2 focus:ring-[#4ADE80] focus:ring-offset-2 focus:ring-offset-[#12151C] disabled:opacity-50"
+          className="inline-flex h-14 items-center justify-center gap-2.5 rounded-xl border border-verde-borde bg-verde-fondo text-base font-semibold text-verde transition-all hover:bg-verde hover:text-fondo active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
         >
           <Check className="h-5 w-5" aria-hidden="true" />
           {enviando ? "Enviando..." : "Aprobar"}
@@ -122,12 +166,13 @@ export default function AccionesDecision({ productoId }: AccionesDecisionProps) 
           type="button"
           onClick={() => decidir("descartado")}
           disabled={enviando}
-          className="inline-flex h-14 items-center justify-center gap-2.5 rounded-md bg-[#2A1414] text-base font-semibold text-[#E88B8B] ring-1 ring-inset ring-[#4A2020] transition-colors hover:bg-[#4A2020] hover:text-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-[#E88B8B] focus:ring-offset-2 focus:ring-offset-[#12151C] disabled:opacity-50"
+          className="inline-flex h-14 items-center justify-center gap-2.5 rounded-xl border border-rojo-borde bg-rojo-fondo text-base font-semibold text-rojo transition-all hover:bg-rojo-borde hover:text-texto active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
         >
           <X className="h-5 w-5" aria-hidden="true" />
           {enviando ? "Enviando..." : "Descartar"}
         </button>
       </div>
+      )}
     </section>
   );
 }

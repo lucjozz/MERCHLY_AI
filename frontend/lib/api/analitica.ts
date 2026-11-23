@@ -1,4 +1,5 @@
 import { fetchAutenticadoServidor } from "@/lib/api/servidor";
+import { errorDeRespuesta } from "@/lib/api/errores";
 
 export interface GrupoResumen {
   clave: string;
@@ -31,9 +32,7 @@ export async function obtenerReporteAnalitica(): Promise<ReporteAnalitica> {
     body: JSON.stringify({}),
   });
 
-  if (!respuesta.ok) {
-    throw new Error(`Error al obtener el reporte: ${respuesta.status}`);
-  }
+  if (!respuesta.ok) throw await errorDeRespuesta(respuesta);
 
   return respuesta.json();
 }

@@ -1,18 +1,16 @@
 import { redirect } from "next/navigation";
-import { Check, Link2, Lock } from "lucide-react";
+import { Check, Link2, Lock, Settings, Mail, Share2, Search } from "lucide-react";
 import BotonCerrarSesion from "@/components/BotonCerrarSesion";
 import SesionInfo from "@/components/SesionInfo";
 import { SesionInvalidaError } from "@/lib/api/errores";
 import { obtenerUsuarioActual } from "@/lib/api/usuario";
+import PageHeader from "@/components/ui/PageHeader";
+import Card, { TituloCard } from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
+import Alerta, { MENSAJE_SIN_BACKEND } from "@/components/ui/Alerta";
+import { etiquetaRol } from "@/lib/etiquetas";
 
 export const dynamic = "force-dynamic";
-
-const ETIQUETA_ROL: Record<string, string> = {
-  admin_principal: "Administrador principal",
-  responsable_tecnico: "Responsable técnico",
-  responsable_negocio: "Responsable de negocio",
-  usuario_operativo: "Usuario operativo",
-};
 
 const ROLES_NEGOCIO = [
   "admin_principal",
@@ -28,13 +26,14 @@ const ACCIONES = [
   },
   { nombre: "Generar campañas de marketing", roles: ROLES_NEGOCIO },
   { nombre: "Aprobar o descartar productos", roles: ROLES_NEGOCIO },
+  { nombre: "Borrar productos", roles: ["admin_principal", "responsable_negocio"] },
 ];
 
 const CANALES = [
-  { nombre: "Instagram", detalle: "Publicar campañas de redes sociales" },
-  { nombre: "Facebook", detalle: "Publicar campañas de redes sociales" },
-  { nombre: "Email", detalle: "Enviar campañas por correo" },
-  { nombre: "Búsqueda paga", detalle: "Anuncios en buscadores" },
+  { nombre: "Instagram", detalle: "Publicar campañas de redes sociales", icono: Share2 },
+  { nombre: "Facebook", detalle: "Publicar campañas de redes sociales", icono: Share2 },
+  { nombre: "Email", detalle: "Enviar campañas por correo", icono: Mail },
+  { nombre: "Búsqueda paga", detalle: "Anuncios en buscadores", icono: Search },
 ];
 
 export default async function Configuracion() {
@@ -45,123 +44,121 @@ export default async function Configuracion() {
     usuario = await obtenerUsuarioActual();
   } catch (e) {
     if (e instanceof SesionInvalidaError) redirect("/login");
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+    error = MENSAJE_SIN_BACKEND;
   }
 
   const rolActual = usuario?.rol ?? "";
 
   return (
-    <div className="px-10 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[#F5F7FA]">Configuración</h1>
-        <p className="text-[#7C8699] mt-1">
-          Tu sesión, tus permisos y los canales del sistema.
-        </p>
-      </header>
+    <>
+      <PageHeader
+        titulo="Configuración"
+        icono={Settings}
+        descripcion="Tu cuenta, tus permisos y los canales de venta."
+      />
 
-      {error && (
-        <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Alerta>{error}</Alerta>}
 
       {usuario && (
-        <div className="grid grid-cols-2 gap-6 max-w-4xl">
-          <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="h-12 w-12 rounded-full bg-[#1E3A5F] flex items-center justify-center text-lg font-bold text-[#F5F7FA]">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-acento to-acento-hondo text-xl font-bold text-white">
                 {usuario.nombre.charAt(0).toUpperCase()}
               </div>
-              <div>
-                <p className="text-[#F5F7FA] font-semibold">{usuario.nombre}</p>
-                <p className="text-[#7C8699] text-sm">{usuario.email}</p>
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-texto">{usuario.nombre}</p>
+                <p className="truncate text-sm text-texto-2">{usuario.email}</p>
               </div>
             </div>
 
-            <dl className="space-y-4 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-[#7C8699]">Rol</dt>
-                <dd className="text-[#F5F7FA]">
-                  {ETIQUETA_ROL[usuario.rol] ?? usuario.rol}
-                </dd>
+            <dl className="space-y-3 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-texto-2">Rol</dt>
+                <dd className="text-right text-texto">{etiquetaRol(usuario.rol)}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-[#7C8699]">Estado</dt>
-                <dd className="text-[#4ADE80]">
-                  {usuario.activo ? "Activo" : "Inactivo"}
+              <div className="flex justify-between gap-4">
+                <dt className="text-texto-2">Estado</dt>
+                <dd>
+                  <Badge tono={usuario.activo ? "verde" : "gris"} punto>
+                    {usuario.activo ? "Activo" : "Inactivo"}
+                  </Badge>
                 </dd>
               </div>
             </dl>
 
-            <div className="border-t border-[#1F2430] mt-6 pt-6">
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-4">
-                Sesión
-              </p>
-              <SesionInfo />
+            <div className="mt-6 border-t border-borde pt-6">
+              <p className="mb-4 text-sm font-semibold text-texto">Tu sesión</p>
+              <SesionInfo organizacion={usuario?.organizacion_nombre} />
             </div>
 
-            <div className="border-t border-[#1F2430] mt-6 pt-6">
+            <div className="mt-6 border-t border-borde pt-6">
               <BotonCerrarSesion />
             </div>
-          </div>
+          </Card>
 
-          <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-6 h-fit">
-            <h2 className="text-lg font-semibold text-[#F5F7FA] mb-5">
+          <Card className="h-fit">
+            <TituloCard descripcion={`Según tu rol: ${etiquetaRol(rolActual)}.`}>
               Qué podés hacer
-            </h2>
-            <ul className="space-y-4">
+            </TituloCard>
+            <ul className="space-y-2">
               {ACCIONES.map((accion) => {
                 const permitido = accion.roles.includes(rolActual);
                 return (
-                  <li key={accion.nombre} className="flex items-center gap-3 text-sm">
+                  <li
+                    key={accion.nombre}
+                    className="flex items-center gap-3 rounded-xl bg-fondo/60 px-3 py-2.5 text-sm"
+                  >
                     {permitido ? (
-                      <Check className="h-4 w-4 text-[#4ADE80]" aria-hidden="true" />
+                      <Check className="h-4 w-4 shrink-0 text-verde" aria-hidden="true" />
                     ) : (
-                      <Lock className="h-4 w-4 text-[#5B6272]" aria-hidden="true" />
+                      <Lock className="h-4 w-4 shrink-0 text-texto-3" aria-hidden="true" />
                     )}
-                    <span className={permitido ? "text-[#F5F7FA]" : "text-[#5B6272]"}>
+                    <span className={permitido ? "text-texto" : "text-texto-2"}>
                       {accion.nombre}
+                      <span className="sr-only">{permitido ? " (permitido)" : " (no permitido)"}</span>
                     </span>
                   </li>
                 );
               })}
             </ul>
-          </div>
+          </Card>
 
-          <div className="col-span-2 bg-[#12151C] border border-[#1F2430] rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-[#F5F7FA] mb-1">
-              Canales
-            </h2>
-            <p className="text-[#7C8699] text-sm mb-5">
-              Hoy el agente de Marketing solo propone contenido: no publica ni
-              gasta. Vincular cuentas requiere un contrato nuevo, aprobado por una
-              persona.
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              {CANALES.map((canal) => (
-                <div
-                  key={canal.nombre}
-                  className="bg-[#0B0D12] border border-[#1F2430] rounded-md p-4 flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-[#F5F7FA] text-sm font-medium">
-                      {canal.nombre}
-                    </p>
-                    <p className="text-[#5B6272] text-xs mt-0.5">{canal.detalle}</p>
-                  </div>
-                  <button
-                    disabled
-                    className="inline-flex items-center gap-1.5 text-xs text-[#5B6272] border border-[#242938] rounded-md px-3 py-1.5 cursor-not-allowed"
+          <Card className="lg:col-span-2">
+            <TituloCard descripcion="Hoy el agente de Marketing solo propone contenido: no publica ni gasta. Conectar cuentas va a requerir la aprobación de una persona.">
+              Canales de venta
+            </TituloCard>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {CANALES.map((canal) => {
+                const Icono = canal.icono;
+                return (
+                  <div
+                    key={canal.nombre}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-borde bg-fondo p-4"
                   >
-                    <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    Próximamente
-                  </button>
-                </div>
-              ))}
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-superficie-2 text-texto-2">
+                        <Icono className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-texto">{canal.nombre}</p>
+                        <p className="text-xs text-texto-2">{canal.detalle}</p>
+                      </div>
+                    </div>
+                    <button
+                      disabled
+                      className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-lg border border-borde-fuerte px-3 py-1.5 text-xs text-texto-2"
+                    >
+                      <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      Próximamente
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          </div>
+          </Card>
         </div>
       )}
-    </div>
+    </>
   );
 }

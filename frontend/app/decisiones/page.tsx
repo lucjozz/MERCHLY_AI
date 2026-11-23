@@ -1,26 +1,20 @@
 import Link from "next/link";
+import { Scale, CircleCheck, CircleSlash, Percent, ArrowRight, Inbox } from "lucide-react";
 import { listarProductosCandidatos } from "@/lib/api/productos-candidatos";
+import PageHeader from "@/components/ui/PageHeader";
+import Metrica from "@/components/ui/Metrica";
+import EmptyState from "@/components/ui/EmptyState";
+import Alerta from "@/components/ui/Alerta";
+import { BadgeEstado, BadgeSimulado } from "@/components/ui/Badge";
+import {
+  esProductoSimulado,
+  etiquetaMercado,
+  formatearFecha,
+  nombreLimpio,
+} from "@/lib/etiquetas";
+import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
 
 export const dynamic = "force-dynamic";
-
-const ETIQUETA_DECISION: Record<string, { texto: string; estilo: string }> = {
-  en_catalogo: {
-    texto: "Aprobado",
-    estilo: "bg-[#123420] text-[#4ADE80] border border-[#1B4A2C]",
-  },
-  descartado: {
-    texto: "Descartado",
-    estilo: "bg-[#1C2029] text-[#7C8699] border border-[#242938]",
-  },
-};
-
-function formatearFecha(iso: string): string {
-  return new Date(iso).toLocaleString("es-BO", {
-    timeZone: "America/La_Paz",
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
 
 export default async function Decisiones() {
   let aprobados;
@@ -32,8 +26,8 @@ export default async function Decisiones() {
       listarProductosCandidatos(1, 100, undefined, "en_catalogo"),
       listarProductosCandidatos(1, 100, undefined, "descartado"),
     ]);
-  } catch {
-    error = "No se pudo conectar con el backend. ¿Está corriendo?";
+  } catch (e) {
+    error = mensajeDeErrorDePagina(e);
   }
 
   const decididos = [
@@ -50,111 +44,78 @@ export default async function Decisiones() {
     totalDecididos > 0 ? Math.round((totalAprobados / totalDecididos) * 100) : 0;
 
   return (
-    <div className="px-10 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[#F5F7FA]">Decisiones</h1>
-        <p className="text-[#7C8699] mt-1">
-          Productos sobre los que una persona ya decidió. Cada decisión queda
-          registrada con su motivo, evidencia y responsable.
-        </p>
-      </header>
+    <>
+      <PageHeader
+        titulo="Decisiones"
+        icono={Scale}
+        descripcion="Los productos sobre los que una persona ya decidió."
+        ayuda="Acá ves qué aprobaste y qué descartaste. Cada decisión queda registrada con su motivo y su responsable en la bitácora (el motivo todavía no se puede consultar desde esta pantalla)."
+      />
 
-      {error && (
-        <div className="bg-[#2A1414] border border-[#4A2020] text-[#E88B8B] rounded-lg p-4 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <Alerta>{error}</Alerta>}
 
       {!error && (
-        <>
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                Aprobados
-              </p>
-              <p className="text-3xl font-bold text-[#4ADE80]">{totalAprobados}</p>
-            </div>
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                Descartados
-              </p>
-              <p className="text-3xl font-bold text-[#7C8699]">{totalDescartados}</p>
-            </div>
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-5">
-              <p className="text-[#7C8699] text-xs uppercase tracking-wide mb-3">
-                Tasa de aprobación
-              </p>
-              <p className="text-3xl font-bold text-[#F5F7FA]">{tasa}%</p>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+            <Metrica etiqueta="Aprobados" valor={totalAprobados} icono={CircleCheck} color="verde" detalle="Entraron a tu catálogo" />
+            <Metrica etiqueta="Descartados" valor={totalDescartados} icono={CircleSlash} color="gris" detalle="No avanzan" retraso={60} />
+            <div className="col-span-2 lg:col-span-1">
+              <Metrica
+                etiqueta="Tasa de aprobación"
+                valor={`${tasa}%`}
+                icono={Percent}
+                color="azul"
+                detalle="De lo que decidiste, cuánto aprobaste"
+                retraso={120}
+              />
             </div>
           </div>
 
           {decididos.length === 0 && (
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg p-12 text-center">
-              <p className="text-[#F5F7FA] text-sm mb-1">
-                Todavía no hay decisiones.
-              </p>
-              <p className="text-[#7C8699] text-xs mb-4">
-                Aprobá o descartá un producto desde su pantalla de detalle.
-              </p>
-              <Link
-                href="/productos"
-                className="text-[#3D7DD8] text-sm font-medium hover:underline"
-              >
-                Ir a Productos →
-              </Link>
-            </div>
+            <EmptyState
+              icono={Inbox}
+              titulo="Todavía no tomaste decisiones"
+              descripcion="Abrí un producto que esté “Por revisar”, mirá la evidencia y aprobalo o descartalo."
+              accion={{ href: "/productos?estado=candidato", texto: "Revisar productos" }}
+            />
           )}
 
           {decididos.length > 0 && (
-            <div className="bg-[#12151C] border border-[#1F2430] rounded-lg overflow-hidden">
-              <table className="w-full border-collapse text-sm">
-                <thead className="border-b border-[#1F2430]">
-                  <tr className="text-left text-[#7C8699] text-xs uppercase tracking-wide">
-                    <th className="p-4 font-medium">Producto</th>
-                    <th className="p-4 font-medium">Categoría</th>
-                    <th className="p-4 font-medium">Decisión</th>
-                    <th className="p-4 font-medium">Detectado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {decididos.map((producto) => {
-                    const etiqueta = ETIQUETA_DECISION[producto.estado] ?? {
-                      texto: producto.estado,
-                      estilo: "bg-[#1C2029] text-[#7C8699] border border-[#242938]",
-                    };
-                    return (
-                      <tr
-                        key={producto.id}
-                        className="border-t border-[#1F2430] hover:bg-[#161922] transition-colors"
-                      >
-                        <td className="p-0 font-medium">
-                          <Link
-                            href={`/productos/${producto.id}`}
-                            className="block p-4 text-[#F5F7FA] hover:text-[#3D7DD8] transition-colors"
-                          >
-                            {producto.nombre_producto}
-                          </Link>
-                        </td>
-                        <td className="p-4 text-[#7C8699]">{producto.categoria}</td>
-                        <td className="p-4">
-                          <span
-                            className={`px-2.5 py-1 rounded-md text-xs font-medium ${etiqueta.estilo}`}
-                          >
-                            {etiqueta.texto}
-                          </span>
-                        </td>
-                        <td className="p-4 text-[#7C8699] text-xs">
-                          {formatearFecha(producto.creado_en)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <section aria-labelledby="titulo-historial">
+              <h2 id="titulo-historial" className="mb-3 text-base font-semibold text-texto">
+                Historial
+              </h2>
+              <ul className="divide-y divide-borde overflow-hidden rounded-2xl border border-borde bg-superficie">
+                {decididos.map((producto, i) => (
+                  <li key={producto.id} className="animate-aparecer" style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }}>
+                    <Link
+                      href={`/productos/${producto.id}`}
+                      className="group flex flex-col gap-2 p-4 transition-colors hover:bg-superficie-2 sm:flex-row sm:items-center sm:gap-4 sm:px-5"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-texto transition-colors group-hover:text-acento-claro">
+                          {nombreLimpio(producto.nombre_producto)}
+                        </p>
+                        <p className="mt-0.5 text-sm text-texto-2">
+                          {producto.categoria} · {etiquetaMercado(producto.mercado_objetivo)}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <BadgeEstado estado={producto.estado} />
+                        {esProductoSimulado(producto) && <BadgeSimulado />}
+                      </div>
+                      <p className="text-xs text-texto-2 sm:w-40 sm:text-right">
+                        Encontrado el {formatearFecha(producto.creado_en)}
+                      </p>
+                      <ArrowRight className="hidden h-4 w-4 text-texto-2 transition-transform group-hover:translate-x-0.5 sm:block" aria-hidden="true" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }
