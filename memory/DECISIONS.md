@@ -730,3 +730,21 @@ Estado:
 
 **Aprobado por Daniel el 2026-11-23. Pendiente visto bueno del CTO.**
 
+
+## DEC-034
+
+Fecha:
+
+2026-11-24
+
+Decisión:
+
+Funciones de producto para el lanzamiento (`docs/004-Backend/03-Funciones-de-Producto-para-Lanzar.md`): historial de campañas (el Agente de Marketing pasa a guardar cada campaña generada, cambiando su contrato), canales de venta sin publicación automática (copiar, WhatsApp, email, descargar), perfil del negocio con onboarding, precios en moneda local con tipo de cambio definido por el negocio y calculadora de margen, invitaciones y gestión de roles del equipo (solo admin, nunca sobre sí mismo, nunca sin admin), uso del plan visible y página de ayuda con WhatsApp de soporte.
+
+Motivo:
+
+Recorrido de la app como emprendedor (2026-11-23): sin esto un negocio real no puede trabajar con su equipo, perder campañas al recargar y ver precios en dólares lo frena.
+
+Estado:
+
+**Pedido por Daniel el 2026-11-23. Pendiente visto bueno del CTO.**

@@ -18,10 +18,13 @@ from fastapi.responses import JSONResponse
 from app.api.agentes import router as agentes_router
 from app.api.analitica import router as analitica_router
 from app.api.auth import router as auth_router
+from app.api.campanas import router as campanas_router
 from app.api.decisiones import router as decisiones_router
 from app.api.health import router as health_router
 from app.api.marketing import router as marketing_router
+from app.api.organizacion import router as organizacion_router
 from app.api.productos_candidatos import router as productos_candidatos_router
+from app.api.usuarios import router as usuarios_router
 from app.core.config import get_settings
 from app.core.middleware import HeadersDeSeguridadMiddleware, LimiteDeBodyMiddleware
 
@@ -87,7 +90,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.lista_cors_origenes,
     allow_credentials=False,  # se usa Bearer, no cookies, entre el BFF y el backend
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
     expose_headers=["Retry-After", "X-Request-ID"],
     max_age=600,
@@ -102,3 +105,6 @@ app.include_router(analitica_router)
 app.include_router(marketing_router)
 app.include_router(productos_candidatos_router)
 app.include_router(decisiones_router)
+app.include_router(campanas_router)
+app.include_router(organizacion_router)
+app.include_router(usuarios_router)

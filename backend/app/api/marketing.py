@@ -15,6 +15,7 @@ from app.api.cuotas import aplicar_cuota
 from app.core.config import get_settings
 from app.core.dependencias import ROLES_DECISION, requiere_rol
 from app.core.redis import get_redis_client
+from app.services.campanas import guardar_campana
 from app.services.planes import modelo_para, plan_de_organizacion
 from app.services.proveedores.marketing_base import ProveedorMarketing
 from app.services.proveedores.marketing_openai import ProveedorMarketingOpenAI
@@ -69,8 +70,16 @@ async def generar_campana_marketing(
     )
 
     try:
-        return await agente.ejecutar(entrada)
+        salida = await agente.ejecutar(entrada)
     except ProductosInvalidosError as error:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)
         ) from error
+
+    # Se guarda en el historial solo si se generó contenido (DEC-034).
+    if salida.angulos_de_campana or salida.copy_por_canal:
+        campana = await guardar_campana(
+            db_session, usuario.organizacion_id, usuario.id, entrada, salida, agente.nombres_productos
+        )
+        salida.metadata.campana_id = campana.id
+    return salida

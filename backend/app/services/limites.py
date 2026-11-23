@@ -14,7 +14,7 @@ import hashlib
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
 
-__all__ = ["RedisError", "LimitesLogin", "consumir_cuota", "revocar_jti", "jti_revocado"]
+__all__ = ["RedisError", "LimitesLogin", "consumir_cuota", "estado_cuota", "revocar_jti", "jti_revocado"]
 
 
 def _hash(*partes: str) -> str:
@@ -96,3 +96,11 @@ async def revocar_jti(redis: Redis, jti: str, segundos_restantes: int) -> None:
 
 async def jti_revocado(redis: Redis, jti: str) -> bool:
     return bool(await redis.exists(f"jwt:revocado:{jti}"))
+
+
+async def estado_cuota(redis: Redis, nombre: str, sujeto: str) -> tuple[int, int]:
+    """Cuánto se usó de una cuota sin consumirla: (usados, segundos hasta renovarse)."""
+    clave = f"cuota:{nombre}:{_hash(sujeto)}"
+    usados = int(await redis.get(clave) or 0)
+    ttl = int(await redis.ttl(clave)) if usados else 0
+    return usados, max(ttl, 0)

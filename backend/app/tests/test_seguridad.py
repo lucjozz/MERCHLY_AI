@@ -317,6 +317,15 @@ MATRIZ = [
     ("post", "/agentes/marketing", {"productos_candidato_ids": [_ID], "canales_objetivo": ["email"], "idioma_destino": "es"}, {"usuario_operativo"}),
     ("post", "/decisiones", _DECISION, {"usuario_operativo"}),
     ("delete", f"/productos-candidatos/{_ID}", None, {"usuario_operativo", "responsable_tecnico"}),
+    ("patch", f"/campanas/{_ID}", {"titulo": "x"}, {"usuario_operativo"}),
+    ("delete", f"/campanas/{_ID}", None, {"usuario_operativo"}),
+    ("put", "/organizacion/perfil", {"nombre": "Mi tienda", "pais": "BO", "rubro": "ropa"},
+     {"usuario_operativo", "responsable_tecnico", "responsable_negocio"}),
+    ("get", "/usuarios", None, {"usuario_operativo", "responsable_tecnico", "responsable_negocio"}),
+    ("post", "/usuarios/invitaciones", {"email": "a@b.co", "rol": "usuario_operativo"},
+     {"usuario_operativo", "responsable_tecnico", "responsable_negocio"}),
+    ("patch", f"/usuarios/{_ID}", {"rol": "admin_principal"},
+     {"usuario_operativo", "responsable_tecnico", "responsable_negocio"}),
 ]
 ROLES = ["admin_principal", "responsable_tecnico", "responsable_negocio", "usuario_operativo"]
 
@@ -347,6 +356,18 @@ def test_matriz_rol_x_endpoint(metodo, ruta, body, prohibidos, rol) -> None:
         ("get", "/auth/me"),
         ("post", "/auth/logout"),
         ("post", "/auth/cerrar-todas-las-sesiones"),
+        ("get", "/campanas"),
+        ("get", f"/campanas/{_ID}"),
+        ("patch", f"/campanas/{_ID}"),
+        ("delete", f"/campanas/{_ID}"),
+        ("get", "/organizacion"),
+        ("put", "/organizacion/perfil"),
+        ("get", "/organizacion/uso"),
+        ("get", "/usuarios"),
+        ("patch", f"/usuarios/{_ID}"),
+        ("get", "/usuarios/invitaciones"),
+        ("post", "/usuarios/invitaciones"),
+        ("delete", f"/usuarios/invitaciones/{_ID}"),
     ],
 )
 def test_todo_exige_autenticacion(metodo: str, ruta: str) -> None:
@@ -356,7 +377,9 @@ def test_todo_exige_autenticacion(metodo: str, ruta: str) -> None:
 
 def test_rutas_publicas_son_solo_las_esperadas() -> None:
     """Si alguien agrega un endpoint sin auth, este test lo detecta."""
-    publicas_esperadas = {"/health", "/health/ready", "/auth/login", "/auth/refresh", "/auth/google"}
+    publicas_esperadas = {
+        "/health", "/health/ready", "/auth/login", "/auth/refresh", "/auth/google", "/auth/aceptar-invitacion"
+    }
     publicas = set()
     rutas = []
     for item in app.routes:

@@ -36,6 +36,9 @@ from app.services.autenticacion import (
     rotar_refresh,
     usuario_desde_google,
 )
+from app.core.security import PasswordInvalidaError
+from app.schemas.usuarios import AceptarInvitacionEntrada
+from app.services.equipo import InvitacionInvalidaError, aceptar_invitacion
 from app.services.google_auth import GoogleTokenInvalidoError, verificar_id_token_google
 from app.services.limites import LimitesLogin, RedisError, revocar_jti
 
@@ -161,6 +164,43 @@ async def login_google(
     usuario = await usuario_desde_google(db_session, identidad.sub, identidad.email, identidad.nombre)
     if usuario is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No se pudo validar tu cuenta de Google.")
+    return _a_output(await emitir_sesion(db_session, usuario))
+
+
+@router.post("/aceptar-invitacion", response_model=SesionOutput)
+async def aceptar(
+    entrada: AceptarInvitacionEntrada,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    redis: Redis = Depends(get_redis_client),
+) -> SesionOutput:
+    """Crea la cuenta de una persona invitada e inicia su sesión.
+
+    Mismo mensaje para token inexistente, vencido, usado o revocado.
+    Comparte el límite de intentos del login (por IP).
+    """
+    ip = obtener_ip_cliente(request)
+    limites = _limites(redis)
+    try:
+        espera = await limites.segundos_bloqueado("invitacion", ip)
+    except RedisError:
+        raise _servicio_no_disponible()
+    if espera:
+        raise _demasiados_intentos(espera)
+    try:
+        usuario = await aceptar_invitacion(db_session, entrada.token, entrada.nombre, entrada.password)
+    except PasswordInvalidaError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+    except InvitacionInvalidaError:
+        try:
+            await limites.registrar_fallo("invitacion", ip)
+        except RedisError:
+            pass
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La invitación no es válida o ya venció. Pedile una nueva al admin de tu negocio.",
+        )
+    logger.info("invitacion_aceptada usuario=%s", usuario.id)
     return _a_output(await emitir_sesion(db_session, usuario))
 
 

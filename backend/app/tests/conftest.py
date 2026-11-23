@@ -42,6 +42,9 @@ class RedisFalso:
         self.datos[clave] = self.datos.get(clave, 0) + 1
         return self.datos[clave]
 
+    async def get(self, clave):
+        return self.datos.get(clave)
+
     async def mget(self, *claves):
         return [self.datos.get(c) for c in claves]
 

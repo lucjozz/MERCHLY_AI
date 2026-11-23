@@ -21,13 +21,14 @@ from app.services.proveedores.simulado import ProveedorInvestigacionSimulado
 from app.api.cuotas import aplicar_cuota
 from app.core.dependencias import ROLES_DECISION, requiere_rol
 from app.core.redis import get_redis_client
+from app.services.organizacion import contexto_para_ia, obtener_organizacion
 from app.services.planes import modelo_para, plan_de_organizacion
 from app.models.usuario import Usuario
 
 router = APIRouter(prefix="/agentes", tags=["agentes"])
 
 
-def _obtener_proveedor(plan: str = "beta") -> ProveedorInvestigacion:
+def _obtener_proveedor(plan: str = "beta", contexto: dict[str, str] | None = None) -> ProveedorInvestigacion:
     """Elige el proveedor de investigación según configuración.
 
     Returns:
@@ -39,7 +40,7 @@ def _obtener_proveedor(plan: str = "beta") -> ProveedorInvestigacion:
     """
     settings = get_settings()
     if settings.gemini_api_key:
-        return ProveedorInvestigacionGemini(modelo=modelo_para("investigador", plan))
+        return ProveedorInvestigacionGemini(modelo=modelo_para("investigador", plan), contexto_negocio=contexto)
     return ProveedorInvestigacionSimulado()
 
 
@@ -70,8 +71,9 @@ async def investigar_producto(
         redis, "investigador", usuario.organizacion_id,
         get_settings().cuota_investigador_por_hora,
     )
+    organizacion = await obtener_organizacion(db_session, usuario.organizacion_id)
     plan = await plan_de_organizacion(db_session, usuario.organizacion_id)
-    proveedor = _obtener_proveedor(plan)
+    proveedor = _obtener_proveedor(plan, contexto_para_ia(organizacion))
     agente = AgenteInvestigadorProducto(
         proveedor=proveedor, db_session=db_session, organizacion_id=usuario.organizacion_id
     )

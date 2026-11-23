@@ -48,6 +48,8 @@ class AgenteMarketing:
         self, proveedor: ProveedorMarketing, db_session: AsyncSession, organizacion_id: uuid.UUID
     ) -> None:
         self.organizacion_id = organizacion_id
+        # Nombres de los productos usados (para titular la campaña guardada).
+        self.nombres_productos: list[str] = []
         self.proveedor = proveedor
         self.db_session = db_session
 
@@ -69,6 +71,7 @@ class AgenteMarketing:
             proveedor, para no gastar cuota en una solicitud inválida.
         """
         productos = await self._obtener_y_validar_productos(entrada)
+        self.nombres_productos = [p.nombre_producto for p in productos]
         resultado = await self._generar_con_reintentos(entrada, productos)
 
         if resultado is None:

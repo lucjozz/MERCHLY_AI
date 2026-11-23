@@ -76,7 +76,12 @@ class ProveedorInvestigacionGemini(ProveedorInvestigacion):
         modelo: nombre del modelo de Gemini a usar.
     """
 
-    def __init__(self, cliente: genai.Client | None = None, modelo: str | None = None) -> None:
+    def __init__(
+        self,
+        cliente: genai.Client | None = None,
+        modelo: str | None = None,
+        contexto_negocio: dict[str, str] | None = None,
+    ) -> None:
         settings = get_settings()
 
         if cliente is None:
@@ -93,6 +98,7 @@ class ProveedorInvestigacionGemini(ProveedorInvestigacion):
         self.timeout = settings.ia_timeout_segundos
         self.max_tokens = settings.ia_max_tokens_salida
         self.ultimo_uso: tuple[int, int] = (0, 0)
+        self.contexto_negocio = contexto_negocio or {}
 
     async def investigar(
         self, entrada: InvestigacionInput
@@ -112,7 +118,7 @@ class ProveedorInvestigacionGemini(ProveedorInvestigacion):
             El llamador (``AgenteInvestigadorProducto``) es responsable
             de la política de reintentos (contrato, sección 8).
         """
-        mensaje_usuario = self._construir_mensaje_usuario(entrada)
+        mensaje_usuario = self._construir_mensaje_usuario(entrada, self.contexto_negocio)
 
         try:
             respuesta = await asyncio.wait_for(
@@ -166,13 +172,17 @@ class ProveedorInvestigacionGemini(ProveedorInvestigacion):
         })
 
     @staticmethod
-    def _construir_mensaje_usuario(entrada: InvestigacionInput) -> str:
+    def _construir_mensaje_usuario(
+        entrada: InvestigacionInput, contexto_negocio: dict[str, str] | None = None
+    ) -> str:
         """Arma el mensaje de usuario a partir de la entrada validada."""
         pedido = [
             f"Mercado objetivo (ISO 3166-1 alpha-2): {entrada.mercado_objetivo}",
             f"Cantidad de productos a devolver: {entrada.cantidad_resultados}",
         ]
         datos = [f"Categoría: {limpiar_dato(entrada.categoria, 120)}"]
+        for clave, valor in (contexto_negocio or {}).items():
+            datos.append(f"{limpiar_dato(clave, 40)}: {limpiar_dato(valor, 160)}")
         if entrada.presupuesto_max_producto is not None:
             pedido.append(
                 f"Presupuesto máximo por producto (USD): "
