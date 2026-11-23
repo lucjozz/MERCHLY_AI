@@ -748,3 +748,21 @@ Recorrido de la app como emprendedor (2026-11-23): sin esto un negocio real no p
 Estado:
 
 **Pedido por Daniel el 2026-11-23. Pendiente visto bueno del CTO.**
+
+## DEC-035
+
+Fecha:
+
+2026-11-24
+
+Decisión:
+
+1. **Dólar oficial del BCB automático:** el tipo de cambio USD/BOB se obtiene del Tipo de Cambio Oficial que publica el Banco Central de Bolivia (régimen flexible desde 2026), vía un servicio que republica sus cifras públicas (el BCB no tiene API oficial; URL configurable en `TIPO_CAMBIO_URL`). Caché de 1 hora, último valor conocido si la fuente falla (marcado como desactualizado) y validación del rango. Si el negocio carga un tipo de cambio propio, se usa el suyo; vacío = BCB.
+2. **Invitaciones con código corto** (12 caracteres legibles, Crockford base32, `XXXX-XXXX-XXXX`, 60 bits) en lugar de un token largo; se acepta escrito a mano. La seguridad se mantiene con la vigencia de 7 días, el uso único y el límite de intentos por IP.
+3. **Canales de venta:** la interfaz muestra el estado real (compartir a mano disponible; conexión directa no disponible y qué requiere). Nada de indicadores falsos.
+4. **Uso diario en modo producción** (`npm run local`): el modo desarrollo compila cada pantalla al abrirla y en esta PC tardaba hasta 47 s.
+5. Compras dentro de la app (agente intermediario): queda como idea, no se implementa.
+
+Estado:
+
+**Pedido por Daniel el 2026-11-24. Pendiente visto bueno del CTO.**

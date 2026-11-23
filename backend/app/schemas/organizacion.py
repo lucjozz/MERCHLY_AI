@@ -18,6 +18,7 @@ class PerfilEntrada(EntradaEstricta):
     rubro: str = Field(min_length=2, max_length=120)
     presupuesto_mensual: Decimal | None = Field(default=None, ge=0, le=Decimal("100000000"))
     moneda: Literal["BOB", "USD"] = "BOB"
+    # None = automático: se usa el tipo de cambio oficial del BCB (DEC-035).
     tipo_cambio: Decimal | None = Field(default=None, gt=0, le=Decimal("100000"))
     costo_envio_unitario_usd: Decimal = Field(default=Decimal("0"), ge=0, le=Decimal("100000"))
     impuestos_importacion_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)

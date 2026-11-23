@@ -65,6 +65,9 @@ class Settings(BaseSettings):
 
     google_client_id: str | None = None
 
+    # Dólar oficial del BCB (DEC-035). El BCB no tiene API oficial: servicio que republica sus cifras.
+    tipo_cambio_url: str = "https://apibcb.cucu.bo/api/v1/tc/oficial"
+
     # IA real (docs/007-Agentes/07). Sin clave = proveedor simulado.
     openai_api_key: str | None = None
     ia_timeout_segundos: float = 45.0

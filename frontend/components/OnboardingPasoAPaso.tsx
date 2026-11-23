@@ -22,18 +22,29 @@ function numero(valor: string): number | null {
   return valor.trim() === "" || !Number.isFinite(n) || n < 0 ? null : n;
 }
 
-export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { organizacion: Organizacion; nombrePersona: string }) {
+export default function OnboardingPasoAPaso({
+  organizacion,
+  nombrePersona,
+  dolarBcb,
+}: {
+  organizacion: Organizacion;
+  nombrePersona: string;
+  dolarBcb: number | null;
+}) {
   const router = useRouter();
   const [paso, setPaso] = useState<Paso>("nombre");
   const [direccion, setDireccion] = useState<"adelante" | "atras">("adelante");
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [listo, setListo] = useState(false);
 
   const [nombre, setNombre] = useState(organizacion.nombre.startsWith("Negocio de ") ? "" : organizacion.nombre);
   const [rubro, setRubro] = useState(organizacion.rubro ?? "");
   const [pais, setPais] = useState(organizacion.pais || "BO");
   const [moneda, setMoneda] = useState<"BOB" | "USD">(organizacion.moneda);
   const [tipoCambio, setTipoCambio] = useState(organizacion.tipo_cambio?.toString() ?? "");
+  // Por defecto, el dólar oficial del BCB (se actualiza solo). "propio" = el que paga el negocio.
+  const [modoCambio, setModoCambio] = useState<"bcb" | "propio">(organizacion.tipo_cambio || !dolarBcb ? "propio" : "bcb");
   const [presupuesto, setPresupuesto] = useState(organizacion.presupuesto_mensual?.toString() ?? "");
   const [envio, setEnvio] = useState(organizacion.costo_envio_unitario_usd ? String(organizacion.costo_envio_unitario_usd) : "");
   const [impuestos, setImpuestos] = useState(organizacion.impuestos_importacion_pct ? String(organizacion.impuestos_importacion_pct) : "");
@@ -44,14 +55,22 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
   const progreso = Math.round(((indice + 1) / pasos.length) * 100);
 
   const campo = useRef<HTMLInputElement>(null);
+  const formulario = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    campo.current?.focus();
+    // En preguntas sin campo de texto, el foco va al formulario para que Enter funcione.
+    (campo.current ?? formulario.current)?.focus();
   }, [paso]);
+
+  // Se precarga la página siguiente mientras responde, así al terminar entra al instante.
+  useEffect(() => {
+    router.prefetch("/productos");
+  }, [router]);
 
   function validar(): string | null {
     if (paso === "nombre" && nombre.trim().length < 2) return "Escribí el nombre de tu negocio.";
     if (paso === "rubro" && rubro.trim().length < 2) return "Contanos qué vendés (o elegí una opción).";
-    if (paso === "cambio" && !numero(tipoCambio)) return "Escribí cuántos bolivianos pagás por 1 dólar (por ejemplo 6,96).";
+    if (paso === "cambio" && modoCambio === "propio" && !numero(tipoCambio))
+      return "Escribí cuántos bolivianos pagás por 1 dólar, o usá el oficial del BCB.";
     if (paso === "presupuesto" && presupuesto.trim() && numero(presupuesto) === null) return "Escribí un número o salteá esta pregunta.";
     if (paso === "costos" && ((envio.trim() && numero(envio) === null) || (impuestos.trim() && (numero(impuestos) === null || (numero(impuestos) ?? 0) > 100))))
       return "Revisá los números (los impuestos van de 0 a 100) o salteá esta pregunta.";
@@ -67,6 +86,14 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
     setError(null);
     setDireccion("adelante");
     setPaso(pasos[Math.min(indice + 1, pasos.length - 1)]);
+  }
+
+  /** Opciones de un toque (país, moneda): eligen y avanzan solas. */
+  function elegirYAvanzar(aplicar: () => void, proximo?: Paso) {
+    aplicar();
+    setError(null);
+    setDireccion("adelante");
+    setTimeout(() => setPaso((actual) => proximo ?? pasos[pasos.indexOf(actual) + 1]), 180);
   }
 
   function anterior() {
@@ -96,12 +123,12 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
         rubro: rubro.trim(),
         presupuesto_mensual: numero(presupuesto),
         moneda,
-        tipo_cambio: numero(tipoCambio),
+        tipo_cambio: moneda === "BOB" && modoCambio === "propio" ? numero(tipoCambio) : null,
         costo_envio_unitario_usd: numero(envio) ?? 0,
         impuestos_importacion_pct: numero(impuestos) ?? 0,
       });
-      router.push("/productos");
-      router.refresh();
+      setListo(true);
+      router.replace("/productos");
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo guardar.");
       setGuardando(false);
@@ -122,6 +149,16 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
       activa ? "border-acento bg-acento-hondo/40 text-texto ring-2 ring-acento/40" : "border-borde bg-fondo text-texto-2 hover:border-borde-fuerte hover:text-texto"
     }`;
 
+  if (listo) {
+    return (
+      <div className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center py-8 text-center animate-aparecer" role="status">
+        <Loader2 className="h-8 w-8 animate-spin text-acento-claro" aria-hidden="true" />
+        <p className="mt-4 text-xl font-semibold text-texto">Preparando tu panel…</p>
+        <p className="mt-1 text-sm text-texto-2">Ya guardamos los datos de {nombre.trim()}.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-xl flex-col justify-center py-8">
       <div className="mb-8">
@@ -139,7 +176,7 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
         </div>
       </div>
 
-      <form onSubmit={alEnviar} noValidate>
+      <form ref={formulario} tabIndex={-1} onSubmit={alEnviar} noValidate className="outline-none">
         {/* key = paso: cada pregunta se monta de nuevo y vuelve a animarse */}
         <div key={paso} className={direccion === "adelante" ? "animate-entrar-adelante" : "animate-entrar-atras"}>
           {paso === "nombre" && (
@@ -171,7 +208,7 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
               <p className={ayuda}>Buscamos productos con demanda en tu mercado.</p>
               <div className="mt-6 grid grid-cols-2 gap-3">
                 {Object.entries(MERCADOS).map(([codigo, m]) => (
-                  <button key={codigo} type="button" onClick={() => setPais(codigo)} className={opcion(pais === codigo)} aria-pressed={pais === codigo}>
+                  <button key={codigo} type="button" onClick={() => elegirYAvanzar(() => setPais(codigo))} className={opcion(pais === codigo)} aria-pressed={pais === codigo}>
                     <span className="font-medium">{m.nombre}</span>
                   </button>
                 ))}
@@ -188,7 +225,14 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
                   ["BOB", "Bolivianos", "Bs 139,20"],
                   ["USD", "Dólares", "US$ 20,00"],
                 ] as const).map(([valor, nombreMoneda, ejemplo]) => (
-                  <button key={valor} type="button" onClick={() => setMoneda(valor)} className={`${opcion(moneda === valor)} !py-4`} aria-pressed={moneda === valor}>
+                  <button
+                    key={valor}
+                    type="button"
+                    // Con dólares no hay pregunta de tipo de cambio: se salta directo al presupuesto.
+                    onClick={() => elegirYAvanzar(() => setMoneda(valor), valor === "BOB" ? "cambio" : "presupuesto")}
+                    className={`${opcion(moneda === valor)} !py-4`}
+                    aria-pressed={moneda === valor}
+                  >
                     <span className="block text-base font-semibold">{nombreMoneda}</span>
                     <span className="text-xs text-texto-3">Ej.: {ejemplo}</span>
                   </button>
@@ -199,12 +243,26 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
 
           {paso === "cambio" && (
             <>
-              <h1 className={titulo}>¿Cuántos bolivianos pagás por 1 dólar?</h1>
-              <p className={ayuda}>Poné el que pagás vos de verdad, así los precios y el margen te dan reales.</p>
-              <div className="relative mt-6">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-texto-2">Bs</span>
-                <input ref={campo} inputMode="decimal" value={tipoCambio} onChange={(e) => setTipoCambio(e.target.value)} placeholder="6,96" aria-label="Tipo de cambio" className={`${CAMPO} py-3 pl-12 text-lg`} />
+              <h1 className={titulo}>¿Qué dólar usamos para tus precios?</h1>
+              <p className={ayuda}>El dólar sube y baja: podés usar el oficial del Banco Central (se actualiza solo) o el que pagás vos.</p>
+              <div className="mt-6 grid gap-3">
+                {dolarBcb && (
+                  <button type="button" onClick={() => elegirYAvanzar(() => setModoCambio("bcb"), "presupuesto")} className={`${opcion(modoCambio === "bcb")} !py-4`} aria-pressed={modoCambio === "bcb"}>
+                    <span className="block text-base font-semibold">Oficial del BCB · hoy Bs {dolarBcb.toLocaleString("es-BO")}</span>
+                    <span className="text-xs text-texto-3">Se actualiza automáticamente todos los días.</span>
+                  </button>
+                )}
+                <button type="button" onClick={() => setModoCambio("propio")} className={`${opcion(modoCambio === "propio")} !py-4`} aria-pressed={modoCambio === "propio"}>
+                  <span className="block text-base font-semibold">El que pago yo</span>
+                  <span className="text-xs text-texto-3">Si comprás dólares a otro precio, así tu margen da real.</span>
+                </button>
               </div>
+              {modoCambio === "propio" && (
+                <div className="relative mt-4 animate-aparecer">
+                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-texto-2">Bs</span>
+                  <input ref={campo} inputMode="decimal" value={tipoCambio} onChange={(e) => setTipoCambio(e.target.value)} placeholder={dolarBcb ? String(dolarBcb).replace(".", ",") : "Ej.: 11,75"} aria-label="Tipo de cambio propio" className={`${CAMPO} py-3 pl-12 text-lg`} autoFocus />
+                </div>
+              )}
             </>
           )}
 
@@ -245,7 +303,7 @@ export default function OnboardingPasoAPaso({ organizacion, nombrePersona }: { o
                   ["Negocio", nombre],
                   ["Vendés", rubro],
                   ["País", MERCADOS[pais]?.nombre ?? pais],
-                  ["Moneda", moneda === "BOB" ? `Bolivianos (Bs ${tipoCambio} por US$ 1)` : "Dólares"],
+                  ["Moneda", moneda === "BOB" ? (modoCambio === "bcb" ? "Bolivianos · dólar oficial del BCB" : `Bolivianos (Bs ${tipoCambio} por US$ 1)`) : "Dólares"],
                   ["Presupuesto mensual", presupuesto ? `${moneda === "BOB" ? "Bs" : "US$"} ${presupuesto}` : "Sin definir"],
                   ["Envío / impuestos", envio || impuestos ? `US$ ${envio || 0} · ${impuestos || 0}%` : "Sin definir"],
                 ].map(([k, v]) => (

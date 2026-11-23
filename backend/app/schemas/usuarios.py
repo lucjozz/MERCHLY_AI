@@ -65,6 +65,6 @@ class AceptarInvitacionEntrada(EntradaEstricta):
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
 
-    token: str = Field(min_length=20, max_length=128)
+    token: str = Field(min_length=12, max_length=40)  # código de invitación (con o sin guiones)
     nombre: str = Field(min_length=2, max_length=120)
     password: str = Field(min_length=12, max_length=128)

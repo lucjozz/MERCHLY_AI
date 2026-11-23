@@ -14,6 +14,7 @@ import { BOTON_PRIMARIO, CAMPO, ETIQUETA_CAMPO } from "@/components/ui/estilos";
 export default function AceptarInvitacion() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
+  const [codigo, setCodigo] = useState("");
   const [nombre, setNombre] = useState("");
   const [password, setPassword] = useState("");
   const [repetida, setRepetida] = useState("");
@@ -35,10 +36,14 @@ export default function AceptarInvitacion() {
       setError("Las contraseñas no coinciden.");
       return;
     }
-    if (!token) return;
+    const valor = token || codigo.trim();
+    if (valor.replace(/[^0-9a-z]/gi, "").length < 12) {
+      setError("Escribí el código de invitación completo (12 letras y números).");
+      return;
+    }
     setEnviando(true);
     try {
-      await aceptarInvitacion(token, nombre.trim(), password);
+      await aceptarInvitacion(valor, nombre.trim(), password);
       router.push("/");
       router.refresh();
     } catch (err) {
@@ -58,10 +63,14 @@ export default function AceptarInvitacion() {
         </div>
         <div className="rounded-2xl border border-borde bg-superficie p-6">
           <h1 className="text-xl font-bold text-texto">Te invitaron a un negocio</h1>
-          {token === "" ? (
-            <p className="mt-3 text-sm text-rojo">Este link no tiene una invitación. Pedile al admin de tu negocio que te mande uno nuevo.</p>
-          ) : (
+          {token !== null && (
             <form onSubmit={enviar} className="mt-5 space-y-4">
+              {!token && (
+                <div>
+                  <label htmlFor="i-codigo" className={ETIQUETA_CAMPO}>Código de invitación</label>
+                  <input id="i-codigo" required value={codigo} onChange={(e) => setCodigo(e.target.value.toUpperCase())} placeholder="XXXX-XXXX-XXXX" autoComplete="off" className={`${CAMPO} font-mono tracking-widest`} />
+                </div>
+              )}
               <div>
                 <label htmlFor="i-nombre" className={ETIQUETA_CAMPO}>Tu nombre</label>
                 <input id="i-nombre" required minLength={2} maxLength={120} value={nombre} onChange={(e) => setNombre(e.target.value)} className={CAMPO} />
@@ -75,7 +84,7 @@ export default function AceptarInvitacion() {
                 <input id="i-pass2" type="password" required minLength={12} maxLength={72} autoComplete="new-password" value={repetida} onChange={(e) => setRepetida(e.target.value)} className={CAMPO} />
               </div>
               {error && <p role="alert" className="rounded-lg border border-rojo-borde bg-rojo-fondo px-3 py-2 text-sm text-rojo">{error}</p>}
-              <button type="submit" disabled={enviando || token === null} className={`w-full py-3 ${BOTON_PRIMARIO}`}>
+              <button type="submit" disabled={enviando} className={`w-full py-3 ${BOTON_PRIMARIO}`}>
                 <UserPlus className="h-4 w-4" aria-hidden="true" /> {enviando ? "Creando tu cuenta…" : "Crear mi cuenta"}
               </button>
             </form>

@@ -169,3 +169,14 @@ def test_sin_clave_de_openai_marketing_usa_el_simulado(monkeypatch) -> None:
     monkeypatch.setattr(get_settings(), "openai_api_key", "sk-test-no-real")
     proveedor = _obtener_proveedor("negocio")
     assert isinstance(proveedor, ProveedorMarketingOpenAI) and proveedor.modelo == modelo_para("marketing", "negocio")
+
+
+def test_codigo_de_invitacion_legible_y_tolerante() -> None:
+    from app.services.equipo import ALFABETO_CODIGO, generar_codigo_invitacion, normalizar_codigo
+
+    codigos = {generar_codigo_invitacion() for _ in range(200)}
+    assert len(codigos) == 200  # sin repetidos
+    c = next(iter(codigos))
+    assert len(c) == 14 and all(ch in ALFABETO_CODIGO for ch in c.replace("-", ""))
+    assert normalizar_codigo(c.lower().replace("-", " ")) == c.replace("-", "")
+    assert normalizar_codigo("o1l0-abcd") == "0110ABCD"  # O→0, I/L→1

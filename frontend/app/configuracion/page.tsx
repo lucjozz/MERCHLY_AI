@@ -32,12 +32,16 @@ const ACCIONES = [
   { nombre: "Borrar productos", roles: ["admin_principal", "responsable_negocio"] },
 ];
 
-/** Canales de venta: estado REAL de cada uno (docs/004-Backend/03, sección 2). */
+/**
+ * Canales de venta con su estado REAL (docs/004-Backend/03, sección 2):
+ * "manual" funciona hoy desde cada campaña; "directa" (publicar desde MERCHLY)
+ * NO está disponible y se explica qué hace falta.
+ */
 const CANALES = [
-  { nombre: "WhatsApp", detalle: "Compartí cada texto con un toque desde tus campañas.", icono: MessageCircle, activo: true },
-  { nombre: "Email", detalle: "Abre tu correo con el texto listo para enviar.", icono: Mail, activo: true },
-  { nombre: "Instagram y Facebook", detalle: "Copiá el texto y pegalo en tu publicación. La conexión directa requiere aprobación de Meta.", icono: Share2, activo: true },
-  { nombre: "Búsqueda paga", detalle: "Copiá los textos para tus anuncios. La conexión con Google Ads llega más adelante.", icono: Search, activo: true },
+  { nombre: "WhatsApp", icono: MessageCircle, manual: "Compartí cada texto con un toque", directa: "Requiere WhatsApp Business API (cuenta aprobada por Meta)" },
+  { nombre: "Email", icono: Mail, manual: "Abre tu correo con el texto listo", directa: "Requiere un proveedor de envío de emails (ej.: Resend)" },
+  { nombre: "Instagram y Facebook", icono: Share2, manual: "Copiá el texto y pegalo en tu publicación", directa: "Requiere una app de Meta aprobada (verificación del negocio)" },
+  { nombre: "Búsqueda paga", icono: Search, manual: "Copiá los textos para tus anuncios", directa: "Requiere acceso a la API de Google Ads" },
 ];
 
 export default async function Configuracion() {
@@ -131,7 +135,7 @@ export default async function Configuracion() {
 
           <Card className="lg:col-span-2">
             <TituloCard
-              descripcion="MERCHLY nunca publica por vos: desde cada campaña copiás o compartís el texto y decidís dónde y cuándo."
+              descripcion="Hoy compartís a mano desde cada campaña (copiar, WhatsApp, email). Publicar directo desde MERCHLY necesita que cada plataforma apruebe nuestra app: todavía no está conectado."
               accion={
                 <Link href="/campanas" className="inline-flex items-center gap-1 text-sm text-acento-claro hover:underline">
                   Mis campañas <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -144,23 +148,23 @@ export default async function Configuracion() {
               {CANALES.map((canal) => {
                 const Icono = canal.icono;
                 return (
-                  <div
-                    key={canal.nombre}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-borde bg-fondo p-4"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
+                  <div key={canal.nombre} className="rounded-xl border border-borde bg-fondo p-4">
+                    <div className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-superficie-2 text-texto-2">
                         <Icono className="h-4 w-4" aria-hidden="true" />
                       </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-texto">{canal.nombre}</p>
-                        <p className="text-xs text-texto-2">{canal.detalle}</p>
-                      </div>
+                      <p className="text-sm font-medium text-texto">{canal.nombre}</p>
                     </div>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-verde-borde bg-verde-fondo px-2.5 py-1 text-xs text-verde">
-                      <Check className="h-3.5 w-3.5" aria-hidden="true" />
-                      Listo
-                    </span>
+                    <ul className="mt-3 space-y-2 text-xs">
+                      <li className="flex gap-2">
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-verde" aria-hidden="true" />
+                        <span><span className="font-medium text-texto">Compartir a mano: disponible.</span> <span className="text-texto-2">{canal.manual}.</span></span>
+                      </li>
+                      <li className="flex gap-2">
+                        <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-texto-3" aria-hidden="true" />
+                        <span><span className="font-medium text-texto-2">Conexión directa: todavía no.</span> <span className="text-texto-3">{canal.directa}.</span></span>
+                      </li>
+                    </ul>
                   </div>
                 );
               })}

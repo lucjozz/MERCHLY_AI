@@ -23,6 +23,20 @@ from app.schemas.usuarios import InvitacionEntrada, MiembroCambio
 from app.services.autenticacion import cerrar_todas_las_sesiones
 
 DIAS_VALIDEZ_INVITACION = 7
+# Código corto y legible (Crockford base32: sin I, L, O, U). 12 caracteres = 60 bits:
+# imposible de adivinar con el límite de intentos por IP y la vigencia de 7 días.
+ALFABETO_CODIGO = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+_EQUIVALENTES = str.maketrans({"O": "0", "I": "1", "L": "1"})
+
+
+def generar_codigo_invitacion() -> str:
+    crudo = "".join(secrets.choice(ALFABETO_CODIGO) for _ in range(12))
+    return f"{crudo[:4]}-{crudo[4:8]}-{crudo[8:]}"
+
+
+def normalizar_codigo(codigo: str) -> str:
+    """Acepta el código con o sin guiones, en minúsculas y con O/I/L confundidas."""
+    return "".join(c for c in codigo.upper().translate(_EQUIVALENTES) if c in ALFABETO_CODIGO)
 MAX_INVITACIONES_PENDIENTES = 50
 
 
@@ -88,13 +102,13 @@ async def invitar(
     for previa in previas.scalars().all():
         previa.revocada_en = ahora
 
-    token = secrets.token_urlsafe(32)
+    token = generar_codigo_invitacion()
     invitacion = Invitacion(
         id=uuid.uuid4(),
         organizacion_id=admin.organizacion_id,
         email=entrada.email,
         rol=entrada.rol,
-        token_hash=hashear_refresh_token(token),
+        token_hash=hashear_refresh_token(normalizar_codigo(token)),
         expira_en=ahora + timedelta(days=DIAS_VALIDEZ_INVITACION),
         creado_por=admin.id,
     )
@@ -177,7 +191,9 @@ async def aceptar_invitacion(db_session: AsyncSession, token: str, nombre: str, 
     password_hash = hashear_password(password)  # valida la política antes de tocar la base
     invitacion = (
         await db_session.execute(
-            select(Invitacion).where(Invitacion.token_hash == hashear_refresh_token(token)).with_for_update()
+            select(Invitacion)
+            .where(Invitacion.token_hash == hashear_refresh_token(normalizar_codigo(token)))
+            .with_for_update()
         )
     ).scalar_one_or_none()
     ahora = datetime.now(timezone.utc)

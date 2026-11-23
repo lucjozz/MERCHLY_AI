@@ -37,10 +37,6 @@ export default function FormularioPerfil({ organizacion, destino, textoBoton = "
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (moneda === "BOB" && !numero(tipoCambio)) {
-      setError("Para ver precios en bolivianos, cargá cuántos Bs pagás por 1 dólar.");
-      return;
-    }
     setGuardando(true);
     try {
       await guardarPerfil({
@@ -90,9 +86,10 @@ export default function FormularioPerfil({ organizacion, destino, textoBoton = "
       </div>
       <div>
         <label htmlFor="p-cambio" className={ETIQUETA_CAMPO}>
-          Tipo de cambio (Bs por 1 US$){moneda === "BOB" ? "" : " · opcional"}
+          Tipo de cambio propio (Bs por 1 US$)
         </label>
-        <input id="p-cambio" inputMode="decimal" placeholder="El que pagás vos, ej.: 6,96" value={tipoCambio} onChange={(e) => setTipoCambio(e.target.value)} className={CAMPO} />
+        <input id="p-cambio" inputMode="decimal" placeholder="Vacío = dólar oficial del BCB (automático)" value={tipoCambio} onChange={(e) => setTipoCambio(e.target.value)} className={CAMPO} />
+        <p className="mt-1 text-xs text-texto-3">Dejalo vacío para usar el oficial del BCB, que se actualiza solo.</p>
       </div>
       <div>
         <label htmlFor="p-presupuesto" className={ETIQUETA_CAMPO}>Presupuesto mensual para comprar mercadería ({moneda === "BOB" ? "Bs" : "US$"}) · opcional</label>

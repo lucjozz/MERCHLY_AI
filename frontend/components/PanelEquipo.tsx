@@ -25,6 +25,7 @@ export default function PanelEquipo({ miembros, invitaciones, miId }: PanelEquip
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [link, setLink] = useState<string | null>(null);
+  const [codigo, setCodigo] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
 
   async function invitar(e: React.FormEvent) {
@@ -35,6 +36,7 @@ export default function PanelEquipo({ miembros, invitaciones, miId }: PanelEquip
     try {
       const inv = await invitarMiembro(email.trim(), rol);
       // El token va en el fragmento (#): el navegador no lo manda al servidor ni a los logs.
+      setCodigo(inv.token);
       setLink(`${window.location.origin}/invitacion#${inv.token}`);
       setEmail("");
       router.refresh();
@@ -92,8 +94,13 @@ export default function PanelEquipo({ miembros, invitaciones, miId }: PanelEquip
             <Link2 className="h-4 w-4" aria-hidden="true" /> Invitación creada
           </p>
           <p className="mt-1 text-sm text-texto-2">
-            Copiá este link y mandáselo por WhatsApp o email. Vale 7 días y se usa una sola vez. No lo vas a poder ver de nuevo.
+            Mandale el link por WhatsApp, o pasale el código para que lo escriba en la pantalla de invitación. Vale 7 días y se usa una sola vez.
           </p>
+          {codigo && (
+            <p className="mt-3 select-all font-mono text-2xl font-bold tracking-widest text-texto" aria-label="Código de invitación">
+              {codigo}
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             <code className="min-w-0 flex-1 truncate rounded-lg bg-fondo px-3 py-2 text-xs text-texto">{link}</code>
             <button type="button" onClick={copiar} className="inline-flex items-center gap-1.5 rounded-lg border border-borde px-3 py-2 text-sm text-texto">

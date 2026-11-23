@@ -76,7 +76,7 @@ export default function CalculadoraMargen({ costoUsd, precioUsd, envioUsd, impue
         <p className="mt-4 text-sm text-texto-2">Cargá el precio de venta para ver el margen.</p>
       )}
       {!enBs && moneda.moneda === "BOB" && (
-        <p className="mt-3 text-xs text-ambar">Para ver todo en bolivianos, cargá tu tipo de cambio en Configuración.</p>
+        <p className="mt-3 text-xs text-ambar">No pudimos obtener el dólar del BCB ahora: los montos se muestran en dólares.</p>
       )}
     </div>
   );

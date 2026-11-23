@@ -135,15 +135,15 @@ async def test_invitacion_completa_y_token_de_un_solo_uso(mundo, fabrica) -> Non
     email = f"invitado-{uuid.uuid4().hex[:8]}@merchly.test"
     async with await _sesion(fabrica, mundo["a"]) as s:
         invitacion, token = await equipo.invitar(s, admin, InvitacionEntrada(email=email.upper(), rol="responsable_negocio"))
-    assert invitacion.email == email and len(token) >= 40
+    assert invitacion.email == email and len(token) == 14 and token.count("-") == 2
     with psycopg.connect(URLS[0]) as c:  # en la base no está el token, solo su hash
         assert c.execute("SELECT count(*) FROM invitaciones WHERE token_hash = %s", (token,)).fetchone()[0] == 0
 
     async with fabrica() as s:
         with pytest.raises(PasswordInvalidaError):
             await equipo.aceptar_invitacion(s, token, "Nuevo", "corta")
-    async with fabrica() as s:
-        nuevo = await equipo.aceptar_invitacion(s, token, "Nuevo Miembro", "una-password-larga-ok")
+    async with fabrica() as s:  # escrito a mano: minúsculas y sin guiones también vale
+        nuevo = await equipo.aceptar_invitacion(s, token.replace("-", "").lower(), "Nuevo Miembro", "una-password-larga-ok")
     assert nuevo.organizacion_id == mundo["a"] and nuevo.rol == "responsable_negocio"
     async with fabrica() as s:
         with pytest.raises(equipo.InvitacionInvalidaError):

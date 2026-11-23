@@ -45,7 +45,7 @@ Lo que un emprendedor necesita para usar MERCHLY en serio, detectado al recorrer
 
 # 4. Precios en moneda local y margen real
 
-* La interfaz muestra los precios en la moneda del negocio, convirtiendo con el `tipo_cambio` que cargó el admin (nunca un valor inventado).
+* La interfaz muestra los precios en la moneda del negocio. Tipo de cambio: el **oficial del BCB, automático** (`GET /tipo-cambio`, caché 1 h, DEC-035) o el propio si el admin lo cargó. Nunca un valor inventado.
 * Calculadora de margen en el detalle: costo del proveedor + envío por unidad + impuestos de importación (%) → costo total, ganancia y margen por unidad. Los valores por defecto salen del perfil y se pueden ajustar.
 * "Dónde comprarle al proveedor": enlaces de **búsqueda** en AliExpress, Alibaba y Mercado Libre con el nombre del producto. Son búsquedas, no recomendaciones de un vendedor concreto.
 
@@ -54,7 +54,7 @@ Lo que un emprendedor necesita para usar MERCHLY en serio, detectado al recorrer
 * Tabla `invitaciones`: organización, email, rol, `token_hash` (SHA-256; el token solo existe en el link), `expira_en` (7 días), `aceptada_en`, `creado_por`.
 * `GET /usuarios`, `POST /usuarios/invitaciones`, `GET /usuarios/invitaciones`, `PATCH /usuarios/{id}` (rol, activo): **solo `admin_principal`**, y siempre dentro de su organización.
 * Reglas: nadie cambia su propio rol ni se desactiva a sí mismo; no se puede dejar a la organización sin ningún admin activo; desactivar a alguien cierra todas sus sesiones.
-* `POST /auth/aceptar-invitacion` (pública, con límite de intentos): token + nombre + contraseña (política de 013-04) → crea el usuario en la organización con el rol de la invitación e inicia sesión.
+* `POST /auth/aceptar-invitacion` (pública, con límite de intentos): código corto `XXXX-XXXX-XXXX` (DEC-035) + nombre + contraseña (política de 013-04) → crea el usuario en la organización con el rol de la invitación e inicia sesión.
 * Hasta tener un proveedor de email, el admin **copia el link** y lo envía por WhatsApp o email.
 
 # 6. Uso del plan

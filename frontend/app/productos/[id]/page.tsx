@@ -4,6 +4,7 @@ import CampanaMarketingPanel from "@/components/CampanaMarketing";
 import CalculadoraMargen from "@/components/CalculadoraMargen";
 import EnlacesProveedor from "@/components/EnlacesProveedor";
 import { obtenerOrganizacion, type Organizacion } from "@/lib/api/organizacion";
+import { obtenerTipoCambioBcb, tipoCambioEfectivo, type TipoCambioBcb } from "@/lib/api/tipo-cambio";
 import { equivalenteUsd, formatearMonto, type ConfigMoneda } from "@/lib/moneda";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -51,13 +52,15 @@ export default async function DetalleProducto({ params }: PageProps) {
   const { id } = await params;
   let producto;
   let organizacion: Organizacion | null = null;
+  let bcb: TipoCambioBcb | null = null;
 
   let mensajeError: string | null = null;
   try {
-    [producto, organizacion] = await Promise.all([
+    [producto, organizacion, bcb] = await Promise.all([
       obtenerProductoCandidato(id),
       // Sin perfil no se bloquea la página: se muestran los precios en USD.
       obtenerOrganizacion().catch(() => null),
+      obtenerTipoCambioBcb(),
     ]);
   } catch (e) {
     mensajeError = mensajeDeErrorDePagina(e);
@@ -80,8 +83,14 @@ export default async function DetalleProducto({ params }: PageProps) {
 
   const moneda: ConfigMoneda = {
     moneda: organizacion?.moneda ?? "USD",
-    tipo_cambio: organizacion?.tipo_cambio ?? null,
+    tipo_cambio: tipoCambioEfectivo(organizacion?.tipo_cambio, bcb),
   };
+  const fuenteCambio =
+    moneda.moneda === "BOB" && moneda.tipo_cambio
+      ? organizacion?.tipo_cambio
+        ? `Tipo de cambio propio: Bs ${moneda.tipo_cambio} por US$ 1`
+        : `Dólar oficial BCB: Bs ${moneda.tipo_cambio}${bcb?.fecha ? ` (${bcb.fecha.split("-").reverse().join("/")})` : ""}${bcb?.desactualizado ? " · puede estar desactualizado" : ""}`
+      : null;
   const simulado = esProductoSimulado(producto);
   const estado = infoEstado(producto.estado);
   const margen =
@@ -181,6 +190,8 @@ export default async function DetalleProducto({ params }: PageProps) {
             <span className="text-texto-2">(antes de envío, impuestos y comisiones)</span>
           </p>
         )}
+
+        {fuenteCambio && <p className="mt-2 text-xs text-texto-3">{fuenteCambio}</p>}
 
         <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
           <CalculadoraMargen

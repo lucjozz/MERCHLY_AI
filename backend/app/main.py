@@ -24,6 +24,7 @@ from app.api.health import router as health_router
 from app.api.marketing import router as marketing_router
 from app.api.organizacion import router as organizacion_router
 from app.api.productos_candidatos import router as productos_candidatos_router
+from app.api.tipo_cambio import router as tipo_cambio_router
 from app.api.usuarios import router as usuarios_router
 from app.core.config import get_settings
 from app.core.middleware import HeadersDeSeguridadMiddleware, LimiteDeBodyMiddleware
@@ -108,3 +109,4 @@ app.include_router(decisiones_router)
 app.include_router(campanas_router)
 app.include_router(organizacion_router)
 app.include_router(usuarios_router)
+app.include_router(tipo_cambio_router)
