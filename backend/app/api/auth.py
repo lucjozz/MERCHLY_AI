@@ -20,6 +20,8 @@ from app.models.organizacion import Organizacion
 from app.models.usuario import Usuario
 from app.schemas.auth import (
     GoogleLoginInput,
+    OlvidePasswordInput,
+    RestablecerPasswordInput,
     LoginInput,
     LogoutInput,
     RefreshInput,
@@ -38,6 +40,11 @@ from app.services.autenticacion import (
 )
 from app.core.security import PasswordInvalidaError
 from app.schemas.usuarios import AceptarInvitacionEntrada
+from app.services.recuperar_password import (
+    TokenRestablecimientoInvalidoError,
+    restablecer_password,
+    solicitar_restablecimiento,
+)
 from app.services.equipo import InvitacionInvalidaError, aceptar_invitacion
 from app.services.google_auth import GoogleTokenInvalidoError, verificar_id_token_google
 from app.services.limites import LimitesLogin, RedisError, revocar_jti
@@ -202,6 +209,60 @@ async def aceptar(
         )
     logger.info("invitacion_aceptada usuario=%s", usuario.id)
     return _a_output(await emitir_sesion(db_session, usuario))
+
+
+@router.post("/olvide-password", status_code=status.HTTP_202_ACCEPTED)
+async def olvide_password(
+    entrada: OlvidePasswordInput,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    redis: Redis = Depends(get_redis_client),
+) -> dict[str, str]:
+    """Siempre la misma respuesta, exista o no el email (sin enumeración).
+    Comparte el límite de intentos del login."""
+    ip = obtener_ip_cliente(request)
+    limites = _limites(redis)
+    try:
+        espera = await limites.segundos_bloqueado(f"olvido:{entrada.email}", ip)
+        if espera:
+            raise _demasiados_intentos(espera)
+        await limites.registrar_fallo(f"olvido:{entrada.email}", ip)  # cada pedido cuenta
+    except RedisError:
+        raise _servicio_no_disponible()
+    await solicitar_restablecimiento(db_session, entrada.email)
+    return {"detail": "Si el email está registrado, te mandamos un link para restablecer la contraseña."}
+
+
+@router.post("/restablecer-password", status_code=status.HTTP_204_NO_CONTENT)
+async def restablecer(
+    entrada: RestablecerPasswordInput,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    redis: Redis = Depends(get_redis_client),
+) -> Response:
+    """Cambia la contraseña con el link del email y cierra todas las sesiones."""
+    ip = obtener_ip_cliente(request)
+    limites = _limites(redis)
+    try:
+        espera = await limites.segundos_bloqueado("restablecer", ip)
+    except RedisError:
+        raise _servicio_no_disponible()
+    if espera:
+        raise _demasiados_intentos(espera)
+    try:
+        await restablecer_password(db_session, entrada.token, entrada.password)
+    except PasswordInvalidaError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)) from error
+    except TokenRestablecimientoInvalidoError:
+        try:
+            await limites.registrar_fallo("restablecer", ip)
+        except RedisError:
+            pass
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El link no es válido o ya venció. Pedí uno nuevo.",
+        )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

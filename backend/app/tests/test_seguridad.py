@@ -364,7 +364,8 @@ def test_todo_exige_autenticacion(metodo: str, ruta: str) -> None:
 def test_rutas_publicas_son_solo_las_esperadas() -> None:
     """Si alguien agrega un endpoint sin auth, este test lo detecta."""
     publicas_esperadas = {
-        "/health", "/health/ready", "/auth/login", "/auth/refresh", "/auth/google", "/auth/aceptar-invitacion"
+        "/health", "/health/ready", "/auth/login", "/auth/refresh", "/auth/google", "/auth/aceptar-invitacion",
+        "/auth/olvide-password", "/auth/restablecer-password",
     }
     publicas = set()
     rutas = []

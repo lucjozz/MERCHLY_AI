@@ -25,6 +25,21 @@ class LoginInput(EntradaEstricta):
     normalizar_email_valido = field_validator("email")(normalizar_email)
 
 
+class OlvidePasswordInput(EntradaEstricta):
+    email: str = Field(min_length=3, max_length=255)
+
+    normalizar_email_valido_olvido = field_validator("email")(normalizar_email)
+
+
+class RestablecerPasswordInput(EntradaEstricta):
+    """Las contraseñas no se recortan."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
+
+    token: str = Field(min_length=20, max_length=128)
+    password: str = Field(min_length=12, max_length=128)
+
+
 class RefreshInput(EntradaEstricta):
     refresh_token: str = Field(min_length=20, max_length=128)
 

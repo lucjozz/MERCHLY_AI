@@ -174,6 +174,11 @@ function Login() {
                 required
                 className={CAMPO}
               />
+              <div className="mt-2 text-right">
+                <a href="/olvide" className="text-xs text-acento-claro hover:underline">
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
             </div>
 
             {error && (

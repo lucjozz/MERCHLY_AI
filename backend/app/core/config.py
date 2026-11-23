@@ -65,6 +65,12 @@ class Settings(BaseSettings):
 
     google_client_id: str | None = None
 
+    # Emails transaccionales (DEC-036). Sin clave: simulado en local, error en producción.
+    resend_api_key: str | None = None
+    email_remitente: str = "MERCHLY AI <no-responder@merchly.ai>"
+    # URL pública del frontend, para armar links (restablecer contraseña, invitaciones).
+    app_url: str = "http://localhost:3000"
+
     # Dólar oficial del BCB (DEC-035). El BCB no tiene API oficial: servicio que republica sus cifras.
     tipo_cambio_url: str = "https://apibcb.cucu.bo/api/v1/tc/oficial"
 

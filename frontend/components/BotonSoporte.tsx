@@ -5,7 +5,7 @@ import { MessageCircle } from "lucide-react";
 
 /** Número de soporte con código de país y sin "+" (ej.: 59170000000). Vacío = sin botón. */
 const NUMERO = (process.env.NEXT_PUBLIC_SOPORTE_WHATSAPP ?? "").replace(/\D/g, "");
-const OCULTO_EN = ["/login", "/invitacion"];
+const OCULTO_EN = ["/login", "/invitacion", "/restablecer"];
 
 /** Botón flotante de ayuda por WhatsApp (docs/004-Backend/03, sección 7). */
 export default function BotonSoporte() {

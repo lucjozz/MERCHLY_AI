@@ -148,7 +148,7 @@ export default function Sidebar() {
   }, [menuAbierto]);
 
   // La pantalla de login ocupa toda la vista: sin navegación.
-  if (pathname.startsWith("/login") || pathname.startsWith("/invitacion")) return null;
+  if (["/login", "/invitacion", "/olvide", "/restablecer"].some((r) => pathname.startsWith(r))) return null;
 
   const enMenuMas = [...INTELIGENCIA, ...CUENTA].some((i) =>
     estaActivo(pathname, i.href)

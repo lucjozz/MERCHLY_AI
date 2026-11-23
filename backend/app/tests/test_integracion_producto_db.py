@@ -54,6 +54,7 @@ def mundo():
         c.execute("DELETE FROM campanas WHERE organizacion_id = ANY(%s)", (orgs,))
         c.execute("DELETE FROM invitaciones WHERE organizacion_id = ANY(%s)", (orgs,))
         c.execute("DELETE FROM refresh_tokens WHERE usuario_id IN (SELECT id FROM usuarios WHERE organizacion_id = ANY(%s))", (orgs,))
+        c.execute("DELETE FROM restablecimientos_password WHERE usuario_id IN (SELECT id FROM usuarios WHERE organizacion_id = ANY(%s))", (orgs,))
         c.execute("DELETE FROM usuarios WHERE organizacion_id = ANY(%s)", (orgs,))
         c.execute("DELETE FROM organizaciones WHERE id = ANY(%s)", (orgs,))
 
@@ -191,3 +192,73 @@ async def test_reglas_del_equipo(mundo, fabrica) -> None:
     async with await _sesion(fabrica, mundo["a"]) as s:
         with pytest.raises(equipo.ReglaEquipoError):
             await equipo.cambiar_miembro(s, otro_admin, mundo["admin_a"], MiembroCambio(rol="usuario_operativo"))
+
+
+# ------------------------------------------------------------ recuperar contraseña (DEC-036)
+
+
+async def test_recuperar_password_de_punta_a_punta(mundo, fabrica, monkeypatch) -> None:
+    import re
+
+    from app.services import recuperar_password as rp
+
+    enviados = []
+
+    async def _capturar(email, cliente=None):
+        enviados.append(email)
+
+    monkeypatch.setattr(rp, "enviar_email", _capturar)
+    with psycopg.connect(URLS[0]) as c:
+        email = c.execute("SELECT email FROM usuarios WHERE id = %s", (mundo["admin2_a"],)).fetchone()[0]
+        version_antes = c.execute("SELECT token_version FROM usuarios WHERE id = %s", (mundo["admin2_a"],)).fetchone()[0]
+
+    async with fabrica() as s:
+        await rp.solicitar_restablecimiento(s, "no-existe-" + email)  # sin rastro ni email
+    assert enviados == []
+
+    async with fabrica() as s:
+        await rp.solicitar_restablecimiento(s, email.upper())
+    token = re.search(r"/restablecer#(\S+)", enviados[-1].texto).group(1)
+    with psycopg.connect(URLS[0]) as c:  # en la base no queda el token, solo su hash
+        assert c.execute("SELECT count(*) FROM restablecimientos_password WHERE token_hash = %s", (token,)).fetchone()[0] == 0
+
+    async with fabrica() as s:
+        with pytest.raises(PasswordInvalidaError):
+            await rp.restablecer_password(s, token, "corta")
+    async with fabrica() as s:
+        await rp.restablecer_password(s, token, "nueva-password-segura-123")
+    with psycopg.connect(URLS[0]) as c:
+        version = c.execute("SELECT token_version FROM usuarios WHERE id = %s", (mundo["admin2_a"],)).fetchone()[0]
+    assert version == version_antes + 1  # se cerraron todas sus sesiones
+    async with fabrica() as s:
+        with pytest.raises(rp.TokenRestablecimientoInvalidoError):  # un solo uso
+            await rp.restablecer_password(s, token, "otra-password-segura-123")
+
+
+async def test_link_de_restablecimiento_vencido_o_reemplazado(mundo, fabrica, monkeypatch) -> None:
+    import re
+
+    from app.services import recuperar_password as rp
+
+    enviados = []
+
+    async def _capturar(email, cliente=None):
+        enviados.append(email)
+
+    monkeypatch.setattr(rp, "enviar_email", _capturar)
+    with psycopg.connect(URLS[0]) as c:
+        email = c.execute("SELECT email FROM usuarios WHERE id = %s", (mundo["admin_b"],)).fetchone()[0]
+    async with fabrica() as s:
+        await rp.solicitar_restablecimiento(s, email)
+    primero = re.search(r"#(\S+)", enviados[-1].texto).group(1)
+    async with fabrica() as s:
+        await rp.solicitar_restablecimiento(s, email)  # pedir otro invalida el anterior
+    segundo = re.search(r"#(\S+)", enviados[-1].texto).group(1)
+    async with fabrica() as s:
+        with pytest.raises(rp.TokenRestablecimientoInvalidoError):
+            await rp.restablecer_password(s, primero, "nueva-password-segura-123")
+    with psycopg.connect(URLS[0], autocommit=True) as c:
+        c.execute("UPDATE restablecimientos_password SET expira_en = now() - interval '1 minute' WHERE usado_en IS NULL")
+    async with fabrica() as s:
+        with pytest.raises(rp.TokenRestablecimientoInvalidoError):
+            await rp.restablecer_password(s, segundo, "nueva-password-segura-123")
