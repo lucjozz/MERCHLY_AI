@@ -84,6 +84,8 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      # Tipos de rutas/layouts (LayoutProps, PageProps) que Next genera: en CI no existen hasta acá.
+      - run: npx next typegen
       - run: npx tsc --noEmit
       - run: npx eslint .
       - run: npm run build

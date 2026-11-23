@@ -3,6 +3,7 @@
 import asyncio
 import sys
 import uuid
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -96,3 +97,37 @@ def override_usuario_autenticado(rol: str = "admin_principal", organizacion_id: 
         return usuario
 
     return _override
+
+
+@pytest.fixture(autouse=True)
+def _aislar_infraestructura():
+    """Los tests unitarios nunca tocan Redis ni Postgres reales.
+
+    En CI ambos servicios están levantados: sin este aislamiento, un endpoint
+    probado con TestClient abría conexiones reales que quedaban atadas al
+    bucle de eventos de un request y fallaban en el siguiente ("Event loop is
+    closed"). Cada test puede pisar estos reemplazos con los suyos; los tests
+    de integración crean sus propias conexiones y no pasan por acá.
+    """
+    from app.core.database import get_db_session
+    from app.core.redis import get_redis_client
+    from app.main import app
+
+    redis = RedisFalso()
+
+    async def _sesion_falsa():
+        sesion = AsyncMock()
+        sesion.add = MagicMock()
+        sesion.in_transaction = MagicMock(return_value=False)
+        yield sesion
+
+    puestos = {}
+    for dependencia, reemplazo in ((get_redis_client, lambda: redis), (get_db_session, _sesion_falsa)):
+        if dependencia not in app.dependency_overrides:
+            app.dependency_overrides[dependencia] = reemplazo
+            puestos[dependencia] = reemplazo
+    yield
+    for dependencia, reemplazo in puestos.items():
+        if app.dependency_overrides.get(dependencia) is reemplazo:
+            del app.dependency_overrides[dependencia]
+

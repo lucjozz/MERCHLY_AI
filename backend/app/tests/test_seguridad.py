@@ -117,17 +117,12 @@ def test_endpoint_con_token_mal_firmado_devuelve_401_no_500() -> None:
     assert r.status_code == 401
 
 
-def test_denylist_de_jti() -> None:
-    import asyncio
-
+async def test_denylist_de_jti() -> None:
     r = RedisFalso()
 
-    async def _flujo():
-        assert not await jti_revocado(r, "j1")
-        await revocar_jti(r, "j1", 100)
-        assert await jti_revocado(r, "j1")
-
-    asyncio.run(_flujo())
+    assert not await jti_revocado(r, "j1")
+    await revocar_jti(r, "j1", 100)
+    assert await jti_revocado(r, "j1")
 
 
 # ---------------------------------------------------------------- arranque
@@ -188,39 +183,29 @@ def test_refresh_token_se_guarda_hasheado() -> None:
 # ---------------------------------------------------------------- límites
 
 
-def test_limites_login_por_email_ip_y_por_ip() -> None:
-    import asyncio
-
+async def test_limites_login_por_email_ip_y_por_ip() -> None:
     r = RedisFalso()
     lim = LimitesLogin(r, max_email_ip=3, max_ip=5, ventana=900)
 
-    async def _flujo():
-        for _ in range(3):
-            await lim.registrar_fallo("a@b.c", "1.1.1.1")
-        assert await lim.segundos_bloqueado("a@b.c", "1.1.1.1") > 0
-        assert await lim.segundos_bloqueado("otro@b.c", "1.1.1.1") == 0  # IP aún con margen
-        for _ in range(2):
-            await lim.registrar_fallo("otro@b.c", "1.1.1.1")
-        assert await lim.segundos_bloqueado("tercero@b.c", "1.1.1.1") > 0  # IP bloqueada
-        assert await lim.segundos_bloqueado("a@b.c", "2.2.2.2") == 0
-        # Las claves no guardan el email ni la IP en claro.
-        assert all("a@b.c" not in k and "1.1.1.1" not in k for k in r.datos)
-
-    asyncio.run(_flujo())
+    for _ in range(3):
+        await lim.registrar_fallo("a@b.c", "1.1.1.1")
+    assert await lim.segundos_bloqueado("a@b.c", "1.1.1.1") > 0
+    assert await lim.segundos_bloqueado("otro@b.c", "1.1.1.1") == 0  # IP aún con margen
+    for _ in range(2):
+        await lim.registrar_fallo("otro@b.c", "1.1.1.1")
+    assert await lim.segundos_bloqueado("tercero@b.c", "1.1.1.1") > 0  # IP bloqueada
+    assert await lim.segundos_bloqueado("a@b.c", "2.2.2.2") == 0
+    # Las claves no guardan el email ni la IP en claro.
+    assert all("a@b.c" not in k and "1.1.1.1" not in k for k in r.datos)
 
 
-def test_cuota_por_organizacion() -> None:
-    import asyncio
-
+async def test_cuota_por_organizacion() -> None:
     r = RedisFalso()
 
-    async def _flujo():
-        for _ in range(3):
-            assert await consumir_cuota(r, "investigador", "org-a", 3, 3600) == 0
-        assert await consumir_cuota(r, "investigador", "org-a", 3, 3600) > 0
-        assert await consumir_cuota(r, "investigador", "org-b", 3, 3600) == 0
-
-    asyncio.run(_flujo())
+    for _ in range(3):
+        assert await consumir_cuota(r, "investigador", "org-a", 3, 3600) == 0
+    assert await consumir_cuota(r, "investigador", "org-a", 3, 3600) > 0
+    assert await consumir_cuota(r, "investigador", "org-b", 3, 3600) == 0
 
 
 # ---------------------------------------------------------------- HTTP
