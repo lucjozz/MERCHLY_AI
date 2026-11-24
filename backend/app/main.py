@@ -31,6 +31,7 @@ from app.api.temporadas import router as temporadas_router
 from app.api.tipo_cambio import router as tipo_cambio_router
 from app.api.usuarios import router as usuarios_router
 from app.core.config import get_settings
+from app.core.limite_peticiones import LimiteDePeticionesMiddleware
 from app.core.middleware import HeadersDeSeguridadMiddleware, LimiteDeBodyMiddleware
 
 settings = get_settings()
@@ -101,6 +102,19 @@ app.add_middleware(
     max_age=600,
 )
 app.add_middleware(LimiteDeBodyMiddleware, max_bytes=settings.max_body_bytes)
+
+
+def _redis_para_limites():
+    # Respeta el reemplazo de los tests (dependency_overrides) para no tocar el Redis real.
+    from app.core.redis import get_redis_client
+
+    from app.core.redis import redis_client
+
+    reemplazo = app.dependency_overrides.get(get_redis_client)
+    return reemplazo() if reemplazo else redis_client
+
+
+app.add_middleware(LimiteDePeticionesMiddleware, obtener_redis=_redis_para_limites)
 app.add_middleware(HeadersDeSeguridadMiddleware, hsts=settings.es_produccion)
 
 app.include_router(auth_router)

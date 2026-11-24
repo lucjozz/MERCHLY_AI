@@ -8,6 +8,7 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { BACKEND_URL, COOKIE_ACCESS, mismoOrigen } from "@/lib/sesion/config";
+import { ipCliente } from "@/lib/sesion/ip";
 
 const UUID = "[0-9a-fA-F-]{36}";
 const PERMITIDAS: Record<string, RegExp[]> = {
@@ -79,6 +80,7 @@ async function reenviar(request: NextRequest, segmentos: string[]) {
       method: metodo,
       headers: {
         Authorization: `Bearer ${access}`,
+        "X-Forwarded-For": ipCliente(request.headers),
         ...(cuerpo !== undefined ? { "Content-Type": "application/json" } : {}),
       },
       body: cuerpo,

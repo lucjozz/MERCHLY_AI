@@ -15,7 +15,7 @@ const headersSeguridad = [
   // con esta página. Con "same-origin" queda colgada para siempre.
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   // HSTS solo con HTTPS real (producción). Empezar corto y subir después.
-  ...(esProduccion ? [{ key: "Strict-Transport-Security", value: "max-age=86400; includeSubDomains" }] : []),
+  ...(esProduccion ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }] : []),
 ];
 
 const nextConfig: NextConfig = {

@@ -1,4 +1,5 @@
-import { cookies } from "next/headers";
+import { cookies, headers as headersEntrantes } from "next/headers";
+import { ipCliente } from "@/lib/sesion/ip";
 import { BACKEND_URL, COOKIE_ACCESS } from "@/lib/sesion/config";
 import { SesionInvalidaError, SinPermisoError } from "@/lib/api/errores";
 
@@ -15,6 +16,7 @@ export async function fetchAutenticadoServidor(ruta: string, init: RequestInit =
 
   const headers = new Headers(init.headers);
   headers.set("Authorization", `Bearer ${token}`);
+  headers.set("X-Forwarded-For", ipCliente(await headersEntrantes()));
 
   const respuesta = await fetch(`${BACKEND_URL}${ruta}`, {
     ...init,

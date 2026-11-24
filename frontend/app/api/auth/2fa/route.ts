@@ -4,14 +4,10 @@
  * celular (o de respaldo) y, si es correcto, guarda las cookies de sesión.
  */
 import { NextResponse, type NextRequest } from "next/server";
+import { ipCliente } from "@/lib/sesion/ip";
 import { BACKEND_URL, COOKIE_2FA, mismoOrigen } from "@/lib/sesion/config";
 import { respuestaDeLogin } from "@/lib/sesion/respuesta-login";
 
-function ipCliente(request: NextRequest): string {
-  const cf = request.headers.get("cf-connecting-ip");
-  if (cf) return cf.trim();
-  return (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "desconocida";
-}
 
 export async function POST(request: NextRequest) {
   if (!mismoOrigen(request, request.nextUrl.origin)) {
@@ -29,7 +25,7 @@ export async function POST(request: NextRequest) {
   try {
     respuesta = await fetch(`${BACKEND_URL}/auth/2fa/verificar`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Forwarded-For": ipCliente(request) },
+      headers: { "Content-Type": "application/json", "X-Forwarded-For": ipCliente(request.headers) },
       body: JSON.stringify({ desafio, codigo }),
       cache: "no-store",
       signal: AbortSignal.timeout(10_000),

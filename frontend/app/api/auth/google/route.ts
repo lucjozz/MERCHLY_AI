@@ -4,6 +4,7 @@
  * sesión en cookies HttpOnly.
  */
 import { NextResponse, type NextRequest } from "next/server";
+import { ipCliente } from "@/lib/sesion/ip";
 import { respuestaDeLogin } from "@/lib/sesion/respuesta-login";
 import {
   BACKEND_URL,
@@ -20,10 +21,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ detail: "Datos inválidos." }, { status: 422 });
   }
 
-  const ip =
-    request.headers.get("cf-connecting-ip")?.trim() ||
-    (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
-    "desconocida";
+  const ip = ipCliente(request.headers);
 
   let respuesta: Response;
   try {

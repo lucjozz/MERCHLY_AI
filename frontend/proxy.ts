@@ -10,6 +10,7 @@
  * Es un chequeo optimista: la autorización real la hace SIEMPRE el backend.
  * Ver docs/013-Seguridad/04, sección 3.
  */
+import { ipCliente } from "@/lib/sesion/ip";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   BACKEND_URL,
@@ -40,11 +41,11 @@ function esPublica(ruta: string): boolean {
   return RUTAS_PUBLICAS.some((p) => ruta === p || ruta.startsWith(`${p}/`));
 }
 
-async function refrescar(refreshToken: string): Promise<SesionBackend | null> {
+async function refrescar(refreshToken: string, ip: string): Promise<SesionBackend | null> {
   try {
     const r = await fetch(`${BACKEND_URL}/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Forwarded-For": ip },
       body: JSON.stringify({ refresh_token: refreshToken }),
       cache: "no-store",
       signal: AbortSignal.timeout(5000),
@@ -87,7 +88,7 @@ export async function proxy(request: NextRequest) {
   const refresh = request.cookies.get(COOKIE_REFRESH)?.value;
 
   let sesionNueva: SesionBackend | null = null;
-  if (!access && refresh) sesionNueva = await refrescar(refresh);
+  if (!access && refresh) sesionNueva = await refrescar(refresh, ipCliente(request.headers));
   const autenticado = Boolean(access || sesionNueva);
 
   if (!autenticado && !esPublica(pathname)) {

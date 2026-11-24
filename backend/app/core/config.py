@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     jwt_audience: str = "merchly-api"
     access_token_minutos: int = 15
     refresh_token_dias: int = 14
+    # La cuenta de administrador puede más: su sesión vence antes si no se usa.
+    refresh_token_dias_admin: int = 7
 
     cors_origenes: str = "http://localhost:3000"
     exponer_docs: bool = False
@@ -61,6 +63,12 @@ class Settings(BaseSettings):
     login_max_fallos_email: int = 10
     login_ventana_segundos: int = 900
     cuota_investigador_por_hora: int = 30
+    # Límite general por minuto (docs/013-Seguridad/09, sección 8): holgado para una persona, bajo para un script.
+    limites_activos: bool = True
+    limite_lecturas_por_minuto: int = 240
+    limite_escrituras_por_minuto: int = 60
+    limite_anonimo_por_minuto: int = 40
+    limite_refresh_por_minuto: int = 20
     cuota_marketing_por_hora: int = 60
     # Agente de Atención al Cliente (docs/007-Agentes/09): tope por conversación y del simulador.
     cuota_atencion_por_conversacion_hora: int = 30

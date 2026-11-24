@@ -4,17 +4,13 @@
  * HttpOnly. Al navegador solo le responde { ok: true }.
  */
 import { NextResponse, type NextRequest } from "next/server";
+import { ipCliente } from "@/lib/sesion/ip";
 import { respuestaDeLogin } from "@/lib/sesion/respuesta-login";
 import {
   BACKEND_URL,
   mismoOrigen,
 } from "@/lib/sesion/config";
 
-function ipCliente(request: NextRequest): string {
-  const cf = request.headers.get("cf-connecting-ip");
-  if (cf) return cf.trim();
-  return (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "desconocida";
-}
 
 export async function POST(request: NextRequest) {
   if (!mismoOrigen(request, request.nextUrl.origin)) {
@@ -41,7 +37,7 @@ export async function POST(request: NextRequest) {
         // IP real del cliente para el rate limit del backend (que solo la usa
         // con CONFIAR_PROXY=true). Detrás de Cloudflare manda CF-Connecting-IP,
         // que Cloudflare sobrescribe y no se puede falsificar.
-        "X-Forwarded-For": ipCliente(request),
+        "X-Forwarded-For": ipCliente(request.headers),
       },
       body: JSON.stringify({ email, password }),
       cache: "no-store",

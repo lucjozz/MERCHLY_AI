@@ -19,7 +19,6 @@ from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import get_settings
 from app.core.database import get_db_session
 from app.core.redis import get_redis_client
 
@@ -31,16 +30,11 @@ class HealthResponse(BaseModel):
 
     Attributes:
         status: Literal health status of the service.
-        service: Name of the service reporting health.
-        version: Deployed version of the service.
-        environment: Environment the service is running in.
+        (Sin nombre, versión ni entorno: es público y esos datos son pistas para un atacante.)
         timestamp: UTC timestamp of the check, in ISO 8601 format.
     """
 
     status: str
-    service: str
-    version: str
-    environment: str
     timestamp: str
 
 
@@ -69,14 +63,7 @@ def health_check() -> HealthResponse:
         endpoint deliberately does not check downstream services; use
         ``/health/ready`` for that.
     """
-    settings = get_settings()
-    return HealthResponse(
-        status="ok",
-        service=settings.app_name,
-        version=settings.app_version,
-        environment=settings.environment,
-        timestamp=datetime.now(timezone.utc).isoformat(),
-    )
+    return HealthResponse(status="ok", timestamp=datetime.now(timezone.utc).isoformat())
 
 
 @router.get("/health/ready", response_model=ReadinessResponse, tags=["infra"])

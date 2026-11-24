@@ -15,6 +15,6 @@ def test_health_returns_ok() -> None:
 
     body = response.json()
     assert body["status"] == "ok"
-    assert "service" in body
-    assert "version" in body
     assert "timestamp" in body
+    # Público: sin nombre del servicio, versión ni entorno (pistas para un atacante).
+    assert not {"service", "version", "environment"} & set(body)
