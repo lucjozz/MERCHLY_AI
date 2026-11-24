@@ -22,7 +22,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from backup import CONTENEDOR, clave_desde_env, descifrar, leer_env  # noqa: E402
 
 IMAGEN = "pgvector/pgvector:pg16"
-TABLAS_RLS = ("productos_candidatos", "decision_records", "campanas")
+TABLAS_RLS = (
+    "productos_candidatos", "decision_records", "campanas", "eventos_auditoria",
+    "inventario_productos", "inventario_fotos", "atencion_config", "qr_pagos", "zonas_envio",
+    "conversaciones", "mensajes", "pedidos", "notificaciones",
+)
 
 
 def sh(*args: str, entrada: bytes | None = None, chequear: bool = True) -> str:
