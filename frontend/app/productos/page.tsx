@@ -12,7 +12,7 @@ import { ESTADOS, plural } from "@/lib/etiquetas";
 import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
 
 interface PageProps {
-  searchParams: Promise<{ categoria?: string; estado?: string }>;
+  searchParams: Promise<{ categoria?: string; estado?: string; buscar?: string }>;
 }
 
 const PESTANAS = [
@@ -62,7 +62,8 @@ export default async function Productos({ searchParams }: PageProps) {
         }
       />
 
-      <BuscarProductos />
+      {/* "buscar" viene de las ideas de temporadas bolivianas del panel (docs/004-Backend/05). */}
+      <BuscarProductos key={filtros.buscar ?? ""} categoriaInicial={filtros.buscar?.slice(0, 120) ?? ""} mercadoInicial={filtros.buscar ? "BO" : "MX"} />
 
       <section aria-labelledby="titulo-lista">
         <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

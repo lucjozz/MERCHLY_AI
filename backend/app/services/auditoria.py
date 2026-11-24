@@ -24,6 +24,8 @@ ACCIONES = frozenset({
     "invitacion_creada", "invitacion_revocada", "invitacion_aceptada",
     "rol_cambiado", "usuario_desactivado", "usuario_reactivado",
     "producto_borrado", "campana_borrada", "perfil_actualizado",
+    "inventario_creado", "inventario_editado", "inventario_borrado", "inventario_importado",
+    "atencion_configurada", "qr_subido", "qr_borrado", "pago_confirmado", "pago_rechazado", "pedido_entregado", "pedido_cancelado",
 })
 _CLAVES_PROHIBIDAS = ("password", "token", "codigo", "secret", "link", "enlace", "authorization")
 

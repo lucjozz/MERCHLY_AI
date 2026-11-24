@@ -88,6 +88,7 @@ jobs:
       - run: npx next typegen
       - run: npx tsc --noEmit
       - run: npx eslint .
+      - run: npm test
       - run: npm run build
       - name: npm audit (falla con hallazgos altos o críticos)
         run: npm audit --audit-level=high

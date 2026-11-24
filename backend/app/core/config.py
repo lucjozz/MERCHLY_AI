@@ -62,6 +62,11 @@ class Settings(BaseSettings):
     login_ventana_segundos: int = 900
     cuota_investigador_por_hora: int = 30
     cuota_marketing_por_hora: int = 60
+    # Agente de Atención al Cliente (docs/007-Agentes/09): tope por conversación y del simulador.
+    cuota_atencion_por_conversacion_hora: int = 30
+    cuota_atencion_simulador_hora: int = 200
+    # Planes que incluyen el agente (todavía sin decidir: por ahora todos).
+    planes_con_atencion: str = "beta,emprendedor,negocio"
 
     google_client_id: str | None = None
 
@@ -86,6 +91,10 @@ class Settings(BaseSettings):
     modelo_marketing_beta: str = "gpt-5-nano"
     modelo_marketing_emprendedor: str = "gpt-5-mini"
     modelo_marketing_negocio: str = "gpt-5"
+    # Atención al cliente: tiene que responder rápido, por eso modelos chicos/medianos.
+    modelo_atencion_beta: str = "gpt-5-nano"
+    modelo_atencion_emprendedor: str = "gpt-5-mini"
+    modelo_atencion_negocio: str = "gpt-5-mini"
 
     db_pool_size: int = 5
     db_max_overflow: int = 5

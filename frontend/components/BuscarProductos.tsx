@@ -14,10 +14,10 @@ const EJEMPLOS = [
   "botellas térmicas",
 ];
 
-export default function BuscarProductos() {
+export default function BuscarProductos({ categoriaInicial = "", mercadoInicial = "MX" }: { categoriaInicial?: string; mercadoInicial?: string }) {
   const router = useRouter();
-  const [categoria, setCategoria] = useState("");
-  const [mercado, setMercado] = useState("MX");
+  const [categoria, setCategoria] = useState(categoriaInicial);
+  const [mercado, setMercado] = useState(mercadoInicial);
   const [buscando, setBuscando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);

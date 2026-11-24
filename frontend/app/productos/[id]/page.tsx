@@ -200,6 +200,7 @@ export default async function DetalleProducto({ params }: PageProps) {
             envioUsd={organizacion?.costo_envio_unitario_usd ?? 0}
             impuestosPct={organizacion?.impuestos_importacion_pct ?? 0}
             moneda={moneda}
+            pais={organizacion?.pais}
           />
           <EnlacesProveedor producto={producto.nombre_producto} />
         </div>

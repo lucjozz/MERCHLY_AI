@@ -8,7 +8,7 @@ from app.core.config import get_settings
 from app.models.organizacion import Organizacion
 
 PLANES = ("beta", "emprendedor", "negocio")
-AGENTES = ("investigador", "marketing")
+AGENTES = ("investigador", "marketing", "atencion")
 
 
 def modelo_para(agente: str, plan: str) -> str:
@@ -23,3 +23,8 @@ async def plan_de_organizacion(db_session: AsyncSession, organizacion_id: uuid.U
     organizacion = await db_session.get(Organizacion, organizacion_id)
     plan = getattr(organizacion, "plan", None)
     return plan if plan in PLANES else "beta"
+
+
+def plan_incluye_atencion(plan: str) -> bool:
+    """Si el plan incluye el Agente de Atención al Cliente (docs/007-Agentes/09)."""
+    return plan in {p.strip() for p in get_settings().planes_con_atencion.split(",")}

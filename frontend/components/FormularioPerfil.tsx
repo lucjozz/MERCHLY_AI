@@ -135,7 +135,7 @@ export default function FormularioPerfil({ organizacion, dolarBcb = null, destin
         <input id="p-envio" inputMode="decimal" value={envio} onChange={(e) => setEnvio(e.target.value)} className={CAMPO} />
       </div>
       <div>
-        <label htmlFor="p-impuestos" className={ETIQUETA_CAMPO}>Impuestos de importación (%) · para el margen</label>
+        <label htmlFor="p-impuestos" className={ETIQUETA_CAMPO}>{pais === "BO" ? "Gravamen arancelario (%) · el IVA de importación se suma solo" : "Impuestos de importación (%) · para el margen"}</label>
         <input id="p-impuestos" inputMode="decimal" value={impuestos} onChange={(e) => setImpuestos(e.target.value)} className={CAMPO} />
       </div>
       {error && <p role="alert" className="sm:col-span-2 rounded-lg border border-rojo-borde bg-rojo-fondo px-3 py-2 text-sm text-rojo">{error}</p>}

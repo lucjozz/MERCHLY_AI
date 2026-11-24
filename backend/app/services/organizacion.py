@@ -1,6 +1,7 @@
 """Perfil del negocio y uso del plan (docs/004-Backend/03, secciones 3 y 6). Sin FastAPI."""
 
 import uuid
+from datetime import date
 
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +10,7 @@ from app.core.config import get_settings
 from app.models.organizacion import Organizacion
 from app.schemas.organizacion import PerfilEntrada, UsoCuota, UsoPlan
 from app.services.limites import RedisError, estado_cuota
+from app.services.temporadas import resumen_para_ia
 
 VENTANA_CUOTA_SEGUNDOS = 3600
 
@@ -46,6 +48,8 @@ def contexto_para_ia(organizacion: Organizacion | None) -> dict[str, str]:
         contexto["Rubro del negocio"] = organizacion.rubro
     if organizacion.presupuesto_mensual is not None:
         contexto["Presupuesto mensual"] = f"{organizacion.presupuesto_mensual} {organizacion.moneda}"
+    if organizacion.pais == "BO":
+        contexto["Próximas fechas comerciales en Bolivia"] = resumen_para_ia(date.today())
     return contexto
 
 

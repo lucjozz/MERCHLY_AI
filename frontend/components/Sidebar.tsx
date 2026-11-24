@@ -18,6 +18,9 @@ import {
   Users,
   LifeBuoy,
   Sparkles,
+  MessageCircle,
+  Boxes,
+  Headset,
   Menu,
   X,
   type LucideIcon,
@@ -38,6 +41,9 @@ const FLUJO: ItemNav[] = [
   { href: "/decisiones", label: "Decisiones", icono: Scale },
   { href: "/marketing", label: "Marketing", icono: Megaphone },
   { href: "/campanas", label: "Mis campañas", icono: History },
+  { href: "/inventario", label: "Inventario", icono: Boxes },
+  { href: "/atencion", label: "Atención al cliente", icono: Headset },
+  { href: "/catalogo", label: "Catálogo WhatsApp", icono: MessageCircle },
 ];
 
 const INTELIGENCIA: ItemNav[] = [

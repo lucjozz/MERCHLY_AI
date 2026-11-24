@@ -25,6 +25,8 @@ import { plural } from "@/lib/etiquetas";
 import { mensajeDeErrorDePagina } from "@/lib/api/errores-pagina";
 import { redirect } from "next/navigation";
 import UsoDelPlan from "@/components/UsoDelPlan";
+import ProximasTemporadas from "@/components/ProximasTemporadas";
+import { obtenerTemporadas, type Temporada } from "@/lib/api/temporadas";
 import { obtenerOrganizacion, obtenerUsoPlan, type UsoPlan } from "@/lib/api/organizacion";
 import { obtenerUsuarioActual } from "@/lib/api/usuario";
 
@@ -34,12 +36,15 @@ export default async function Dashboard() {
   let reporte;
   let recientes;
   let uso: UsoPlan | null = null;
+  let temporadas: Temporada[] = [];
+  let esBolivia = false;
   let irAOnboarding = false;
   let error: string | null = null;
 
   try {
     const [usuario, organizacion] = await Promise.all([obtenerUsuarioActual(), obtenerOrganizacion()]);
     // Primer ingreso del admin: completar el perfil del negocio.
+    esBolivia = organizacion.pais === "BO";
     irAOnboarding = usuario.rol === "admin_principal" && !organizacion.onboarding_completo;
     if (!irAOnboarding) {
       [reporte, recientes, uso] = await Promise.all([
@@ -47,6 +52,7 @@ export default async function Dashboard() {
         listarProductosCandidatos(1, 5, undefined, "candidato"),
         obtenerUsoPlan().catch(() => null),
       ]);
+      if (esBolivia) temporadas = await obtenerTemporadas();
     }
   } catch (e) {
     error = mensajeDeErrorDePagina(e);
@@ -86,6 +92,8 @@ export default async function Dashboard() {
             aprobados={conversion.en_catalogo}
             descartados={conversion.descartado}
           />
+
+          <ProximasTemporadas temporadas={temporadas} />
 
           <section aria-labelledby="titulo-numeros">
             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">

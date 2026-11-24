@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  ArrowLeft, KeyRound, LogIn, LogOut, ShieldAlert, ShieldCheck, Trash2, UserCog, UserMinus, UserPlus, Settings,
+  ArrowLeft, KeyRound, LogIn, LogOut, ShieldAlert, ShieldCheck, Trash2, UserCog, UserMinus, UserPlus, Settings, Boxes, Upload, Headset, QrCode, BadgeCheck, CircleX, Truck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
@@ -33,6 +33,17 @@ const ACCIONES: Record<string, { texto: string; icono: LucideIcon; tono: string 
   producto_borrado: { texto: "Borró un producto", icono: Trash2, tono: "text-rojo" },
   campana_borrada: { texto: "Borró una campaña", icono: Trash2, tono: "text-rojo" },
   perfil_actualizado: { texto: "Actualizó el perfil del negocio", icono: Settings, tono: "text-acento-claro" },
+  inventario_creado: { texto: "Agregó un producto al inventario", icono: Boxes, tono: "text-verde" },
+  inventario_editado: { texto: "Editó un producto del inventario", icono: Boxes, tono: "text-acento-claro" },
+  inventario_borrado: { texto: "Borró un producto del inventario", icono: Trash2, tono: "text-rojo" },
+  inventario_importado: { texto: "Importó productos al inventario", icono: Upload, tono: "text-verde" },
+  atencion_configurada: { texto: "Cambió la configuración del asistente", icono: Headset, tono: "text-acento-claro" },
+  qr_subido: { texto: "Subió un QR de pago", icono: QrCode, tono: "text-ambar" },
+  qr_borrado: { texto: "Quitó un QR de pago", icono: Trash2, tono: "text-rojo" },
+  pago_confirmado: { texto: "Confirmó un pago", icono: BadgeCheck, tono: "text-verde" },
+  pago_rechazado: { texto: "Rechazó un pago", icono: CircleX, tono: "text-rojo" },
+  pedido_entregado: { texto: "Marcó un pedido como entregado", icono: Truck, tono: "text-verde" },
+  pedido_cancelado: { texto: "Canceló un pedido", icono: CircleX, tono: "text-texto-2" },
 };
 
 const FILTROS: [string, string][] = [
@@ -43,11 +54,26 @@ const FILTROS: [string, string][] = [
   ["producto_borrado", "Productos borrados"],
 ];
 
+const esSi = (v: unknown) => v === true || v === "True" || v === "true";
+
 function descripcion(e: EventoAuditoria): string {
   const d = e.detalle;
   if (e.accion === "rol_cambiado") return `${d.miembro ?? "Un miembro"}: ${etiquetaRol(String(d.antes))} → ${etiquetaRol(String(d.despues))}`;
   if (e.accion === "usuario_desactivado" || e.accion === "usuario_reactivado") return String(d.miembro ?? "");
   if (e.accion === "invitacion_creada" || e.accion === "invitacion_aceptada") return d.rol ? `Rol: ${etiquetaRol(String(d.rol))}` : "";
+  if (e.accion === "inventario_importado") return `${d.productos ?? 0} productos`;
+  if (e.accion === "inventario_editado") {
+    const partes = [d.nombre ? String(d.nombre) : ""];
+    if ("precio_venta_ahora" in d) partes.push(`precio ${d.precio_venta_antes ?? "—"} → ${d.precio_venta_ahora ?? "—"}`);
+    if ("stock_ahora" in d) partes.push(`stock ${d.stock_antes} → ${d.stock_ahora}`);
+    if ("costo_unitario_ahora" in d) partes.push("cambió el costo");
+    if ("publicado_ahora" in d) partes.push(d.publicado_ahora === "True" ? "lo publicó" : "lo ocultó");
+    return partes.filter(Boolean).join(" · ");
+  }
+  if (e.accion === "pago_confirmado" || e.accion === "pago_rechazado") return `Total ${d.total ?? ""}${esSi(d.simulado) ? " · prueba" : ""}`;
+  if (e.accion === "atencion_configurada") return `${esSi(d.encendido) ? "Encendido" : "Apagado"} · completar ventas: ${esSi(d.completar_ventas) ? "sí" : "no"}`;
+  if (e.accion === "qr_subido") return String(d.etiqueta ?? "");
+  if (e.accion === "inventario_creado") return String(d.nombre ?? "");
   if (e.accion === "perfil_actualizado") return d.dolar === "bcb" ? "Dólar: oficial del BCB" : d.dolar === "propio" ? "Dólar: propio" : "";
   return "";
 }

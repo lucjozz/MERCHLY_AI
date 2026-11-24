@@ -18,21 +18,34 @@ const PERMITIDAS: Record<string, RegExp[]> = {
     /^auth\/me$/,
     /^organizacion(\/uso)?$/,
     /^usuarios(\/invitaciones)?$/,
+    new RegExp(`^inventario(/${UUID}|/catalogo-publico|/fotos/${UUID})?$`),
+    new RegExp(`^atencion/(config|qr|zonas|conversaciones|pedidos|notificaciones)$`),
+    new RegExp(`^atencion/(conversaciones/${UUID}|qr/${UUID}/imagen)$`),
   ],
   POST: [
     /^agentes\/(investigador-producto|marketing|analitica-basica)$/,
     /^decisiones$/,
     /^usuarios\/invitaciones$/,
+    /^inventario(\/importar(\/vista-previa)?)?$/,
+    new RegExp(`^inventario/${UUID}/fotos$`),
+    new RegExp(`^atencion/(qr|simulador|notificaciones/leer)$`),
+    new RegExp(`^atencion/conversaciones/${UUID}/mensajes$`),
+    new RegExp(`^atencion/pedidos/${UUID}/(confirmar-pago|rechazar-pago|entregado|cancelar)$`),
   ],
-  PUT: [/^organizacion\/perfil$/],
-  PATCH: [new RegExp(`^campanas/${UUID}$`), new RegExp(`^usuarios/${UUID}$`)],
+  PUT: [/^organizacion\/perfil$/, /^atencion\/(config|zonas)$/],
+  PATCH: [new RegExp(`^campanas/${UUID}$`), new RegExp(`^usuarios/${UUID}$`), new RegExp(`^inventario/${UUID}$`), new RegExp(`^atencion/conversaciones/${UUID}$`)],
   DELETE: [
     new RegExp(`^productos-candidatos/${UUID}$`),
     new RegExp(`^campanas/${UUID}$`),
     new RegExp(`^usuarios/invitaciones/${UUID}$`),
+    new RegExp(`^inventario/${UUID}(/fotos/${UUID})?$`),
+    new RegExp(`^atencion/qr/${UUID}$`),
   ],
 };
 const MAX_BODY_BYTES = 64 * 1024;
+// Fotos e importación de catálogos viajan en base64: tope propio, alineado con el del backend (1 MB).
+const RUTAS_CON_ARCHIVO = [/^atencion\/qr$/, new RegExp(`^inventario/${UUID}/fotos$`), /^inventario\/importar\/vista-previa$/, /^inventario\/importar$/];
+const MAX_BODY_ARCHIVO_BYTES = 1_048_576;
 
 async function reenviar(request: NextRequest, segmentos: string[]) {
   const metodo = request.method.toUpperCase();
@@ -53,7 +66,8 @@ async function reenviar(request: NextRequest, segmentos: string[]) {
   let cuerpo: string | undefined;
   if (metodo === "POST" || metodo === "PUT" || metodo === "PATCH") {
     cuerpo = await request.text();
-    if (new TextEncoder().encode(cuerpo).length > MAX_BODY_BYTES) {
+    const tope = RUTAS_CON_ARCHIVO.some((re) => re.test(ruta)) ? MAX_BODY_ARCHIVO_BYTES : MAX_BODY_BYTES;
+    if (new TextEncoder().encode(cuerpo).length > tope) {
       return NextResponse.json({ detail: "La solicitud es demasiado grande." }, { status: 413 });
     }
   }
@@ -78,10 +92,13 @@ async function reenviar(request: NextRequest, segmentos: string[]) {
     );
   }
 
-  const texto = respuesta.status === 204 ? null : await respuesta.text();
-  const salida = new NextResponse(texto, { status: respuesta.status });
-  salida.headers.set("Content-Type", respuesta.headers.get("content-type") ?? "application/json");
-  salida.headers.set("Cache-Control", "no-store");
+  // arrayBuffer y no text(): las fotos del inventario son binarias.
+  const cuerpoRespuesta = respuesta.status === 204 ? null : await respuesta.arrayBuffer();
+  const salida = new NextResponse(cuerpoRespuesta, { status: respuesta.status });
+  const tipo = respuesta.headers.get("content-type") ?? "application/json";
+  salida.headers.set("Content-Type", tipo);
+  // Las fotos se pueden cachear en el navegador de esa persona (privado); el resto, nunca.
+  salida.headers.set("Cache-Control", tipo.startsWith("image/") && respuesta.ok ? "private, max-age=3600" : "no-store");
   const retry = respuesta.headers.get("retry-after");
   if (retry) salida.headers.set("Retry-After", retry);
   return salida;
