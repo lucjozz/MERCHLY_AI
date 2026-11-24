@@ -84,3 +84,56 @@ Para producción: programarlo una vez por semana, igual que los backups.
 * Decidir con el CTO si la verificación en dos pasos es **obligatoria** para administradores (hoy es optativa).
 * Programar la retención y los backups en producción (Render Cron Job).
 * Visión del asistente (A6): las fotos de compradores van a tener retención de 30 días (falta agregar esa regla cuando exista la tabla).
+
+---
+
+## 8. Límite general de pedidos (todas las entradas)
+
+`app/core/limite_peticiones.py`, un middleware para toda la API (ventana de 60 s en Redis):
+
+| Quién | Tope por minuto |
+|---|---|
+| Usuario con sesión, lecturas | 240 |
+| Usuario con sesión, escrituras | 60 |
+| Sin sesión (login, recuperar contraseña, invitaciones) | 40 por IP |
+| `/auth/refresh` | 20 por IP |
+
+* Con sesión se cuenta **por usuario** y no por IP: todos llegan a través del BFF, y así un usuario no frena a otro.
+* El BFF ahora le pasa la IP real del cliente al backend (`X-Forwarded-For`) en todas las llamadas, no solo en el login. Además, la bitácora ya registra la IP verdadera.
+* Fail-open si Redis no responde (el login y los pagos siguen siendo fail-closed).
+* `/health` ya no muestra versión ni entorno, y HSTS pasó a 2 años con `preload`.
+
+## 9. Blindaje de la cuenta de administrador
+
+* **Re-verificación** (código del celular o contraseña, 10 minutos) para:
+  * invitar personas, cambiar roles, desactivar miembros y revocar invitaciones;
+  * cambiar la configuración del asistente;
+  * **subir o borrar el QR de cobro**, la estafa más directa con una sesión robada;
+  * confirmar o rechazar pagos.
+* Ventana única "Confirmá que sos vos" en el frontend: aparece sola y, si la persona confirma, la acción se reintenta.
+* **Aviso de QR nuevo** a todo el equipo.
+* **Aviso de inicio de sesión desde una IP nueva** (en la app y por email) cuando un admin entra desde una conexión que no usó en 90 días.
+* **Sesión de admin más corta:** 7 días sin uso, contra 14 del resto.
+
+## 10. Pentest v4 (2026-11-24)
+
+51 pruebas sobre toda la superficie:
+
+* filtraciones: `.env`, `.git`, el bundle del navegador, `/health`;
+* enumeración de usuarios por mensaje y por tiempo de respuesta;
+* rutas protegidas sin sesión;
+* JWT alterado o con `alg=none`;
+* fuzzing de 140 pedidos con valores raros;
+* JSON con 5.000 niveles;
+* inyección SQL en filtros;
+* CORS, cookies y límites.
+
+**Hallazgos corregidos:** `/health` filtraba la versión y el entorno; HSTS de un día; faltaba un límite general de pedidos.
+
+**Pendiente de infraestructura:** Next devuelve 500 ante el método `TRACE`. No expone datos, pero hay que bloquear los métodos no estándar con una regla del WAF de Cloudflare al publicar.
+
+## 11. Bugs encontrados recorriendo la web
+
+* **Simulador del asistente roto en Chrome y Edge recientes.** `scrollIntoView` ahora devuelve una Promise; el efecto la devolvía y React la tomaba como función de limpieza, así que la pantalla se rompía en el primer mensaje. Se corrigió y se agregó una regla de ESLint que prohíbe efectos `() => valor`.
+* **Catálogo de WhatsApp vacío** para negocios con inventario: solo leía las sugerencias de la IA. Ahora sale del catálogo público del inventario, con el precio y el stock reales.
+* **404 en inglés y sin página de error:** se agregaron las páginas "no existe", "error" y "error global" en español, sin detalles técnicos.
