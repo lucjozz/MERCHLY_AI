@@ -44,6 +44,11 @@ const ACCIONES: Record<string, { texto: string; icono: LucideIcon; tono: string 
   pago_rechazado: { texto: "Rechazó un pago", icono: CircleX, tono: "text-rojo" },
   pedido_entregado: { texto: "Marcó un pedido como entregado", icono: Truck, tono: "text-verde" },
   pedido_cancelado: { texto: "Canceló un pedido", icono: CircleX, tono: "text-texto-2" },
+  dos_pasos_activado: { texto: "Activó la verificación en dos pasos", icono: ShieldCheck, tono: "text-verde" },
+  dos_pasos_desactivado: { texto: "Desactivó la verificación en dos pasos", icono: ShieldAlert, tono: "text-ambar" },
+  dos_pasos_fallido: { texto: "Código de verificación incorrecto", icono: ShieldAlert, tono: "text-rojo" },
+  reautenticacion_fallida: { texto: "Falló al confirmar su identidad", icono: ShieldAlert, tono: "text-rojo" },
+  login_ip_nueva: { texto: "Entró desde una conexión nueva", icono: ShieldAlert, tono: "text-ambar" },
 };
 
 const FILTROS: [string, string][] = [

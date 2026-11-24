@@ -23,7 +23,11 @@ export default function ChatSimulador({ proveedor }: { proveedor: string }) {
   const [atendidaPor, setAtendidaPor] = useState<"agente" | "humano">("agente");
   const fin = useRef<HTMLLIElement>(null);
 
-  useEffect(() => fin.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [mensajes]);
+  // Con llaves: en Chrome reciente scrollIntoView devuelve una Promise, y si el efecto
+  // la devuelve React la toma como función de limpieza y la pantalla se rompe.
+  useEffect(() => {
+    fin.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [mensajes]);
 
   async function enviar(valor: string) {
     const limpio = valor.trim();

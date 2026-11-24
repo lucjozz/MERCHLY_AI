@@ -8,18 +8,18 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, Copy, MessageCircle } from "lucide-react";
 import Card from "@/components/ui/Card";
 import { BOTON_PRIMARIO, BOTON_SECUNDARIO, CAMPO, ETIQUETA_CAMPO } from "@/components/ui/estilos";
-import { usaBolivianos, type ConfigMoneda } from "@/lib/moneda";
 import { armarMensajeCatalogo, enlaceWhatsApp } from "@/lib/whatsapp";
 
 interface Producto {
   id: string;
   nombre: string;
-  precioUsd: number | null;
+  /** Ya en la moneda del negocio. */
+  precio: number | null;
 }
 
 interface Props {
   negocio: string;
-  moneda: ConfigMoneda;
+  simbolo: string;
   productos: Producto[];
 }
 
@@ -40,11 +40,8 @@ function leer(): Guardado {
   }
 }
 
-export default function CatalogoWhatsApp({ negocio, moneda, productos }: Props) {
-  const enBs = usaBolivianos(moneda);
-  const factor = enBs ? (moneda.tipo_cambio as number) : 1;
-  const simbolo = enBs ? "Bs" : "US$";
-  const precioInicial = (p: Producto) => (p.precioUsd === null ? "" : String(Math.round(p.precioUsd * factor)));
+export default function CatalogoWhatsApp({ negocio, simbolo, productos }: Props) {
+  const precioInicial = (p: Producto) => (p.precio === null ? "" : String(Number.isInteger(p.precio) ? p.precio : p.precio.toFixed(2)));
 
   const [encabezado, setEncabezado] = useState(negocio ? `Catálogo de ${negocio}` : "Nuestro catálogo");
   const [nota, setNota] = useState("Hacemos envíos. Pagás por QR o en efectivo. ¡Escribinos para hacer tu pedido!");
