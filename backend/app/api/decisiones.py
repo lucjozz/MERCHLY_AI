@@ -37,7 +37,10 @@ async def crear_decision(
     except EntidadNoEncontradaError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     except TransicionInvalidaError as error:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este producto ya tiene una decisión que no permite eso. Recargá la página para ver su estado.",
+        ) from error
 
 
 @router.get("/{decision_id}", response_model=DecisionOutput)

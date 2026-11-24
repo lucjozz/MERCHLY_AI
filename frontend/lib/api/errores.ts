@@ -49,11 +49,11 @@ export function mensajeDeError(status: number, detalle?: unknown, retryAfter?: s
     case 404:
       return "Eso ya no existe (o no es de tu negocio).";
     case 409:
-      return "Este producto ya tiene una decisión final y no se puede cambiar. Recargá la página para ver su estado.";
+      return texto ?? "Este producto ya tiene una decisión final y no se puede cambiar. Recargá la página para ver su estado.";
     case 413:
       return "Lo que enviaste es demasiado grande.";
     case 422:
-      return "Revisá los datos: hay algo que no es válido.";
+      return texto ?? "Revisá los datos: hay algo que no es válido.";
     case 429:
       return `Hiciste muchos intentos seguidos. Esperá ${minutos(retryAfter ?? null)} y probá de nuevo.`;
     case 503:
