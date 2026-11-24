@@ -5,9 +5,9 @@ En cada mensaje:
 2. Si una persona tomó la conversación, no responde (solo guarda).
 3. Le pide la respuesta al proveedor (IA real si hay clave; si no, simulado). El
    proveedor llama solo a los sub-agentes que necesita.
-4. **Guardia de montos:** si la respuesta menciona un monto que no salió de los
-   sub-agentes (precio, envío, total), se reemplaza por una respuesta segura y se
-   avisa al vendedor. Los números nunca salen del modelo.
+4. **Guardia de salida** (``guardia.py``): montos que no salieron de los sub-agentes,
+   descuentos o regalos prometidos, pagos "confirmados" o costos internos → se
+   reemplaza por una respuesta segura y se avisa al vendedor.
 5. Guarda la respuesta con sus adjuntos (QR, fotos de productos).
 """
 
@@ -22,7 +22,7 @@ from app.models.atencion import Conversacion, Mensaje
 from app.models.organizacion import Organizacion
 from app.services.atencion.configuracion import obtener_config
 from app.services.atencion.conversaciones import agregar_mensaje, historial, notificar
-from app.services.atencion.dinero import montos_no_permitidos
+from app.services.atencion import guardia
 from app.services.atencion import stock
 from app.services.atencion.herramientas import Herramientas
 from app.services.atencion.venta import vencer_reservas
@@ -102,11 +102,11 @@ async def procesar_mensaje(
         return Resultado(mensajes=nuevos, proveedor=proveedor.nombre)
 
     respuesta = (respuesta or "").strip() or RESPUESTA_SEGURA
-    inventados = montos_no_permitidos(respuesta, h.montos_permitidos)
-    if inventados:
-        logger.warning("Guardia de montos: la respuesta tenía montos que no salieron de la base")
-        await notificar(db_session, org_id, "guardia_montos", "El asistente quiso decir un precio que no está en tu catálogo",
-                        "Se reemplazó la respuesta por una segura. Revisá la conversación.", conversacion_id=conversacion.id)
+    motivo = guardia.revisar(respuesta, h.montos_permitidos)
+    if motivo:
+        logger.warning("Guardia de salida del asistente: %s", motivo)
+        await notificar(db_session, org_id, "guardia_montos", f"El asistente {motivo}: no se lo mandamos al cliente",
+                        "Se reemplazó por una respuesta segura. Revisá la conversación.", conversacion_id=conversacion.id)
         respuesta = RESPUESTA_SEGURA
         h.adjuntos = [a for a in h.adjuntos if a.get("tipo") == "qr"]  # el QR sigue valiendo: el monto lo calculó la base
 
