@@ -214,3 +214,59 @@ async def test_aislamiento_y_mensajes_append_only(mundo, fabrica) -> None:
         assert c.execute("SELECT count(*) FROM mensajes").fetchone()[0] == 0  # sin organización: nada
         with pytest.raises(psycopg.Error):
             c.execute("UPDATE mensajes SET texto = 'x'")  # append-only para la app
+
+
+async def test_compras_simultaneas_no_sobrevenden(mundo, fabrica) -> None:
+    """10 compradores piden la ÚLTIMA unidad al mismo tiempo: exactamente uno la reserva."""
+    import asyncio
+
+    org = mundo["a"]
+    await _preparar(fabrica, org, completar_ventas=True)
+    async with await _sesion(fabrica, org) as s:
+        p = await inventario.crear(s, org, ProductoInventarioEntrada(
+            nombre=f"Última unidad {uuid.uuid4().hex[:4]}", precio_venta=Decimal("99"), stock=1, publicado=True))
+    convs = [await _conversacion(fabrica, org) for _ in range(10)]
+
+    async def comprar(conv):
+        async with await _sesion(fabrica, org) as s:
+            try:
+                await venta.armar_pedido(s, await s.merge(conv), [(p.id, 1)], None, None, None, simulado=True)
+                await s.commit()
+                return True
+            except venta.VentaError:
+                await s.rollback()
+                return False
+
+    resultados = await asyncio.gather(*(comprar(c) for c in convs))
+    assert sum(resultados) == 1
+    final = await _producto(fabrica, org, p.id)
+    assert final.stock == 1 and final.stock_reservado == 1
+
+
+async def test_confirmaciones_simultaneas_descuentan_una_sola_vez(mundo, fabrica) -> None:
+    """Dos personas apretan "Confirmar pago" a la vez: el stock baja una sola vez y el otro recibe 409."""
+    import asyncio
+
+    org = mundo["a"]
+    await _preparar(fabrica, org, completar_ventas=True)
+    async with await _sesion(fabrica, org) as s:
+        p = await inventario.crear(s, org, ProductoInventarioEntrada(
+            nombre=f"Doble clic {uuid.uuid4().hex[:4]}", precio_venta=Decimal("10"), stock=3, publicado=True))
+    conv = await _conversacion(fabrica, org)
+    async with await _sesion(fabrica, org) as s:
+        r = await venta.armar_pedido(s, await s.merge(conv), [(p.id, 2)], None, None, None, simulado=True)
+        pedido_id = r.pedido.id
+        await s.commit()
+
+    async def confirmar():
+        async with await _sesion(fabrica, org) as s:
+            try:
+                await venta.decidir(s, org, pedido_id, "confirmar_pago", mundo["vendedor"])
+                return "ok"
+            except venta.TransicionInvalidaError:
+                return "409"
+
+    resultados = sorted(await asyncio.gather(*(confirmar() for _ in range(5))))
+    assert resultados == ["409", "409", "409", "409", "ok"]
+    final = await _producto(fabrica, org, p.id)
+    assert final.stock == 1 and final.stock_reservado == 0
