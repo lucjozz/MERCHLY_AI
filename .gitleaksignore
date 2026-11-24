@@ -1,0 +1,3 @@
+# Falsos positivos revisados a mano (no son secretos reales).
+# Vector de prueba público del RFC 6238 (base32 de "12345678901234567890"), en el historial.
+bc8c0c80c036a8f0ec13847ce4501128f3b634c6:backend/app/tests/test_dos_pasos.py:generic-api-key:18

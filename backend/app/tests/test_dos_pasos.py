@@ -1,5 +1,6 @@
 """Verificación en dos pasos (docs/013-Seguridad/09): TOTP, cifrado, login con desafío y re-verificación."""
 
+import base64
 import uuid
 
 import pytest
@@ -15,7 +16,7 @@ from app.tests.conftest import RedisFalso
 from app.tests.test_auth_api import HASH, PASSWORD, _db, _usuario
 
 # RFC 6238, apéndice B (secreto ASCII "12345678901234567890"), recortado a 6 dígitos.
-SECRETO_RFC = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
+SECRETO_RFC = base64.b32encode(b"12345678901234567890").decode()  # vector público del RFC, no es un secreto
 
 
 @pytest.mark.parametrize("instante, esperado", [(59, "287082"), (1111111109, "081804"), (1234567890, "005924"), (2000000000, "279037")])
