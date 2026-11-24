@@ -7,8 +7,6 @@ import Dialogo from "@/components/Dialogo";
 import { BOTON_PRIMARIO, BOTON_SECUNDARIO, CAMPO, ETIQUETA_CAMPO } from "@/components/ui/estilos";
 import { fetchJson } from "@/lib/api/cliente";
 
-export const REAUTENTICACION_REQUERIDA = "Confirmá que sos vos para continuar.";
-
 export default function ConfirmarQueSosVos({ conDosPasos, onListo, onCancelar }: {
   conDosPasos: boolean; onListo: () => void; onCancelar: () => void;
 }) {
@@ -34,7 +32,7 @@ export default function ConfirmarQueSosVos({ conDosPasos, onListo, onCancelar }:
   }
 
   return (
-    <Dialogo titulo="Confirmá que sos vos" descripcion="Para confirmar pagos te lo pedimos de nuevo. Vale por 10 minutos." onCerrar={onCancelar} ancho="max-w-md">
+    <Dialogo titulo="Confirmá que sos vos" descripcion="Para acciones sensibles (confirmar pagos, cambiar el equipo o el QR de cobro) te lo pedimos de nuevo. Vale por 10 minutos." onCerrar={onCancelar} ancho="max-w-md">
       <form onSubmit={confirmar} className="space-y-4">
         <div>
           <label htmlFor="rv-valor" className={ETIQUETA_CAMPO}>

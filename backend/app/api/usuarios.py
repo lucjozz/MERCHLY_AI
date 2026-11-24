@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
-from app.core.dependencias import contexto_peticion, requiere_rol
+from app.core.dependencias import contexto_peticion, requiere_rol, verificar_reautenticacion
 from app.services.auditoria import hash_corto, registrar_evento
 from app.models.usuario import Usuario
 from app.schemas.usuarios import (
@@ -36,7 +36,7 @@ async def miembros(
     return await listar_miembros(db_session, admin.organizacion_id)
 
 
-@router.patch("/{miembro_id}", response_model=MiembroSalida)
+@router.patch("/{miembro_id}", response_model=MiembroSalida, dependencies=[Depends(verificar_reautenticacion)])
 async def cambiar(
     miembro_id: uuid.UUID,
     cambio: MiembroCambio,
@@ -69,7 +69,8 @@ async def invitaciones(
     return await listar_invitaciones(db_session, admin.organizacion_id)
 
 
-@router.post("/invitaciones", response_model=InvitacionCreada, status_code=status.HTTP_201_CREATED)
+@router.post("/invitaciones", response_model=InvitacionCreada, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(verificar_reautenticacion)])
 async def crear_invitacion(
     entrada: InvitacionEntrada,
     request: Request,
@@ -89,7 +90,8 @@ async def crear_invitacion(
     return InvitacionCreada(**InvitacionSalida.model_validate(invitacion).model_dump(), token=token)
 
 
-@router.delete("/invitaciones/{invitacion_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/invitaciones/{invitacion_id}", status_code=status.HTTP_204_NO_CONTENT,
+               dependencies=[Depends(verificar_reautenticacion)])
 async def revocar(
     invitacion_id: uuid.UUID,
     request: Request,

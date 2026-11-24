@@ -332,7 +332,10 @@ ROLES = ["admin_principal", "responsable_tecnico", "responsable_negocio", "usuar
 @pytest.mark.parametrize("metodo, ruta, body, prohibidos", MATRIZ)
 @pytest.mark.parametrize("rol", ROLES)
 def test_matriz_rol_x_endpoint(metodo, ruta, body, prohibidos, rol) -> None:
+    from app.core.dependencias import verificar_reautenticacion
+
     app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado(rol)
+    app.dependency_overrides[verificar_reautenticacion] = lambda: None  # acá se prueba el ROL; la re-verificación aparte
     client = TestClient(app, raise_server_exceptions=False)
     r = client.request(metodo, ruta, json=body) if body is not None else client.request(metodo, ruta)
     if rol in prohibidos:
@@ -437,3 +440,25 @@ def test_rutas_publicas_son_solo_las_esperadas() -> None:
         if not nombres & {"obtener_claims", "obtener_usuario_autenticado", "_verificar"}:
             publicas.add(ruta.path)
     assert publicas == publicas_esperadas
+
+
+
+@pytest.mark.parametrize(
+    "metodo, ruta, body",
+    [
+        ("post", "/usuarios/invitaciones", {"email": "a@b.co", "rol": "usuario_operativo"}),
+        ("patch", f"/usuarios/{_ID}", {"rol": "admin_principal"}),
+        ("delete", f"/usuarios/invitaciones/{_ID}", None),
+        ("put", "/atencion/config", {"encendido": True, "completar_ventas": True}),
+        ("post", "/atencion/qr", {"etiqueta": "BNB", "imagen_base64": "A" * 200}),
+        ("delete", f"/atencion/qr/{_ID}", None),
+    ],
+)
+def test_acciones_de_admin_exigen_reverificacion(metodo, ruta, body) -> None:
+    """Aun siendo admin con sesión válida: sin confirmar que sos vos (10 min), 403."""
+    from app.core.dependencias import REAUTENTICACION_REQUERIDA
+
+    app.dependency_overrides[obtener_usuario_autenticado] = override_usuario_autenticado("admin_principal")
+    client = TestClient(app, raise_server_exceptions=False)
+    r = client.request(metodo, ruta, json=body) if body is not None else client.request(metodo, ruta)
+    assert r.status_code == 403 and r.json()["detail"] == REAUTENTICACION_REQUERIDA, ruta

@@ -85,7 +85,8 @@ async def emitir_sesion(
         token_version=usuario.token_version,
     )
     refresh, refresh_hash = generar_refresh_token()
-    refresh_duracion = settings.refresh_token_dias * 86400
+    dias = settings.refresh_token_dias_admin if usuario.rol == "admin_principal" else settings.refresh_token_dias
+    refresh_duracion = dias * 86400
     db_session.add(
         RefreshToken(
             id=uuid.uuid4(),

@@ -57,6 +57,7 @@ from app.services.recuperar_password import (
 from app.services.equipo import InvitacionInvalidaError, aceptar_invitacion
 from app.services.google_auth import GoogleTokenInvalidoError, verificar_id_token_google
 from app.services import dos_pasos
+from app.services.alertas_admin import avisar_si_ip_nueva
 from app.services.limites import LimitesLogin, RedisError, revocar_jti
 
 logger = logging.getLogger(__name__)
@@ -82,6 +83,12 @@ async def _sesion_o_desafio(db_session: AsyncSession, redis: Redis, usuario: Usu
         except RedisError:
             raise _servicio_no_disponible()
     return _a_output(await emitir_sesion(db_session, usuario))
+
+
+async def _avisar_admin(usuario: Usuario, request: Request) -> None:
+    if usuario.rol == "admin_principal":
+        contexto = contexto_peticion(request)
+        await avisar_si_ip_nueva(usuario.id, usuario.organizacion_id, usuario.email, contexto["ip"], contexto["user_agent"])
 
 
 def _limites(redis: Redis) -> LimitesLogin:
@@ -147,7 +154,9 @@ async def login(
         return await _sesion_o_desafio(db_session, redis, usuario)  # el login_ok se registra al verificar el código
     logger.info("login_ok usuario=%s", usuario.id)
     await registrar_evento("login_ok", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request))
-    return _a_output(await emitir_sesion(db_session, usuario))
+    sesion = _a_output(await emitir_sesion(db_session, usuario))
+    await _avisar_admin(usuario, request)
+    return sesion
 
 
 @router.post("/refresh", response_model=SesionOutput)
@@ -204,7 +213,9 @@ async def login_google(
         "login_google" if existia else "registro_google",
         organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request),
     )
-    return _a_output(await emitir_sesion(db_session, usuario))
+    sesion = _a_output(await emitir_sesion(db_session, usuario))
+    await _avisar_admin(usuario, request)
+    return sesion
 
 
 @router.post("/aceptar-invitacion", response_model=SesionOutput)
@@ -394,7 +405,9 @@ async def verificar_dos_pasos(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=_CODIGO_INVALIDO)
     await registrar_evento("login_ok", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id,
                            detalle={"dos_pasos": True}, **contexto_peticion(request))
-    return _a_output(await emitir_sesion(db_session, usuario))
+    sesion = _a_output(await emitir_sesion(db_session, usuario))
+    await _avisar_admin(usuario, request)
+    return sesion
 
 
 @router.post("/2fa/iniciar", response_model=DosPasosInicio)

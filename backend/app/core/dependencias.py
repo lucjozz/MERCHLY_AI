@@ -120,3 +120,25 @@ def requiere_rol(*roles_permitidos: str):
         return usuario
 
     return _verificar
+
+
+
+# ------------------------------------------------------------------ re-verificación (013-09)
+
+REAUTENTICACION_REQUERIDA = "Confirmá que sos vos para continuar."
+
+
+async def verificar_reautenticacion(
+    usuario: Usuario = Depends(obtener_usuario_autenticado),
+    redis: Redis = Depends(get_redis_client),
+) -> None:
+    """Acciones sensibles (equipo, QR de pago, configuración del asistente, pagos):
+    exige haber confirmado que sos vos hace menos de 10 minutos (POST /auth/reautenticar).
+    Así, quien agarre una sesión abierta no puede cambiar el QR por el suyo ni sumarse al equipo.
+    Fail-closed: sin Redis, no pasa."""
+    try:
+        ok = bool(await redis.exists(f"reauth:{usuario.id}"))
+    except Exception:  # noqa: BLE001
+        ok = False
+    if not ok:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=REAUTENTICACION_REQUERIDA)

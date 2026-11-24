@@ -14,7 +14,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.cuotas import aplicar_cuota
 from app.core.config import get_settings
 from app.core.database import get_db_session
-from app.core.dependencias import ROLES_BORRADO, TODOS_LOS_ROLES, contexto_peticion, requiere_rol
+from app.core.dependencias import (
+    REAUTENTICACION_REQUERIDA,
+    ROLES_BORRADO,
+    TODOS_LOS_ROLES,
+    contexto_peticion,
+    requiere_rol,
+    verificar_reautenticacion,
+)
 from app.core.redis import get_redis_client
 from app.models.atencion import ESTADOS_PEDIDO
 from app.models.usuario import Usuario
@@ -47,8 +54,6 @@ router = APIRouter(prefix="/atencion", tags=["atencion"])
 EDITORES = ROLES_BORRADO
 NO_CONVERSACION = "No existe esa conversación."
 NO_PEDIDO = "No existe ese pedido."
-# El frontend reconoce este texto para pedir el código o la contraseña.
-REAUTENTICACION_REQUERIDA = "Confirmá que sos vos para continuar."
 
 
 async def _reautenticado(redis: Redis, usuario_id: uuid.UUID) -> bool:
@@ -80,7 +85,7 @@ async def ver_config(
     )
 
 
-@router.put("/config", response_model=ConfigSalida)
+@router.put("/config", response_model=ConfigSalida, dependencies=[Depends(verificar_reautenticacion)])
 async def guardar_config(
     entrada: ConfigEntrada,
     request: Request,
@@ -104,7 +109,7 @@ async def listar_qr(
     return [QrSalida(id=q.id, etiqueta=q.etiqueta) for q in await configuracion.listar_qr(db_session, usuario.organizacion_id)]
 
 
-@router.post("/qr", response_model=QrSalida, status_code=status.HTTP_201_CREATED)
+@router.post("/qr", response_model=QrSalida, status_code=status.HTTP_201_CREATED, dependencies=[Depends(verificar_reautenticacion)])
 async def subir_qr(
     entrada: QrEntrada,
     request: Request,
@@ -119,6 +124,11 @@ async def subir_qr(
         qr_id, etiqueta = await configuracion.agregar_qr(db_session, usuario.organizacion_id, entrada.etiqueta, contenido)
     except configuracion.DemasiadosQrError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Podés tener hasta {configuracion.MAX_QR} QR.")
+    await conversaciones.notificar(
+        db_session, usuario.organizacion_id, "seguridad", f"Se agregó un QR de pago: {etiqueta}",
+        f"Lo subió {usuario.nombre}. Si no lo reconocés, borralo ya y cambiá tu contraseña.",
+    )
+    await db_session.commit()
     await registrar_evento(
         "qr_subido", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, objetivo_tipo="qr",
         objetivo_id=qr_id, detalle={"etiqueta": etiqueta}, **contexto_peticion(request),
@@ -138,7 +148,7 @@ async def ver_qr(
     return Response(content=qr.contenido, media_type="image/png", headers={"Cache-Control": "private, max-age=3600"})
 
 
-@router.delete("/qr/{qr_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/qr/{qr_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(verificar_reautenticacion)])
 async def borrar_qr(
     qr_id: uuid.UUID,
     request: Request,

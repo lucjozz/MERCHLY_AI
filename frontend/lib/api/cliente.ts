@@ -8,6 +8,7 @@
  * - 403 → NO cierra la sesión: lanza SinPermisoError para mostrar un mensaje.
  */
 import { MENSAJE_SIN_CONEXION, SesionInvalidaError, errorDeRespuesta } from "@/lib/api/errores";
+import { REAUTENTICACION_REQUERIDA, pedirReverificacion } from "@/lib/api/reverificacion";
 
 export async function fetchAutenticado(ruta: string, init: RequestInit = {}): Promise<Response> {
   let respuesta: Response;
@@ -33,7 +34,14 @@ export async function fetchAutenticado(ruta: string, init: RequestInit = {}): Pr
 
 /** fetchAutenticado + lanza un error con mensaje legible si no es 2xx. */
 export async function fetchJson<T>(ruta: string, init: RequestInit = {}): Promise<T> {
-  const respuesta = await fetchAutenticado(ruta, init);
+  let respuesta = await fetchAutenticado(ruta, init);
+  // Acción sensible: pedir que la persona confirme que es ella y reintentar UNA vez.
+  if (respuesta.status === 403 && ruta !== "/auth/reautenticar") {
+    const detalle = await respuesta.clone().json().catch(() => null);
+    if (detalle?.detail === REAUTENTICACION_REQUERIDA && (await pedirReverificacion())) {
+      respuesta = await fetchAutenticado(ruta, init);
+    }
+  }
   if (!respuesta.ok) throw await errorDeRespuesta(respuesta);
   return (respuesta.status === 204 ? undefined : await respuesta.json()) as T;
 }

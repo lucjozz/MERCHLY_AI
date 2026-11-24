@@ -15,7 +15,6 @@ export default async function AtencionPedidos() {
   let sinLeer = 0;
   let moneda = "BOB";
   let puedeDecidir = false;
-  let conDosPasos = false;
   let error: string | null = null;
   try {
     const [usuario, organizacion, lista, notificaciones] = await Promise.all([
@@ -29,7 +28,6 @@ export default async function AtencionPedidos() {
     sinLeer = notificaciones.sin_leer;
     moneda = organizacion?.moneda ?? "BOB";
     puedeDecidir = ["admin_principal", "responsable_negocio"].includes(usuario.rol);
-    conDosPasos = Boolean(usuario.totp_activado);
   } catch (e) {
     error = mensajeDeErrorDePagina(e);
   }
@@ -39,7 +37,7 @@ export default async function AtencionPedidos() {
       {error ? (
         <Alerta>{error}</Alerta>
       ) : (
-        <PanelPedidos pedidos={pedidos} avisos={avisos} sinLeer={sinLeer} moneda={moneda} puedeDecidir={puedeDecidir} conDosPasos={conDosPasos} />
+        <PanelPedidos pedidos={pedidos} avisos={avisos} sinLeer={sinLeer} moneda={moneda} puedeDecidir={puedeDecidir} />
       )}
     </>
   );
