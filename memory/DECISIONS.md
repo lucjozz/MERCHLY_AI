@@ -841,3 +841,26 @@ Agentes jerárquicos para inventario, catálogo y atención al cliente (acordado
 Estado:
 
 **Pedido por Daniel y el socio el 2026-11-23. Pendiente aprobación formal de los contratos por el CTO.**
+
+## DEC-040
+
+Fecha:
+
+2026-11-24
+
+Decisión:
+
+Blindaje de seguridad (`docs/013-Seguridad/09`):
+
+1. **Verificación en dos pasos (TOTP)**, optativa por ahora:
+   * clave cifrada con AES-GCM (`CIFRADO_CLAVE`, obligatoria en producción);
+   * anti-repetición y 10 códigos de respaldo guardados como hash;
+   * en el login, un desafío de un solo uso en una cookie HttpOnly.
+2. **Re-verificación** (código o contraseña, 10 minutos) para confirmar o rechazar pagos reales.
+3. **Guardia de salida del asistente:** sin descuentos prometidos, sin pagos "confirmados" y sin hablar de costos internos.
+4. **Base de seguridad para los webhooks de Meta** (Fase B, sin rutas expuestas): firma HMAC, idempotencia, descarte de mensajes viejos y tokens cifrados.
+5. **Retención de datos** (`ops/retencion/limpiar.py`): mensajes 12 meses, anonimización de compradores, bitácora 24 meses.
+
+Estado:
+
+**Pedido por Daniel el 2026-11-24. Pendiente visto bueno del CTO; falta decidir si la verificación en dos pasos es obligatoria para administradores.**

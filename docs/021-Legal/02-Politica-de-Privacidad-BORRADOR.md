@@ -20,6 +20,8 @@ Esta lista refleja lo que el sistema guarda hoy (ver `docs/006-BaseDatos/02-Esqu
 | Datos del negocio: nombre, país, rubro, presupuesto, moneda, tipo de cambio, costos | Personalizar las recomendaciones y calcular márgenes |
 | Productos, decisiones (con su motivo) y campañas | Prestar el Servicio e historial del negocio |
 | Registro de actividad de seguridad: inicios de sesión, cambios de rol, borrados, con IP y navegador | Seguridad, prevención de fraude e investigación de incidentes |
+| Clave de verificación en dos pasos (si la activás), guardada cifrada | Proteger tu cuenta con un código del celular |
+| Conversaciones de tus clientes con el asistente (teléfono o usuario del canal, nombre, mensajes, dirección de entrega) | Atender y entregar sus pedidos. El negocio es el responsable de esos datos; MERCHLY los procesa por su cuenta |
 | Cookies de sesión (técnicas, necesarias) | Mantener la sesión iniciada de forma segura |
 
 No usamos cookies de publicidad ni vendemos datos personales.
@@ -38,7 +40,8 @@ Para prestar el Servicio usamos proveedores que procesan datos por cuenta nuestr
 ## 4. Cuánto tiempo guardamos los datos
 
 * Datos de cuenta y del negocio: mientras la cuenta esté activa y [plazo] después de la baja.
-* Registro de actividad de seguridad: al menos 12 meses.
+* Registro de actividad de seguridad: 24 meses.
+* Mensajes de compradores: 12 meses; después se borran y el nombre, el teléfono y la dirección de los pedidos se anonimizan (los montos se conservan para la contabilidad).
 * Copias de seguridad cifradas: hasta 12 meses según la política de retención.
 
 ## 5. Seguridad
