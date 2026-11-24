@@ -799,3 +799,45 @@ Decisión:
 Estado:
 
 **Pedido por Daniel el 2026-11-24. Pendiente visto bueno del CTO (y del abogado para 021-Legal).**
+
+## DEC-038
+
+Fecha:
+
+2026-11-23
+
+Decisión:
+
+Funciones diferenciales para Bolivia (`docs/004-Backend/05-Funciones-Diferenciales-Bolivia.md`):
+
+1. **Costo real puesto en Bolivia:** la calculadora de margen desglosa FOB, flete, seguro presunto (2 %), CIF, gravamen arancelario (editable, 10 % por defecto), IVA de importación (14,94 %), gastos locales y comisión de cobro. Son estimaciones, con aviso de confirmar con un despachante. No se implementa el dólar paralelo: con el régimen flexible, el TCO del BCB es el único oficial y existe el tipo de cambio propio.
+2. **Catálogo listo para WhatsApp:** solo productos aprobados por una persona. Copiar o abrir en WhatsApp (`wa.me`). Nunca envía nada solo.
+3. **Calendario de temporadas bolivianas:** servicio y `GET /temporadas`, tarjeta en el panel y contexto para el Investigador.
+4. **Agente vendedor por WhatsApp (idea de Daniel):** queda para después de la beta. Condiciones: responde solo con datos aprobados, deriva a una persona lo que comprometa al negocio, no se hace pasar por humano y tiene apagado inmediato.
+
+Estado:
+
+**Pedido por Daniel el 2026-11-23. Pendiente visto bueno del CTO.**
+
+## DEC-039
+
+Fecha:
+
+2026-11-23
+
+Decisión:
+
+Agentes jerárquicos para inventario, catálogo y atención al cliente (acordado por Daniel y el socio). Contratos: `docs/007-Agentes/08` y `docs/007-Agentes/09`.
+
+1. **Estructura:** agente principal → sub-agentes → funciones. Cada sub-agente se carga y se ejecuta solo cuando se usa (sin procesos de fondo). Precios, stock y montos los calcula siempre el código, nunca el modelo.
+2. **Dos catálogos sobre los mismos productos:** el **inventario** del dueño (costo, gastos, proveedor, stock real, margen) y el **catálogo público** que usa la IA para buscar, dar precios y responder (solo productos publicados; nombre, descripción, especificaciones, precio, disponibles y fotos). Con RLS y auditoría; fotos re-codificadas y guardadas en Postgres.
+3. **Sub-agente Catálogo** (hijo de Marketing): textos únicos (el dueño los acepta), catálogo diseñado en PDF e imagen, e importación de cualquier formato con vista previa obligatoria.
+4. **Agente de Atención al Cliente** (planes pagos; plan exacto sin decidir) con sub-agentes Canales, Conversación, Catálogo/Stock, Visión, Venta y Envíos. Interruptor "Completar ventas" (por defecto en NO). Con SÍ: reserva el stock y manda el QR que subió el dueño, pero **la venta se marca como pagada solo cuando el vendedor lo confirma**. No se hace pasar por humano y tiene apagado instantáneo.
+5. **Envíos:** API de Yango (`check-price`) si el negocio tiene cuenta de empresa, y tarifas por zona como respaldo. Falta contactar a Yango Bolivia.
+6. **Fases:**
+   * **A (sin cuentas externas):** A1 inventario + fotos + Excel/CSV; A2 importar cualquier formato con IA; A3 catálogo PDF/imagen; A4 QR + interruptor + pedidos + avisos en la app; A5 agente de atención con simulador de chat; A6 visión.
+   * **B:** deploy + Meta → WhatsApp; Instagram y Facebook; Yango; TikTok si hay API.
+
+Estado:
+
+**Pedido por Daniel y el socio el 2026-11-23. Pendiente aprobación formal de los contratos por el CTO.**

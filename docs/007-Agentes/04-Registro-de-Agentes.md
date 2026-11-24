@@ -37,6 +37,8 @@ Este registro es el punto de entrada rápido; el detalle completo de cada agente
 
 ---
 
+> **Propuestos (DEC-039, pendientes de aprobación):** Sub-agente Catálogo, hijo de Marketing (`08-Inventario-y-Subagente-Catalogo.md`), y Agente de Atención al Cliente con 6 sub-agentes (`09-Agente-de-Atencion-al-Cliente.md`).
+
 # Pendientes Conocidos
 
 ## Agente Investigador de Producto

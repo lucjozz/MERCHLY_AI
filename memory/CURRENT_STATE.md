@@ -221,3 +221,38 @@ El CTO revisa docs/013-Seguridad/04 y DEC-032. Daniel rota su contraseña con `d
 # Bloqueos
 
 Ninguno.
+
+## Funciones diferenciales para Bolivia (DEC-038)
+
+* Costo real puesto en Bolivia en la calculadora de margen: FOB, flete, seguro presunto, CIF, gravamen arancelario, IVA de importación, gastos locales y comisión de cobro.
+* Pantalla Catálogo WhatsApp (`/catalogo`): solo productos aprobados; copiar o abrir en WhatsApp.
+* Calendario de temporadas bolivianas: `GET /temporadas`, tarjeta en el panel con ideas que precargan la búsqueda, y contexto para el Investigador.
+* Tests del frontend con `node --test` (`npm test`), también en el CI.
+* Agente vendedor por WhatsApp: idea evaluada en `docs/004-Backend/05`, sección 4; queda para después de la beta.
+* Pendiente: visto bueno del CTO.
+
+## Inventario y catálogo público (DEC-039, fase A1)
+
+* Tablas `inventario_productos` e `inventario_fotos`, con RLS forzado (migración 202611250001).
+* Dos vistas sobre los mismos productos:
+  * **Inventario privado** del dueño: costo, gastos, proveedor, notas, stock y margen.
+  * **Catálogo público** que usa la IA: solo los productos publicados y sin datos privados, garantizado por un test.
+* Fotos re-codificadas a WebP sin EXIF; se sirven solo con sesión.
+* Importación de Excel/CSV con vista previa obligatoria; PDF, Word y fotos quedan para A2.
+* Pantalla `/inventario`, con las pestañas privado y público.
+* Siguiente: A2, importar cualquier formato con IA.
+
+## Agente de Atención al Cliente (DEC-039, fases A4 y A5)
+
+* Tablas nuevas: `atencion_config`, `qr_pagos`, `zonas_envio`, `conversaciones`, `mensajes` (append-only), `pedidos` y `notificaciones`. Todas con RLS forzado; migración 202611260001.
+* Orquestador más 5 sub-agentes:
+  * Catálogo/Stock;
+  * Envíos por zona;
+  * Venta (reserva y QR, informar pago);
+  * Conversación;
+  * Derivar a una persona.
+* Proveedores: IA real (OpenAI con herramientas) o simulado.
+* El pago lo confirma solo una persona, y el stock se descuenta recién ahí.
+* Guardia de montos: los números nunca salen del modelo.
+* Simulador de chat dentro de la app.
+* Siguiente: sub-agentes de Catálogo (A2 y A3); Visión (A6); Fase B con WhatsApp.
