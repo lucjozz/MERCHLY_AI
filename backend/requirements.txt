@@ -12,7 +12,7 @@ alembic==1.14.0
 google-genai==1.2.0
 bcrypt==5.0.0
 pyjwt[crypto]==2.15.1
-openai==3.50.0
+openai==3.57.0
 httpx==0.28.1
 # Inventario (docs/007-Agentes/08): fotos re-codificadas e importación de Excel.
 pillow==13.0.0
