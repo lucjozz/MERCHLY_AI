@@ -9,6 +9,7 @@ export interface UsuarioActual {
   activo: boolean;
   organizacion_id: string;
   organizacion_nombre: string | null;
+  totp_activado?: boolean;
 }
 
 export async function obtenerUsuarioActual(): Promise<UsuarioActual> {

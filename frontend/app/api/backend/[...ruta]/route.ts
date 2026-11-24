@@ -29,6 +29,7 @@ const PERMITIDAS: Record<string, RegExp[]> = {
     /^inventario(\/importar(\/vista-previa)?)?$/,
     new RegExp(`^inventario/${UUID}/fotos$`),
     new RegExp(`^atencion/(qr|simulador|notificaciones/leer)$`),
+    /^auth\/(2fa\/(iniciar|activar|desactivar)|reautenticar)$/,
     new RegExp(`^atencion/conversaciones/${UUID}/mensajes$`),
     new RegExp(`^atencion/pedidos/${UUID}/(confirmar-pago|rechazar-pago|entregado|cancelar)$`),
   ],

@@ -4,7 +4,8 @@
  */
 import { MENSAJE_SIN_CONEXION, mensajeDeError } from "@/lib/api/errores";
 
-export async function iniciarSesion(email: string, password: string): Promise<void> {
+/** Devuelve true si falta el código de la verificación en dos pasos. */
+export async function iniciarSesion(email: string, password: string): Promise<boolean> {
   let respuesta: Response;
   try {
     respuesta = await fetch("/api/auth/login", {
@@ -19,6 +20,28 @@ export async function iniciarSesion(email: string, password: string): Promise<vo
   if (!respuesta.ok) {
     const cuerpo = await respuesta.json().catch(() => ({}));
     if (respuesta.status === 401) throw new Error("Email o contraseña incorrectos.");
+    throw new Error(mensajeDeError(respuesta.status, cuerpo?.detail, respuesta.headers.get("retry-after")));
+  }
+  const cuerpo = await respuesta.json().catch(() => ({}));
+  return cuerpo?.requiere_2fa === true;
+}
+
+/** Segundo paso del login: el código del celular o uno de respaldo. */
+export async function verificarCodigo(codigo: string): Promise<void> {
+  let respuesta: Response;
+  try {
+    respuesta = await fetch("/api/auth/2fa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ codigo }),
+    });
+  } catch {
+    throw new Error(MENSAJE_SIN_CONEXION);
+  }
+  if (!respuesta.ok) {
+    const cuerpo = await respuesta.json().catch(() => ({}));
+    if (respuesta.status === 401) throw new Error(typeof cuerpo?.detail === "string" ? cuerpo.detail : "El código no es correcto.");
     throw new Error(mensajeDeError(respuesta.status, cuerpo?.detail, respuesta.headers.get("retry-after")));
   }
 }

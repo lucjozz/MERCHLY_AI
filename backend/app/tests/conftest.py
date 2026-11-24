@@ -34,7 +34,10 @@ class RedisFalso:
     async def set(self, clave, valor, ex=None, nx=False):
         if nx and clave in self.datos:
             return None
-        self.datos[clave] = int(valor)
+        try:
+            self.datos[clave] = int(valor)
+        except (TypeError, ValueError):
+            self.datos[clave] = valor.encode() if isinstance(valor, str) else valor  # como redis: devuelve bytes
         if ex:
             self.ttls[clave] = ex
         return True
@@ -59,6 +62,12 @@ class RedisFalso:
 
     async def exists(self, clave):
         return 1 if clave in self.datos else 0
+
+    async def expire(self, clave, segundos):
+        if clave in self.datos:
+            self.ttls[clave] = segundos
+            return True
+        return False
 
 
 class RedisCaido:

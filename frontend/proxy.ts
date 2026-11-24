@@ -30,6 +30,7 @@ const RUTAS_PUBLICAS = [
   "/restablecer",
   "/api/auth/login",
   "/api/auth/google",
+  "/api/auth/2fa",
   "/api/auth/aceptar-invitacion",
   "/api/auth/olvide-password",
   "/api/auth/restablecer-password",

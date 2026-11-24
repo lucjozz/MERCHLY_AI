@@ -47,6 +47,8 @@ services:
           property: connectionString
       - key: JWT_SECRET_KEY
         generateValue: true
+      - key: CIFRADO_CLAVE  # Render genera 256 bits en base64 (justo lo que pide app/core/cifrado.py)
+        generateValue: true
       - key: CONFIAR_PROXY  # solo lo alcanza el BFF, que le pasa la IP real del cliente
         value: "true"
       - key: CORS_ORIGENES

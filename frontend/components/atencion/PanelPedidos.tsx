@@ -11,6 +11,7 @@ import { BOTON_PRIMARIO, BOTON_SECUNDARIO } from "@/components/ui/estilos";
 import { ESTADO_PEDIDO, type Notificacion, type Pedido } from "@/lib/api/atencion-tipos";
 import { decidirPedido, marcarAvisosLeidos } from "@/lib/api/atencion-acciones";
 import { formatearPrecioLocal } from "@/lib/moneda";
+import ConfirmarQueSosVos, { REAUTENTICACION_REQUERIDA } from "@/components/atencion/ConfirmarQueSosVos";
 
 type Accion = "confirmar-pago" | "rechazar-pago" | "entregado" | "cancelar";
 const ACCIONES: Record<string, { accion: Accion; texto: string; primario?: boolean; confirmar?: string }[]> = {
@@ -29,22 +30,27 @@ const ACCIONES: Record<string, { accion: Accion; texto: string; primario?: boole
   pagado: [{ accion: "entregado", texto: "Marcar entregado", primario: true }],
 };
 
-export default function PanelPedidos({ pedidos, avisos, sinLeer, moneda, puedeDecidir }: {
-  pedidos: Pedido[]; avisos: Notificacion[]; sinLeer: number; moneda: string; puedeDecidir: boolean;
+export default function PanelPedidos({ pedidos, avisos, sinLeer, moneda, puedeDecidir, conDosPasos }: {
+  pedidos: Pedido[]; avisos: Notificacion[]; sinLeer: number; moneda: string; puedeDecidir: boolean; conDosPasos: boolean;
 }) {
   const router = useRouter();
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendiente, setPendiente] = useState<{ pedido: Pedido; a: (typeof ACCIONES)[string][number] } | null>(null);
   const precio = (v: string) => formatearPrecioLocal(v, moneda);
 
-  async function decidir(pedido: Pedido, a: (typeof ACCIONES)[string][number]) {
-    if (a.confirmar && !window.confirm(a.confirmar)) return;
+  async function decidir(pedido: Pedido, a: (typeof ACCIONES)[string][number], yaConfirmado = false) {
+    if (a.confirmar && !yaConfirmado && !window.confirm(a.confirmar)) return;
     setError(null);
     setOcupado(pedido.id + a.accion);
     try {
       await decidirPedido(pedido.id, a.accion);
       router.refresh();
     } catch (err) {
+      if (err instanceof Error && err.message === REAUTENTICACION_REQUERIDA) {
+        setPendiente({ pedido, a });  // pedir el código o la contraseña y reintentar
+        return;
+      }
       setError(err instanceof Error ? err.message : "No se pudo actualizar el pedido.");
     } finally {
       setOcupado(null);
@@ -56,11 +62,20 @@ export default function PanelPedidos({ pedidos, avisos, sinLeer, moneda, puedeDe
     router.refresh();
   }
 
+  const reintento = pendiente && (
+    <ConfirmarQueSosVos
+      conDosPasos={conDosPasos}
+      onCancelar={() => setPendiente(null)}
+      onListo={() => { const p = pendiente; setPendiente(null); decidir(p.pedido, p.a, true); }}
+    />
+  );
+
   const abiertos = pedidos.filter((p) => ["pedido_armado", "reservado", "pago_por_confirmar", "pagado"].includes(p.estado));
   const cerrados = pedidos.filter((p) => !abiertos.includes(p));
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+      {reintento}
       <section aria-labelledby="t-pedidos">
         <h2 id="t-pedidos" className="mb-3 flex items-center gap-2 text-base font-semibold text-texto">
           <ShoppingBag className="h-4 w-4 text-acento-claro" aria-hidden="true" /> Pedidos abiertos

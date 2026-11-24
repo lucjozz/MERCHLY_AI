@@ -380,6 +380,10 @@ def test_matriz_rol_x_endpoint(metodo, ruta, body, prohibidos, rol) -> None:
         ("delete", f"/inventario/{_ID}/fotos/{_ID}"),
         ("post", "/inventario/importar/vista-previa"),
         ("post", "/inventario/importar"),
+        ("post", "/auth/2fa/iniciar"),
+        ("post", "/auth/2fa/activar"),
+        ("post", "/auth/2fa/desactivar"),
+        ("post", "/auth/reautenticar"),
         ("get", "/atencion/config"),
         ("put", "/atencion/config"),
         ("get", "/atencion/qr"),
@@ -410,6 +414,7 @@ def test_rutas_publicas_son_solo_las_esperadas() -> None:
     publicas_esperadas = {
         "/health", "/health/ready", "/auth/login", "/auth/refresh", "/auth/google", "/auth/aceptar-invitacion",
         "/auth/olvide-password", "/auth/restablecer-password",
+        "/auth/2fa/verificar",  # segundo paso del login: todavía no hay sesión (protegida por el desafío)
     }
     publicas = set()
     rutas = []

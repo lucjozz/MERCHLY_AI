@@ -11,7 +11,7 @@ import {
   Megaphone,
   ShieldCheck,
 } from "lucide-react";
-import { iniciarSesion } from "@/lib/api/auth";
+import { iniciarSesion, verificarCodigo } from "@/lib/api/auth";
 import { rutaInternaSegura } from "@/lib/sesion/config";
 import { BOTON_PRIMARIO, CAMPO, ETIQUETA_CAMPO } from "@/components/ui/estilos";
 import BotonGoogle from "@/components/BotonGoogle";
@@ -46,6 +46,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pideCodigo, setPideCodigo] = useState(false);
+  const [codigo, setCodigo] = useState("");
 
   // Solo rutas internas: evita usar el login para redirigir a otro sitio.
   const irAlDestino = useCallback(() => {
@@ -59,7 +61,17 @@ function Login() {
     setCargando(true);
 
     try {
-      await iniciarSesion(email.trim(), password);
+      if (pideCodigo) {
+        await verificarCodigo(codigo.trim());
+        irAlDestino();
+        return;
+      }
+      if (await iniciarSesion(email.trim(), password)) {
+        setPideCodigo(true);
+        setPassword("");
+        setCargando(false);
+        return;
+      }
       irAlDestino();
     } catch (err) {
       setError(
@@ -140,10 +152,35 @@ function Login() {
             onSubmit={entrar}
             className="mx-auto w-full max-w-md rounded-3xl border border-borde bg-superficie/90 p-6 shadow-2xl shadow-black/40 backdrop-blur sm:p-8"
           >
-            <h2 className="text-xl font-bold text-texto">Entrá a tu cuenta</h2>
+            <h2 className="text-xl font-bold text-texto">{pideCodigo ? "Verificación en dos pasos" : "Entrá a tu cuenta"}</h2>
             <p className="mt-1 text-sm text-texto-2">
-              Usá el email y la contraseña que te dio tu administrador.
+              {pideCodigo
+                ? "Abrí la app de autenticación de tu celular y escribí el código de 6 dígitos de MERCHLY AI. Si no tenés el celular, usá un código de respaldo."
+                : "Usá el email y la contraseña que te dio tu administrador."}
             </p>
+
+            {pideCodigo && (
+              <div className="mt-7">
+                <label htmlFor="codigo" className={ETIQUETA_CAMPO}>Código</label>
+                <input
+                  id="codigo"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value)}
+                  autoComplete="one-time-code"
+                  inputMode="text"
+                  maxLength={12}
+                  placeholder="123456"
+                  required
+                  autoFocus
+                  className={`${CAMPO} text-center text-lg tracking-[0.3em]`}
+                />
+                <button type="button" onClick={() => { setPideCodigo(false); setCodigo(""); setError(null); }} className="mt-2 text-xs text-acento-claro hover:underline">
+                  Volver a ingresar la contraseña
+                </button>
+              </div>
+            )}
+
+            <div className={pideCodigo ? "hidden" : ""}>
 
             <div className="mt-7">
               <label htmlFor="email" className={ETIQUETA_CAMPO}>
@@ -156,7 +193,7 @@ function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
                 placeholder="vos@tutienda.com"
-                required
+                required={!pideCodigo}
                 className={CAMPO}
               />
             </div>
@@ -171,7 +208,7 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                required
+                required={!pideCodigo}
                 className={CAMPO}
               />
               <div className="mt-2 text-right">
@@ -179,6 +216,7 @@ function Login() {
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
+            </div>
             </div>
 
             {error && (
@@ -198,11 +236,13 @@ function Login() {
               {cargando && (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               )}
-              {cargando ? "Entrando..." : "Entrar"}
+              {cargando ? "Entrando..." : pideCodigo ? "Verificar" : "Entrar"}
             </button>
 
             {/* El botón de Google no envía este formulario: abre su propia ventana. */}
-            <BotonGoogle onSesion={irAlDestino} />
+            {!pideCodigo && (
+              <BotonGoogle onSesion={(requiere2fa) => (requiere2fa ? setPideCodigo(true) : irAlDestino())} />
+            )}
           </form>
         </div>
       </div>

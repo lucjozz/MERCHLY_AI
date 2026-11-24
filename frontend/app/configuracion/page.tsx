@@ -6,6 +6,7 @@ import { obtenerOrganizacion, type Organizacion } from "@/lib/api/organizacion";
 import { obtenerTipoCambioBcb, type TipoCambioBcb } from "@/lib/api/tipo-cambio";
 import BotonCerrarSesion from "@/components/BotonCerrarSesion";
 import SesionInfo from "@/components/SesionInfo";
+import DosPasos from "@/components/DosPasos";
 import { SesionInvalidaError } from "@/lib/api/errores";
 import { obtenerUsuarioActual } from "@/lib/api/usuario";
 import PageHeader from "@/components/ui/PageHeader";
@@ -72,6 +73,7 @@ export default async function Configuracion() {
 
       {usuario && (
         <div className="grid gap-6 lg:grid-cols-2">
+          <DosPasos activado={Boolean(usuario.totp_activado)} esAdmin={usuario.rol === "admin_principal"} />
           <Card>
             <div className="mb-6 flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-acento to-acento-hondo text-xl font-bold text-white">

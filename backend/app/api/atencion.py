@@ -37,7 +37,9 @@ from app.schemas.atencion import (
 )
 from app.services.atencion import configuracion, conversaciones, venta
 from app.services.atencion.orquestador import procesar_mensaje
+from app.services import dos_pasos
 from app.services.auditoria import registrar_evento
+from app.services.limites import RedisError
 from app.services.imagenes import ImagenInvalidaError, decodificar_base64, recodificar
 from app.services.planes import plan_de_organizacion, plan_incluye_atencion
 
@@ -45,6 +47,15 @@ router = APIRouter(prefix="/atencion", tags=["atencion"])
 EDITORES = ROLES_BORRADO
 NO_CONVERSACION = "No existe esa conversación."
 NO_PEDIDO = "No existe ese pedido."
+# El frontend reconoce este texto para pedir el código o la contraseña.
+REAUTENTICACION_REQUERIDA = "Confirmá que sos vos para continuar."
+
+
+async def _reautenticado(redis: Redis, usuario_id: uuid.UUID) -> bool:
+    try:
+        return await dos_pasos.reautenticado(redis, usuario_id)
+    except RedisError:
+        return False  # fail-closed: sin Redis no se confirman pagos
 
 
 async def _exigir_plan(db_session: AsyncSession, usuario: Usuario) -> None:
@@ -280,11 +291,21 @@ async def decidir_pedido(
     accion: str,
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
+    redis: Redis = Depends(get_redis_client),
     usuario: Usuario = Depends(requiere_rol(*EDITORES)),
 ) -> PedidoSalida:
-    """Solo una PERSONA confirma un pago (el agente nunca)."""
+    """Solo una PERSONA confirma un pago (el agente nunca).
+
+    Confirmar o rechazar un pago REAL exige haber confirmado que sos vos hace
+    menos de 10 minutos (código del celular o contraseña: POST /auth/reautenticar).
+    Así, alguien que agarre una sesión abierta no puede marcar ventas como pagadas.
+    """
     if accion not in ACCIONES:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Acción desconocida.")
+    if ACCIONES[accion] in ("confirmar_pago", "rechazar_pago"):
+        previo = await venta.obtener_pedido(db_session, usuario.organizacion_id, pedido_id)
+        if previo is not None and not previo.simulado and not await _reautenticado(redis, usuario.id):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=REAUTENTICACION_REQUERIDA)
     try:
         pedido = await venta.decidir(db_session, usuario.organizacion_id, pedido_id, ACCIONES[accion], usuario.id)
     except venta.TransicionInvalidaError as error:

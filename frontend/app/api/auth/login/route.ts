@@ -4,12 +4,10 @@
  * HttpOnly. Al navegador solo le responde { ok: true }.
  */
 import { NextResponse, type NextRequest } from "next/server";
+import { respuestaDeLogin } from "@/lib/sesion/respuesta-login";
 import {
   BACKEND_URL,
-  COOKIE_LEGADA,
-  cookiesDeSesion,
   mismoOrigen,
-  type SesionBackend,
 } from "@/lib/sesion/config";
 
 function ipCliente(request: NextRequest): string {
@@ -67,10 +65,5 @@ export async function POST(request: NextRequest) {
     return salida;
   }
 
-  const sesion = (await respuesta.json()) as SesionBackend;
-  const salida = NextResponse.json({ ok: true });
-  for (const c of cookiesDeSesion(sesion)) salida.cookies.set(c);
-  salida.cookies.delete(COOKIE_LEGADA);
-  salida.headers.set("Cache-Control", "no-store");
-  return salida;
+  return respuestaDeLogin(respuesta);
 }

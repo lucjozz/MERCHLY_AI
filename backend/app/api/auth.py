@@ -22,6 +22,12 @@ from app.core.security import ClaimsAcceso
 from app.models.organizacion import Organizacion
 from app.models.usuario import Usuario
 from app.schemas.auth import (
+    CodigoInput,
+    CodigosRespaldo,
+    DesafioOutput,
+    DosPasosInicio,
+    ReautenticarInput,
+    VerificarDosPasosInput,
     GoogleLoginInput,
     OlvidePasswordInput,
     RestablecerPasswordInput,
@@ -50,6 +56,7 @@ from app.services.recuperar_password import (
 )
 from app.services.equipo import InvitacionInvalidaError, aceptar_invitacion
 from app.services.google_auth import GoogleTokenInvalidoError, verificar_id_token_google
+from app.services import dos_pasos
 from app.services.limites import LimitesLogin, RedisError, revocar_jti
 
 logger = logging.getLogger(__name__)
@@ -65,6 +72,16 @@ def _a_output(sesion: Sesion) -> SesionOutput:
         refresh_token=sesion.refresh_token,
         refresh_expira_en=sesion.refresh_expira_en,
     )
+
+
+async def _sesion_o_desafio(db_session: AsyncSession, redis: Redis, usuario: Usuario) -> SesionOutput | DesafioOutput:
+    """Con la verificación en dos pasos activada, la contraseña (o Google) no alcanza: falta el código."""
+    if usuario.totp_activado:
+        try:
+            return DesafioOutput(desafio=await dos_pasos.crear_desafio(redis, usuario.id))
+        except RedisError:
+            raise _servicio_no_disponible()
+    return _a_output(await emitir_sesion(db_session, usuario))
 
 
 def _limites(redis: Redis) -> LimitesLogin:
@@ -90,13 +107,13 @@ def _servicio_no_disponible() -> HTTPException:
     )
 
 
-@router.post("/login", response_model=SesionOutput)
+@router.post("/login", response_model=SesionOutput | DesafioOutput)
 async def login(
     entrada: LoginInput,
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
     redis: Redis = Depends(get_redis_client),
-) -> SesionOutput:
+) -> SesionOutput | DesafioOutput:
     """Login con email y contraseña.
 
     429 tras 5 fallos por email+IP o 20 por IP en 15 min. Si Redis no
@@ -126,6 +143,8 @@ async def login(
         await limites.limpiar(entrada.email, ip)
     except RedisError:
         pass
+    if usuario.totp_activado:
+        return await _sesion_o_desafio(db_session, redis, usuario)  # el login_ok se registra al verificar el código
     logger.info("login_ok usuario=%s", usuario.id)
     await registrar_evento("login_ok", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request))
     return _a_output(await emitir_sesion(db_session, usuario))
@@ -142,13 +161,13 @@ async def refrescar(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sesión vencida.")
 
 
-@router.post("/google", response_model=SesionOutput)
+@router.post("/google", response_model=SesionOutput | DesafioOutput)
 async def login_google(
     entrada: GoogleLoginInput,
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
     redis: Redis = Depends(get_redis_client),
-) -> SesionOutput:
+) -> SesionOutput | DesafioOutput:
     """Login / auto-registro con Google. 503 si GOOGLE_CLIENT_ID no está configurado."""
     client_id = get_settings().google_client_id
     if not client_id:
@@ -179,6 +198,8 @@ async def login_google(
     usuario = await usuario_desde_google(db_session, identidad.sub, identidad.email, identidad.nombre)
     if usuario is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No se pudo validar tu cuenta de Google.")
+    if usuario.totp_activado:
+        return await _sesion_o_desafio(db_session, redis, usuario)
     await registrar_evento(
         "login_google" if existia else "registro_google",
         organizacion_id=usuario.organizacion_id, usuario_id=usuario.id, **contexto_peticion(request),
@@ -334,3 +355,121 @@ async def obtener_usuario_actual(
     salida = UsuarioActual.model_validate(usuario)
     salida.organizacion_nombre = organizacion.nombre if organizacion else None
     return salida
+
+
+# ------------------------------------------------------------ verificación en dos pasos (013-09)
+
+_CODIGO_INVALIDO = "El código no es correcto o ya venció. Volvé a iniciar sesión si hace falta."
+
+
+@router.post("/2fa/verificar", response_model=SesionOutput)
+async def verificar_dos_pasos(
+    entrada: VerificarDosPasosInput,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    redis: Redis = Depends(get_redis_client),
+) -> SesionOutput:
+    """Segundo paso del login: desafío + código del celular (o de respaldo). Pública (no hay sesión todavía)."""
+    ip = obtener_ip_cliente(request)
+    limites = _limites(redis)
+    try:
+        espera = await limites.segundos_bloqueado("2fa", ip)
+        if espera:
+            raise _demasiados_intentos(espera)
+        usuario_id = await dos_pasos.usuario_del_desafio(redis, entrada.desafio)
+    except RedisError:
+        raise _servicio_no_disponible()
+    if usuario_id is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=_CODIGO_INVALIDO)
+    if not await dos_pasos.verificar_codigo(db_session, usuario_id, entrada.codigo):
+        try:
+            await limites.registrar_fallo("2fa", ip)
+        except RedisError:
+            pass
+        await registrar_evento("dos_pasos_fallido", usuario_id=usuario_id, **contexto_peticion(request))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=_CODIGO_INVALIDO)
+    await dos_pasos.consumir_desafio(redis, entrada.desafio)
+    usuario = await db_session.get(Usuario, usuario_id)
+    if usuario is None or not usuario.activo:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=_CODIGO_INVALIDO)
+    await registrar_evento("login_ok", organizacion_id=usuario.organizacion_id, usuario_id=usuario.id,
+                           detalle={"dos_pasos": True}, **contexto_peticion(request))
+    return _a_output(await emitir_sesion(db_session, usuario))
+
+
+@router.post("/2fa/iniciar", response_model=DosPasosInicio)
+async def iniciar_dos_pasos(
+    db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(obtener_usuario_autenticado),
+) -> DosPasosInicio:
+    if usuario.totp_activado:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="La verificación en dos pasos ya está activada.")
+    return DosPasosInicio(**await dos_pasos.iniciar(db_session, usuario.id))
+
+
+@router.post("/2fa/activar", response_model=CodigosRespaldo)
+async def activar_dos_pasos(
+    entrada: CodigoInput,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(obtener_usuario_autenticado),
+) -> CodigosRespaldo:
+    """Activa con un código válido. Devuelve los 10 códigos de respaldo UNA sola vez."""
+    if usuario.totp_activado:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="La verificación en dos pasos ya está activada.")
+    org_id, usuario_id = usuario.organizacion_id, usuario.id
+    try:
+        codigos = await dos_pasos.activar(db_session, usuario_id, entrada.codigo)
+    except dos_pasos.CodigoInvalidoError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error))
+    await registrar_evento("dos_pasos_activado", organizacion_id=org_id, usuario_id=usuario_id, **contexto_peticion(request))
+    return CodigosRespaldo(codigos=codigos)
+
+
+@router.post("/2fa/desactivar", status_code=status.HTTP_204_NO_CONTENT)
+async def desactivar_dos_pasos(
+    entrada: CodigoInput,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    usuario: Usuario = Depends(obtener_usuario_autenticado),
+) -> Response:
+    """Pide un código válido: alguien con la sesión abierta no puede apagarla sin el celular."""
+    if not usuario.totp_activado:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="La verificación en dos pasos no está activada.")
+    org_id, usuario_id = usuario.organizacion_id, usuario.id
+    try:
+        await dos_pasos.desactivar(db_session, usuario_id, entrada.codigo)
+    except dos_pasos.CodigoInvalidoError as error:
+        await registrar_evento("dos_pasos_fallido", organizacion_id=org_id, usuario_id=usuario_id, **contexto_peticion(request))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error))
+    await registrar_evento("dos_pasos_desactivado", organizacion_id=org_id, usuario_id=usuario_id, **contexto_peticion(request))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/reautenticar", status_code=status.HTTP_204_NO_CONTENT)
+async def reautenticar(
+    entrada: ReautenticarInput,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    redis: Redis = Depends(get_redis_client),
+    usuario: Usuario = Depends(obtener_usuario_autenticado),
+) -> Response:
+    """Confirmar que sos vos antes de una acción sensible (vale 10 minutos)."""
+    limites = _limites(redis)
+    org_id, usuario_id, con_codigo = usuario.organizacion_id, usuario.id, usuario.totp_activado
+    ip = obtener_ip_cliente(request)
+    try:
+        espera = await limites.segundos_bloqueado(f"reauth:{usuario_id}", ip)
+        if espera:
+            raise _demasiados_intentos(espera)
+        ok = await dos_pasos.reautenticar(redis, db_session, usuario_id, entrada.codigo, entrada.password)
+        if not ok:
+            await limites.registrar_fallo(f"reauth:{usuario_id}", ip)
+    except RedisError:
+        raise _servicio_no_disponible()
+    if not ok:
+        await registrar_evento("reautenticacion_fallida", organizacion_id=org_id, usuario_id=usuario_id, **contexto_peticion(request))
+        detalle = "El código no es correcto." if con_codigo else "La contraseña no es correcta."
+        # 422 y no 401: la sesión sigue siendo válida (un 401 haría que el navegador cierre la sesión).
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=detalle)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

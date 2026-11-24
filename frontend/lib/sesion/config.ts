@@ -15,6 +15,8 @@ export const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 const PREFIJO = ES_PRODUCCION ? "__Host-" : "";
 export const COOKIE_ACCESS = `${PREFIJO}merchly_at`;
 export const COOKIE_REFRESH = `${PREFIJO}merchly_rt`;
+/** Desafío de la verificación en dos pasos (5 minutos, un solo uso). */
+export const COOKIE_2FA = `${PREFIJO}merchly_2fa`;
 /** Cookie vieja (escrita por JavaScript, legible por XSS): se borra si aparece. */
 export const COOKIE_LEGADA = "merchly_token";
 
@@ -26,6 +28,14 @@ export const OPCIONES_COOKIE = {
   secure: ES_PRODUCCION,
   sameSite: "lax" as const,
   path: "/",
+};
+
+export const OPCIONES_COOKIE_2FA = {
+  httpOnly: true,
+  secure: ES_PRODUCCION,
+  sameSite: "strict" as const,
+  path: "/",
+  maxAge: 300,
 };
 
 export interface SesionBackend {

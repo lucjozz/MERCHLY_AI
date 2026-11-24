@@ -53,7 +53,8 @@ function cargarScript(): Promise<void> {
 }
 
 interface BotonGoogleProps {
-  onSesion: () => void;
+  /** requiere2fa: falta el código de la verificación en dos pasos. */
+  onSesion: (requiere2fa: boolean) => void;
 }
 
 export default function BotonGoogle({ onSesion }: BotonGoogleProps) {
@@ -84,7 +85,8 @@ export default function BotonGoogle({ onSesion }: BotonGoogleProps) {
               : mensajeDeError(r.status, cuerpo?.detail, r.headers.get("retry-after"))
           );
         }
-        onSesion();
+        const cuerpo = await r.json().catch(() => ({}));
+        onSesion(cuerpo?.requiere_2fa === true);
       } catch (e) {
         setError(e instanceof Error ? e.message : MENSAJE_SIN_CONEXION);
         setEntrando(false);

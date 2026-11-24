@@ -2,8 +2,8 @@
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import BigInteger, Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, ConMarcaDeTiempo
@@ -47,3 +47,11 @@ class Usuario(ConMarcaDeTiempo, Base):
     token_version: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default="0"
     )
+
+    # Verificación en dos pasos (docs/013-Seguridad/09). Las claves van CIFRADAS
+    # (app/core/cifrado.py, atadas al id del usuario); los códigos de respaldo, como hash.
+    totp_secreto: Mapped[str | None] = mapped_column(Text, nullable=True)
+    totp_pendiente: Mapped[str | None] = mapped_column(Text, nullable=True)  # mientras se configura
+    totp_activado: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    totp_ultimo_paso: Mapped[int | None] = mapped_column(BigInteger, nullable=True)  # anti-repetición
+    codigos_respaldo: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default="[]")

@@ -70,6 +70,10 @@ class Settings(BaseSettings):
 
     google_client_id: str | None = None
 
+    # Cifrado de secretos en la base (TOTP, tokens de canales). 32 bytes en base64.
+    # Obligatoria en producción; en local se deriva del JWT si falta.
+    cifrado_clave: str | None = None
+
     # Emails transaccionales (DEC-036). Sin clave: simulado en local, error en producción.
     resend_api_key: str | None = None
     email_remitente: str = "MERCHLY AI <no-responder@merchly.ai>"
@@ -137,6 +141,11 @@ class Settings(BaseSettings):
             problemas.append(
                 "JWT_SECRET_KEY es débil (mínimo 32 caracteres, no un valor de ejemplo). "
                 "Generá uno con: python -c \"import secrets;print(secrets.token_urlsafe(64))\""
+            )
+        if self.es_produccion and not self.cifrado_clave:
+            problemas.append(
+                "Falta CIFRADO_CLAVE (32 bytes en base64). Generala con: "
+                "python -c \"import base64,os;print(base64.b64encode(os.urandom(32)).decode())\""
             )
         if self.es_produccion and self.exponer_docs:
             problemas.append("EXPONER_DOCS no puede estar activo en staging/producción.")

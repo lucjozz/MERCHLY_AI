@@ -1,8 +1,9 @@
 """Pydantic schemas para autenticación (docs/013-Seguridad/01 y 04)."""
 
 import uuid
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
 
 from app.schemas.base import EntradaEstricta
 
@@ -75,3 +76,40 @@ class UsuarioActual(BaseModel):
     activo: bool
     organizacion_id: uuid.UUID
     organizacion_nombre: str | None = None
+    totp_activado: Annotated[bool, BeforeValidator(bool)] = False  # None (usuarios viejos) = no
+
+
+# ------------------------------------------------------------ verificación en dos pasos (013-09)
+
+
+class DesafioOutput(BaseModel):
+    """La contraseña (o Google) estaba bien, pero falta el código del celular."""
+
+    requiere_2fa: bool = True
+    desafio: str
+
+
+class VerificarDosPasosInput(EntradaEstricta):
+    desafio: str = Field(min_length=20, max_length=100)
+    codigo: str = Field(min_length=6, max_length=12)
+
+
+class CodigoInput(EntradaEstricta):
+    codigo: str = Field(min_length=6, max_length=12)
+
+
+class ReautenticarInput(EntradaEstricta):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
+
+    codigo: str | None = Field(default=None, min_length=6, max_length=12)
+    password: str | None = Field(default=None, min_length=1, max_length=128)
+
+
+class DosPasosInicio(BaseModel):
+    secreto: str
+    uri: str
+    qr: str  # data URI SVG para mostrar en <img>
+
+
+class CodigosRespaldo(BaseModel):
+    codigos: list[str]
